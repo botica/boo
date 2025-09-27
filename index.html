@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>game</title>
+<title>boo!</title>
 <style>
 html, body { margin: 0; height: 100%; overflow: hidden; background-color: #010830; }
 canvas { background:#000; display:block; image-rendering: pixelated; }
@@ -122,7 +122,7 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 0;                /* align with bottom of canvas */
+  bottom: 0;
   z-index: 40;
   pointer-events: auto;
 }
@@ -133,7 +133,7 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
   border-color: rgba(255,255,255,0.6);
   color: rgba(255,255,255,0.9);
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-  opacity: 0.5; /* make overlay tiles translucent */
+  opacity: 0.5;
 }
 </style>
 </head>
@@ -505,7 +505,6 @@ function checkComboSuccess() {
     if (keys[k]) return false;
   }
 
-  // If we required release after showing this combo, ensure both keys have come up since it started.
   if (requireKeyRelease) {
     const a = currentCombo[0], b = currentCombo[1];
     if (!keyReleasedSinceComboStart[a] || !keyReleasedSinceComboStart[b]) return false;
