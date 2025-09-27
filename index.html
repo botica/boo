@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>game</title>
+<style>
+  canvas { background:#211166; display:block; image-rendering: pixelated; }
+
+  /* wrapper holds the canvas and tiles in a row; center the whole group on the page */
+  .wrapper {
+    display: flex;
+    align-items: flex-end; /* bottom-align tiles with canvas bottom */
+    justify-content: center; /* center the group horizontally */
+    gap: 12px;
+    margin: 20px auto; /* center wrapper in page */
+  }
+
+  /* tile strip (now normal flow left of canvas) */
+  .tiles { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; /* lift tiles 10px above canvas bottom to match square bottom */ }
+
+  .tile {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #333;
+    color: #fff;
+    font: 20px sans-serif;
+    border: 1px solid rgba(0,0,0,0.4);
+    box-sizing: border-box;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <!-- WASD tiles exist in markup before the script runs -->
+  <div id="tiles" class="tiles" aria-hidden="true">
+    <div id="tile-w" class="tile" data-key="w" data-activecolor="#66ff66">W</div>
+    <div id="tile-a" class="tile" data-key="a" data-activecolor="#66ccff">A</div>
+    <div id="tile-s" class="tile" data-key="s" data-activecolor="#ffcc66">S</div>
+    <div id="tile-d" class="tile" data-key="d" data-activecolor="#ff66aa">D</div>
+  </div>
+
+  <canvas id="game" width="640" height="360"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+const sprite = new Image();
+sprite.src = 'boo-mock.png'; // your 100x100 image
+
+const player = {
+  x: canvas.width/2,
+  y: canvas.height/2,
+  vx: 0,
+  vy: 0,
+  width: 100,
+  height: 100,
+  speed: 400, // pixels per second
+  facing: 'right' // new: current facing direction ('left' or 'right')
+};
+
+// new: blue-square sprite (center-based coordinates), spawn bottom-left
+const square = {
+  width: 50,
+  height: 50,
+  x: 50/2 + 10, // padding 10 from left
+  y: canvas.height - 50/2 - 10, // padding 10 from bottom
+  color: '#2ea3ff',
+  colliding: false
+};
+
+// remove previous JS tile drawing data — tiles are DOM elements now
+// tile appearance constants (used to compute layout)
+const tileSize = 48;
+const tileGap = 6;
+const tilePadding = 10; // gap between tiles and the blue square
+
+// get DOM tiles container and items
+const tilesContainer = document.getElementById('tiles');
+const tileEls = {
+  w: document.getElementById('tile-w'),
+  a: document.getElementById('tile-a'),
+  s: document.getElementById('tile-s'),
+  d: document.getElementById('tile-d'),
+};
+
+const keys = { w:false, a:false, s:false, d:false };
+// use toLowerCase so Shift/CapsLock doesn't break it
+window.addEventListener('keydown', e => {
+  const k = (e.key || '').toLowerCase();
+  if (k === 'w') keys.w = true;
+  if (k === 'a') keys.a = true;
+  if (k === 's') keys.s = true;
+  if (k === 'd') keys.d = true;
+
+  // toggle tile visuals on keydown
+  if (tileEls[k]) {
+    tileEls[k].style.background = tileEls[k].dataset.activecolor || '#666';
+  }
+});
+window.addEventListener('keyup', e => {
+  const k = (e.key || '').toLowerCase();
+  if (k === 'w') keys.w = false;
+  if (k === 'a') keys.a = false;
+  if (k === 's') keys.s = false;
+  if (k === 'd') keys.d = false;
+
+  // revert tile visuals on keyup
+  if (tileEls[k]) {
+    tileEls[k].style.background = '#333';
+  }
+});
+
+let lastTime = performance.now();
+
+// helper: axis-aligned box overlap (both objects use center x,y and width/height)
+function rectsOverlap(a, b) {
+  return Math.abs(a.x - b.x) < (a.width + b.width)/2 &&
+         Math.abs(a.y - b.y) < (a.height + b.height)/2;
+}
+
+function update(dt) {
+  player.vx = 0;
+  player.vy = 0;
+  if (keys.w) player.vy -= 1;
+  if (keys.s) player.vy += 1;
+  if (keys.a) player.vx -= 1;
+  if (keys.d) player.vx += 1;
+
+  // update facing based on horizontal input so it persists when stopped
+  if (keys.a) player.facing = 'left';
+  else if (keys.d) player.facing = 'right';
+
+  // normalize diagonal speed
+  if (player.vx !== 0 && player.vy !== 0) {
+    const inv = 1/Math.sqrt(2);
+    player.vx *= inv;
+    player.vy *= inv;
+  }
+
+  player.x += player.vx * player.speed * dt;
+  player.y += player.vy * player.speed * dt;
+
+  // bounds
+  player.x = Math.max(player.width/2, Math.min(canvas.width - player.width/2, player.x));
+  player.y = Math.max(player.height/2, Math.min(canvas.height - player.height/2, player.y));
+
+  // collision check with blue square; log "boo!" only when collision begins
+  const nowColliding = rectsOverlap(player, square);
+  if (nowColliding && !square.colliding) {
+    console.log('boo!');
+  }
+  square.colliding = nowColliding;
+}
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // draw blue square (behind the ghost)
+  ctx.fillStyle = square.color;
+  ctx.fillRect(square.x - square.width/2, square.y - square.height/2, square.width, square.height);
+
+  // draw flipped when facing left, otherwise normal
+  if (player.facing === 'left') {
+    ctx.save();
+    // translate to player's center, flip horizontally, draw centered at origin
+    ctx.translate(player.x, player.y);
+    ctx.scale(-1, 1);
+    ctx.drawImage(sprite, -player.width/2, -player.height/2, player.width, player.height);
+    ctx.restore();
+  } else {
+    ctx.drawImage(sprite, player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+  }
+}
+
+function loop(now) {
+  const dt = (now - lastTime)/1000;
+  lastTime = now;
+
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+sprite.onload = () => requestAnimationFrame(loop);
+</script>
+</body>
+</html>
