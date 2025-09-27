@@ -517,3 +517,170 @@ function _onAssetLoad() {
 }
 sprite.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
+
+// Add automation / click-press support for arrow tiles and combo arrows
+{
+  // Helper to simulate press (keydown) and update UI/flags
+  function pressKey(k) {
+    if (!k) return;
+    if (!(k in keys)) keys[k] = false;
+    keys[k] = true;
+    // mark that the key is currently pressed (so requireKeyRelease logic can work)
+    if (k in keyReleasedSinceComboStart) keyReleasedSinceComboStart[k] = false;
+
+    // Update visual state (same as window keydown handler)
+    if (tileEls[k]) {
+      tileEls[k].style.background = '#fff';
+      tileEls[k].style.color = '#000';
+      tileEls[k].style.border = '1px solid #000';
+    }
+    if (interactionActive && currentCombo) {
+      for (let i = 0; i < 2; i++) {
+        if (currentCombo[i] === k && arrowEls[i]) {
+          arrowEls[i].style.background = '#fff';
+          arrowEls[i].style.color = '#000';
+          arrowEls[i].style.border = '1px solid #000';
+        }
+      }
+    }
+
+    // Dispatch a keyboard event so any listeners relying on real events still run
+    try {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: k }));
+    } catch (e) {
+      // ignore if synthetic event creation is restricted
+    }
+  }
+
+  // Helper to simulate release (keyup) and update UI/flags
+  function releaseKey(k) {
+    if (!k) return;
+    if (!(k in keys)) keys[k] = false;
+    keys[k] = false;
+    // mark as released for combo logic
+    if (k in keyReleasedSinceComboStart) keyReleasedSinceComboStart[k] = true;
+
+    // Update visual state (same as window keyup handler)
+    if (tileEls[k]) {
+      tileEls[k].style.background = '#000';
+      tileEls[k].style.color = '#fff';
+      tileEls[k].style.border = '1px solid #fff';
+    }
+    if (interactionActive && currentCombo) {
+      for (let i = 0; i < 2; i++) {
+        if (currentCombo[i] === k && arrowEls[i]) {
+          arrowEls[i].style.background = '#000';
+          arrowEls[i].style.color = '#fff';
+          arrowEls[i].style.border = '1px solid #fff';
+        }
+      }
+    }
+
+    try {
+      window.dispatchEvent(new KeyboardEvent('keyup', { key: k }));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Attach press/release handlers to a tile element that represents a specific key name
+  function attachTilePress(tileEl, keyName) {
+    if (!tileEl || !keyName) return;
+    // make it focusable / accessible
+    tileEl.tabIndex = tileEl.tabIndex || 0;
+    tileEl.setAttribute('role', 'button');
+
+    // pointer events (mouse/touch)
+    tileEl.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      pressKey(keyName);
+      // capture pointer so we get pointerup even if pointer leaves
+      tileEl.setPointerCapture && tileEl.setPointerCapture(e.pointerId);
+    });
+    tileEl.addEventListener('pointerup', e => {
+      releaseKey(keyName);
+      tileEl.releasePointerCapture && tileEl.releasePointerCapture(e.pointerId);
+    });
+    tileEl.addEventListener('pointercancel', e => {
+      releaseKey(keyName);
+      tileEl.releasePointerCapture && tileEl.releasePointerCapture(e.pointerId);
+    });
+
+    // support click automation by performing a short press/release on click
+    tileEl.addEventListener('click', e => {
+      // quick press
+      pressKey(keyName);
+      setTimeout(() => releaseKey(keyName), 120);
+    });
+
+    // keyboard activation (Enter / Space)
+    tileEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        // avoid repeat behavior: only press on initial keydown
+        pressKey(keyName);
+      }
+    });
+    tileEl.addEventListener('keyup', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        releaseKey(keyName);
+      }
+    });
+  }
+
+  // Attach to each static tile (ArrowUp / ArrowDown / ArrowLeft / ArrowRight)
+  for (const k of Object.keys(tileEls)) {
+    attachTilePress(tileEls[k], k);
+  }
+
+  // Attach to the dynamic combo arrow elements (arrowEls[0] and arrowEls[1]).
+  // These press whatever key is required by the current combo at the time of activation.
+  function attachComboArrow(el, index) {
+    if (!el) return;
+    el.tabIndex = el.tabIndex || 0;
+    el.setAttribute('role', 'button');
+
+    const doPress = () => {
+      const k = currentCombo ? currentCombo[index] : null;
+      if (k) {
+        pressKey(k);
+      }
+    };
+    const doRelease = () => {
+      const k = currentCombo ? currentCombo[index] : null;
+      if (k) {
+        releaseKey(k);
+      }
+    };
+
+    el.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      doPress();
+      el.setPointerCapture && el.setPointerCapture(e.pointerId);
+    });
+    el.addEventListener('pointerup', e => {
+      doRelease();
+      el.releasePointerCapture && el.releasePointerCapture(e.pointerId);
+    });
+    el.addEventListener('click', e => {
+      doPress();
+      setTimeout(doRelease, 120);
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        doPress();
+      }
+    });
+    el.addEventListener('keyup', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        doRelease();
+      }
+    });
+  }
+
+  attachComboArrow(arrowEls[0], 0);
+  attachComboArrow(arrowEls[1], 1);
+}
