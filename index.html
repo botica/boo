@@ -221,7 +221,8 @@ const player = {
   x: 0, y: 0, vx: 0, vy: 0,
   width: 100, height: 100,
   speed: 400,
-  facing: 'right'
+  facing: 'right',
+  accel: 2000 // pixels per second^2 (how quickly velocity moves toward input)
 };
 
 /* new: person sprite (center-based coordinates), spawn bottom-left
@@ -472,26 +473,38 @@ function updateComboStatus() {
 function update(dt) {
   // Freeze movement while an interaction is active — only arrow keys are used during interaction
   if (!interactionActive) {
-    player.vx = 0;
-    player.vy = 0;
-    if (keys.w) player.vy -= 1;
-    if (keys.s) player.vy += 1;
-    if (keys.a) player.vx -= 1;
-    if (keys.d) player.vx += 1;
+    // --- replaced immediate-velocity block with inertia-based acceleration ---
+    // compute input vector
+    let inputX = 0, inputY = 0;
+    if (keys.w) inputY -= 1;
+    if (keys.s) inputY += 1;
+    if (keys.a) inputX -= 1;
+    if (keys.d) inputX += 1;
 
-    // update facing based on horizontal input so it persists when stopped
-    if (keys.a) player.facing = 'left';
-    else if (keys.d) player.facing = 'right';
+    // update facing based on horizontal input (prefer direct input)
+    if (inputX < 0) player.facing = 'left';
+    else if (inputX > 0) player.facing = 'right';
 
-    // normalize diagonal speed
-    if (player.vx !== 0 && player.vy !== 0) {
-      const inv = 1/Math.sqrt(2);
-      player.vx *= inv;
-      player.vy *= inv;
+    // compute target velocity in px/s (normalize diagonal)
+    let targetVx = 0, targetVy = 0;
+    const len = Math.hypot(inputX, inputY);
+    if (len > 0) {
+      targetVx = (inputX / len) * player.speed;
+      targetVy = (inputY / len) * player.speed;
     }
 
-    player.x += player.vx * player.speed * dt;
-    player.y += player.vy * player.speed * dt;
+    // accelerate toward target velocity with a max acceleration per frame
+    const maxDelta = player.accel * dt;
+    const dvx = targetVx - player.vx;
+    const dvy = targetVy - player.vy;
+    if (Math.abs(dvx) > maxDelta) player.vx += Math.sign(dvx) * maxDelta;
+    else player.vx = targetVx;
+    if (Math.abs(dvy) > maxDelta) player.vy += Math.sign(dvy) * maxDelta;
+    else player.vy = targetVy;
+
+    // integrate position using velocities (vx/vy are in px/s now)
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
 
     // bounds
     player.x = Math.max(player.width/2, Math.min(canvas.width - player.width/2, player.x));
