@@ -117,7 +117,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     background: #000; /* pure black */
     border: 1px solid #fff; /* pure white */
     box-sizing: border-box;
-    border-radius: 6px;
+    border-radius: 0; /* hard angles (was 6px) */
     overflow: hidden;
   }
   .progress-fill {
@@ -126,6 +126,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     background: #fff; /* pure white fill (no gradient) */
     transform-origin: left;
     transition: transform 0.1s linear;
+    border-radius: 0; /* ensure fill is also hard-edged */
   }
 </style>
 </head>
