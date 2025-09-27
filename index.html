@@ -54,10 +54,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #333;
-    color: #fff;
+    background: #000; /* changed to pure black */
+    color: #fff; /* pure white */
     font: 20px sans-serif;
-    border: 1px solid rgba(0,0,0,0.4);
+    border: 1px solid #fff; /* pure white border for contrast */
     box-sizing: border-box;
     user-select: none;
     border-radius: 0; /* sharp corners */
@@ -92,7 +92,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     /* base size, actual size may be overridden by JS to fit canvas */
     width: 400px;
     height: 400px;
-    background: #333;
+    background: #000; /* pure black */
     font-size: 180px;
     line-height: 1;
     border-radius: 0; /* sharp corners */
@@ -109,13 +109,13 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     gap: 6px;
     margin-left: 6px;
     font: 12px sans-serif;
-    color: #ddd;
+    color: #fff; /* pure white */
   }
   .progress {
     width: min(85%, 520px);
     height: 14px;
-    background: #222;
-    border: 1px solid rgba(255,255,255,0.05);
+    background: #000; /* pure black */
+    border: 1px solid #fff; /* pure white */
     box-sizing: border-box;
     border-radius: 6px;
     overflow: hidden;
@@ -123,7 +123,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
   .progress-fill {
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg,#66c,#339);
+    background: #fff; /* pure white fill (no gradient) */
     transform-origin: left;
     transition: transform 0.1s linear;
   }
@@ -134,10 +134,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
 <div class="wrapper">
   <!-- WASD tiles exist in markup before the script runs -->
   <div id="tiles" class="tiles" aria-hidden="true">
-    <div id="tile-w" class="tile" data-key="w" data-activecolor="#66ff66">W</div>
-    <div id="tile-a" class="tile" data-key="a" data-activecolor="#66ccff">A</div>
-    <div id="tile-s" class="tile" data-key="s" data-activecolor="#ffcc66">S</div>
-    <div id="tile-d" class="tile" data-key="d" data-activecolor="#ff66aa">D</div>
+    <div id="tile-w" class="tile" data-key="w" data-activecolor="#fff">W</div>
+    <div id="tile-a" class="tile" data-key="a" data-activecolor="#fff">A</div>
+    <div id="tile-s" class="tile" data-key="s" data-activecolor="#fff">S</div>
+    <div id="tile-d" class="tile" data-key="d" data-activecolor="#fff">D</div>
   </div>
 
   <!-- canvas with overlay area for arrow UI -->
@@ -296,12 +296,20 @@ window.addEventListener('keydown', e => {
   const k = (raw.length === 1) ? raw.toLowerCase() : raw; // letters lowercased, arrows kept
   if (k in keys) keys[k] = true;
 
-  // toggle tile visuals on keydown — use a single grey color for all keys
-  if (tileEls[k]) tileEls[k].style.background = '#888';
+  // toggle tile visuals on keydown — switch to white background with black text for visibility
+  if (tileEls[k]) { 
+    tileEls[k].style.background = '#fff'; 
+    tileEls[k].style.color = '#000'; 
+    tileEls[k].style.border = '1px solid #000'; 
+  }
   // if an arrow tile is shown and matches a displayed arrow key, also highlight it on down
   if (interactionActive && currentCombo) {
     for (let i=0;i<2;i++) {
-      if (currentCombo[i] === k) arrowEls[i].style.background = '#888';
+      if (currentCombo[i] === k) { 
+        arrowEls[i].style.background = '#fff'; 
+        arrowEls[i].style.color = '#000'; 
+        arrowEls[i].style.border = '1px solid #000';
+      }
     }
   }
 });
@@ -310,11 +318,19 @@ window.addEventListener('keyup', e => {
   const k = (raw.length === 1) ? raw.toLowerCase() : raw;
   if (k in keys) keys[k] = false;
 
-  // revert tile visuals on keyup
-  if (tileEls[k]) tileEls[k].style.background = '#333';
+  // revert tile visuals on keyup (back to black bg, white text)
+  if (tileEls[k]) { 
+    tileEls[k].style.background = '#000'; 
+    tileEls[k].style.color = '#fff'; 
+    tileEls[k].style.border = '1px solid #fff'; 
+  }
   if (interactionActive && currentCombo) {
     for (let i=0;i<2;i++) {
-      if (currentCombo[i] === k) arrowEls[i].style.background = '#333';
+      if (currentCombo[i] === k) { 
+        arrowEls[i].style.background = '#000'; 
+        arrowEls[i].style.color = '#fff'; 
+        arrowEls[i].style.border = '1px solid #fff';
+      }
     }
   }
 });
@@ -366,11 +382,23 @@ function startNextCombo() {
      ArrowUp: '^',
      ArrowDown: 'v'
    };
-   arrowsEl.style.display = 'flex';
-   arrowEls[0].textContent = labelMap[currentCombo[0]] || currentCombo[0];
-   arrowEls[1].textContent = labelMap[currentCombo[1]] || currentCombo[1];
-   arrowEls[0].style.background = '#333';
-   arrowEls[1].style.background = '#333';
+   // show arrows container
+   if (arrowsEl) arrowsEl.style.display = 'flex';
+   // ensure individual arrow tiles are visible and set labels + readable colors
+   if (arrowEls[0]) { 
+     arrowEls[0].style.display = ''; 
+     arrowEls[0].textContent = labelMap[currentCombo[0]] || currentCombo[0]; 
+     arrowEls[0].style.background = '#000'; 
+     arrowEls[0].style.color = '#fff'; 
+     arrowEls[0].style.border = '1px solid #fff';
+   }
+   if (arrowEls[1]) { 
+     arrowEls[1].style.display = ''; 
+     arrowEls[1].textContent = labelMap[currentCombo[1]] || currentCombo[1]; 
+     arrowEls[1].style.background = '#000'; 
+     arrowEls[1].style.color = '#fff'; 
+     arrowEls[1].style.border = '1px solid #fff';
+   }
    // ensure UI shown
    showComboUI(true);
    updateComboStatus();
@@ -391,9 +419,19 @@ function endInteraction(reason) {
   if (arrowsEl) arrowsEl.style.display = 'none';
   if (arrowArea) arrowArea.style.display = 'none';
   showComboUI(false);
-  // clear individual arrow tiles so they are blank when next shown
-  if (arrowEls[0]) { arrowEls[0].textContent = ''; arrowEls[0].style.background = '#333'; }
-  if (arrowEls[1]) { arrowEls[1].textContent = ''; arrowEls[1].style.background = '#333'; }
+  // clear individual arrow tiles so they are blank when next shown (black background + white text)
+  if (arrowEls[0]) { 
+    arrowEls[0].textContent = ''; 
+    arrowEls[0].style.background = '#000'; 
+    arrowEls[0].style.color = '#fff'; 
+    arrowEls[0].style.border = '1px solid #fff';
+  }
+  if (arrowEls[1]) { 
+    arrowEls[1].textContent = ''; 
+    arrowEls[1].style.background = '#000'; 
+    arrowEls[1].style.color = '#fff'; 
+    arrowEls[1].style.border = '1px solid #fff';
+  }
   console.log('interaction ended:', reason || 'finished');
 }
 
@@ -417,11 +455,25 @@ function resetScene() {
   // reset tile visuals
   for (const k in tileEls) {
     const el = tileEls[k];
-    if (el && el.style) el.style.background = '#333';
+    if (el && el.style) { 
+      el.style.background = '#000'; 
+      el.style.color = '#fff'; 
+      el.style.border = '1px solid #fff'; 
+    }
   }
-  // clear individual arrow tiles/state as well
-  if (arrowEls[0]) { arrowEls[0].textContent = ''; arrowEls[0].style.background = '#333'; }
-  if (arrowEls[1]) { arrowEls[1].textContent = ''; arrowEls[1].style.background = '#333'; }
+  // clear individual arrow tiles/state as well (keep display untouched)
+  if (arrowEls[0]) {
+    arrowEls[0].textContent = '';
+    arrowEls[0].style.background = '#000';
+    arrowEls[0].style.color = '#fff';
+    arrowEls[0].style.border = '1px solid #fff';
+  }
+  if (arrowEls[1]) {
+    arrowEls[1].textContent = '';
+    arrowEls[1].style.background = '#000';
+    arrowEls[1].style.color = '#fff';
+    arrowEls[1].style.border = '1px solid #fff';
+  }
 
   // release all keys
   for (const k in keys) keys[k] = false;
@@ -451,8 +503,18 @@ function handleTimeout() {
   if (arrowsEl) arrowsEl.style.display = 'none';
   if (arrowArea) arrowArea.style.display = 'none';
   showComboUI(false);
-  if (arrowEls[0]) { arrowEls[0].textContent = ''; arrowEls[0].style.background = '#333'; }
-  if (arrowEls[1]) { arrowEls[1].textContent = ''; arrowEls[1].style.background = '#333'; }
+  if (arrowEls[0]) { 
+    arrowEls[0].textContent = ''; 
+    arrowEls[0].style.background = '#000'; 
+    arrowEls[0].style.color = '#fff'; 
+    arrowEls[0].style.border = '1px solid #fff';
+  }
+  if (arrowEls[1]) { 
+    arrowEls[1].textContent = ''; 
+    arrowEls[1].style.background = '#000'; 
+    arrowEls[1].style.color = '#fff'; 
+    arrowEls[1].style.border = '1px solid #fff';
+  }
 
   // single-button alert; OK resets the scene
   alert('Try again?');
@@ -560,9 +622,17 @@ function update(dt) {
         comboAccepted = true;
         combosCompleted++;
         updateComboStatus();
-        // brief success flash
-        arrowEls[0].style.background = '#6f6';
-        arrowEls[1].style.background = '#6f6';
+        // brief success flash (use white bg with black text)
+        if (arrowEls[0]) { 
+          arrowEls[0].style.background = '#fff'; 
+          arrowEls[0].style.color = '#000'; 
+          arrowEls[0].style.border = '1px solid #000';
+        }
+        if (arrowEls[1]) { 
+          arrowEls[1].style.background = '#fff'; 
+          arrowEls[1].style.color = '#000'; 
+          arrowEls[1].style.border = '1px solid #000';
+        }
         // reset for next combo or finish
         if (combosCompleted >= 3) {
           // advance level or finish the game
