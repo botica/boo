@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <title>game</title>
 <style>
-html, body { margin: 0; height: 100%; overflow: hidden; }
+html, body { margin: 0; height: 100%; overflow: hidden; background-color: #000; }
 canvas { background:#000; display:block; image-rendering: pixelated; }
 
 .game-wrap { position: relative; display: inline-block; }
@@ -192,9 +192,9 @@ window.addEventListener('resize', () => {
 const player = {
   x: 0, y: 0, vx: 0, vy: 0,
   width: 100, height: 100,
-  speed: 400,
+  speed: 800,
   facing: 'right',
-  accel: 2000
+  accel: 3000
 };
 
 const person = {
@@ -242,11 +242,12 @@ arrowKeys.forEach(k => keys[k] = false);
 let interactionActive = false;
 let currentCombo = null;
 let currentLevel = 1;
-const levelDurations = { 1: 5.0, 2: 3.0, 3: 2.0 };
+const levelDurations = { 1: 5.0, 2: 3.0, 3: 2.0 };//level durations in seconds
 let comboDuration = levelDurations[currentLevel];
 let comboTimeLeft = 0;
 let combosCompleted = 0;
 let comboAccepted = false;
+let usedCombos = [];
 
 function updateLevelTitle() {
   document.title = `game - Level ${currentLevel}`;
@@ -301,11 +302,26 @@ function rectsOverlap(a, b) {
 }
 
 function pickCombo() {
+  const maxAttempts = 50;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const a = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
+    let b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
+    if (b === a) {
+      do { b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)]; } while (b === a);
+    }
+    const key = `${a}|${b}`;
+    if (!usedCombos.includes(key)) {
+      usedCombos.push(key);
+      return [a,b];
+    }
+  }
   const a = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
   let b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
   if (b === a) {
     do { b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)]; } while (b === a);
   }
+  const key = `${a}|${b}`;
+  usedCombos.push(key);
   return [a,b];
 }
 
@@ -314,6 +330,7 @@ function startInteraction() {
   interactionActive = true;
   combosCompleted = 0;
   comboAccepted = false;
+  usedCombos = [];
   showComboUI(true);
   startNextCombo();
 }
@@ -367,6 +384,13 @@ function endInteraction(reason, opts = {}) {
   currentCombo = null;
   comboTimeLeft = 0;
 
+  if (resetSceneAfter) {
+    resetScene();
+    if (alertMsg) alert(alertMsg);
+    console.log('interaction ended:', reason || 'finished');
+    return;
+  }
+
   if (arrowsEl) arrowsEl.style.display = 'none';
   if (arrowArea) arrowArea.style.display = 'none';
   showComboUI(false);
@@ -401,7 +425,6 @@ function endInteraction(reason, opts = {}) {
   console.log('interaction ended:', reason || 'finished');
 
   if (alertMsg) alert(alertMsg);
-  if (resetSceneAfter) resetScene();
 }
 
 function handleTimeout() {
@@ -414,6 +437,7 @@ function resetScene() {
   comboTimeLeft = 0;
   combosCompleted = 0;
   comboAccepted = false;
+  usedCombos = [];
   let flashState = false;
   let flashTimer = 0;
   if (arrowsEl) arrowsEl.style.display = 'none';
@@ -435,12 +459,14 @@ function resetScene() {
     arrowEls[0].style.background = '#000';
     arrowEls[0].style.color = '#fff';
     arrowEls[0].style.border = '1px solid #fff';
+    arrowEls[0].style.display = 'none';
   }
   if (arrowEls[1]) {
     arrowEls[1].textContent = '';
     arrowEls[1].style.background = '#000';
     arrowEls[1].style.color = '#fff';
     arrowEls[1].style.border = '1px solid #fff';
+    arrowEls[1].style.display = 'none';
   }
 
   for (const k in keys) keys[k] = false;
@@ -463,7 +489,14 @@ function resetScene() {
 
 function checkComboSuccess() {
   if (!currentCombo) return false;
-  return !!(keys[currentCombo[0]] && keys[currentCombo[1]]);
+  // both required keys must be pressed
+  if (!(keys[currentCombo[0]] && keys[currentCombo[1]])) return false;
+  // no other arrow keys may be pressed
+  for (const k of arrowKeys) {
+    if (k === currentCombo[0] || k === currentCombo[1]) continue;
+    if (keys[k]) return false;
+  }
+  return true;
 }
 
 function updateComboStatus() {
@@ -631,9 +664,6 @@ function _onAssetLoad() {
 }
 sprite.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
