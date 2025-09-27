@@ -80,7 +80,6 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
 .big-arrow {
   width: 400px;
   height: 400px;
-  /* make big arrow backgrounds translucent to match small tiles */
   background: rgba(0,0,0,0.55);
   font-size: 180px;
   line-height: 1;
@@ -125,7 +124,7 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
   transform: translateX(-50%);
   bottom: 0;                /* align with bottom of canvas */
   z-index: 40;
-  pointer-events: auto;     /* allow clicks/hover on the tiles */
+  pointer-events: auto;
 }
 
 /* Make the small arrow tiles translucent so focus remains on the canvas */
@@ -150,11 +149,9 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
       </div>
       <div id="combo-ui" class="combo-ui" style="display:none; align-items:center;">
         <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
-        <!-- combo counter removed; progress bar retained -->
       </div>
     </div>
 
-    <!-- moved into .game-wrap so it overlays and lines up with the canvas bottom -->
     <div id="tiles-arrows" class="tiles" aria-hidden="true">
       <div id="tile-up" class="tile" data-key="ArrowUp">^</div>
       <div id="tile-left" class="tile" data-key="ArrowLeft"><</div>
@@ -247,7 +244,6 @@ const arrowKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
 const keys = {};
 arrowKeys.forEach(k => keys[k] = false);
 
-// Add: require keys to come up after a new combo is shown before it can be accepted
 let requireKeyRelease = false;
 const keyReleasedSinceComboStart = {};
 arrowKeys.forEach(k => keyReleasedSinceComboStart[k] = true);
@@ -382,7 +378,6 @@ function startNextCombo() {
     arrowEls[1].style.border = '1px solid #fff';
   }
   showComboUI(true);
-  updateComboStatus();
 }
 
 function showComboUI(show) {
@@ -435,7 +430,6 @@ function endInteraction(reason, opts = {}) {
   }
 
   if (progressFill) progressFill.style.transform = 'scaleX(1)';
-  updateComboStatus();
 
   console.log('interaction ended:', reason || 'finished');
 
@@ -460,7 +454,6 @@ function resetScene() {
   const node = document.getElementById('combo-ui');
   if (node) node.style.display = 'none';
   if (progressFill) progressFill.style.transform = 'scaleX(1)';
-  updateComboStatus();
   for (const k in tileEls) {
     const el = tileEls[k];
     if (el && el.style) {
@@ -519,10 +512,6 @@ function checkComboSuccess() {
   }
 
   return true;
-}
-
-function updateComboStatus() {
-  // no UI counter required — keep as no-op so callers remain unchanged
 }
 
 function update(dt) {
@@ -593,7 +582,6 @@ function update(dt) {
       if (!comboAccepted) {
         comboAccepted = true;
         combosCompleted++;
-        updateComboStatus();
         if (arrowEls[0]) {
           arrowEls[0].style.background = '#fff';
           arrowEls[0].style.color = '#000';
