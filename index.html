@@ -239,6 +239,11 @@ const arrowKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
 const keys = { w:false, a:false, s:false, d:false };
 arrowKeys.forEach(k => keys[k] = false);
 
+// Add: require keys to come up after a new combo is shown before it can be accepted
+let requireKeyRelease = false;
+const keyReleasedSinceComboStart = {};
+arrowKeys.forEach(k => keyReleasedSinceComboStart[k] = true);
+
 let interactionActive = false;
 let currentCombo = null;
 let currentLevel = 1;
@@ -277,6 +282,9 @@ window.addEventListener('keyup', e => {
   const raw = e.key || '';
   const k = (raw.length === 1) ? raw.toLowerCase() : raw;
   if (k in keys) keys[k] = false;
+
+  // Mark this arrow key as released for the current combo-checking rules
+  if (k in keyReleasedSinceComboStart) keyReleasedSinceComboStart[k] = true;
 
   if (tileEls[k]) {
     tileEls[k].style.background = '#000';
@@ -343,6 +351,13 @@ function startNextCombo() {
     progressFill.style.transform = 'scaleX(1)';
   }
   comboAccepted = false;
+
+  // Require keys to come up if they are currently pressed.
+  requireKeyRelease = true;
+  for (const k of arrowKeys) {
+    keyReleasedSinceComboStart[k] = !keys[k]; // true if not currently pressed
+  }
+
   let flashState = false;
   let flashTimer = 0;
   const labelMap = {
@@ -496,6 +511,13 @@ function checkComboSuccess() {
     if (k === currentCombo[0] || k === currentCombo[1]) continue;
     if (keys[k]) return false;
   }
+
+  // If we required release after showing this combo, ensure both keys have come up since it started.
+  if (requireKeyRelease) {
+    const a = currentCombo[0], b = currentCombo[1];
+    if (!keyReleasedSinceComboStart[a] || !keyReleasedSinceComboStart[b]) return false;
+  }
+
   return true;
 }
 
@@ -597,9 +619,8 @@ function update(dt) {
             resetScene();
           }
         } else {
-          setTimeout(() => {
-            startNextCombo();
-          }, 300);
+          // Immediately start the next combo (remove the pause).
+          startNextCombo();
         }
       }
     } else if (comboTimeLeft <= 0) {
@@ -675,4 +696,5 @@ sprite.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
 </script>
 </body>
+</html>
 </html>
