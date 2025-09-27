@@ -136,7 +136,7 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
       </div>
       <div id="combo-ui" class="combo-ui" style="display:none; align-items:center;">
         <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
-        <div id="combo-status" style="font-size:18px; margin-top:6px;">0 / 3</div>
+        <!-- combo counter removed; progress bar retained -->
       </div>
     </div>
   </div>
@@ -154,7 +154,7 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 const sprite = new Image();
-sprite.src = 'boo-mock.png';
+sprite.src = 'boo-mock-2.png';
 const personSprite = new Image();
 personSprite.src = 'person-mock.png';
 
@@ -232,7 +232,6 @@ const arrowEls = {
   1: document.getElementById('arrow-2'),
 };
 const progressFill = document.getElementById('progress-fill');
-const comboStatus = document.getElementById('combo-status');
 
 const arrowKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
 
@@ -309,30 +308,6 @@ function rectsOverlap(a, b) {
          Math.abs(a.y - b.y) < (a.height + b.height)/2;
 }
 
-function pickCombo() {
-  const maxAttempts = 50;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const a = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
-    let b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
-    if (b === a) {
-      do { b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)]; } while (b === a);
-    }
-    const key = `${a}|${b}`;
-    if (!usedCombos.includes(key)) {
-      usedCombos.push(key);
-      return [a,b];
-    }
-  }
-  const a = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
-  let b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
-  if (b === a) {
-    do { b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)]; } while (b === a);
-  }
-  const key = `${a}|${b}`;
-  usedCombos.push(key);
-  return [a,b];
-}
-
 function startInteraction() {
   if (interactionActive) return;
   interactionActive = true;
@@ -345,7 +320,23 @@ function startInteraction() {
 
 function startNextCombo() {
   comboDuration = levelDurations[currentLevel] || 5.0;
-  currentCombo = pickCombo();
+  // Inline combo-picking (enumerate ordered pairs, exclude a|a)
+  const all = [];
+  for (const a of arrowKeys) {
+    for (const b of arrowKeys) {
+      if (a === b) continue;
+      all.push(`${a}|${b}`);
+    }
+  }
+  let remaining = all.filter(k => !usedCombos.includes(k));
+  if (remaining.length === 0) {
+    usedCombos = [];
+    remaining = all.slice();
+  }
+  const chosen = remaining[Math.floor(Math.random() * remaining.length)];
+  usedCombos.push(chosen);
+  const parts = chosen.split('|');
+  currentCombo = [parts[0], parts[1]];
   comboTimeLeft = comboDuration;
   if (progressFill) {
     progressFill.style.transform = 'scaleX(1)';
@@ -522,7 +513,7 @@ function checkComboSuccess() {
 }
 
 function updateComboStatus() {
-  comboStatus.textContent = `${combosCompleted} / 3`;
+  // no UI counter required — keep as no-op so callers remain unchanged
 }
 
 function update(dt) {
@@ -696,5 +687,4 @@ sprite.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
 </script>
 </body>
-</html>
 </html>
