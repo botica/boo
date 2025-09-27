@@ -4,136 +4,122 @@
 <meta charset="utf-8" />
 <title>game</title>
 <style>
-/* prevent page scrollbars */
 html, body { margin: 0; height: 100%; overflow: hidden; }
-  canvas { background:#000; display:block; image-rendering: pixelated; }
+canvas { background:#000; display:block; image-rendering: pixelated; }
 
-  /* wrap canvas so arrow UI can be absolutely positioned over it */
-  .game-wrap { position: relative; display: inline-block; }
-  /* center the overlay in the canvas */
-  #arrow-area {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 20;
-    pointer-events: none; /* keep clicks through the overlay */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  /* allow arrow tiles to still visually react (JS sets background) */
-  #arrow-area .tile { pointer-events: auto; }
+.game-wrap { position: relative; display: inline-block; }
+#arrow-area {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  box-sizing: border-box;
+}
+#arrow-area .tile { pointer-events: auto; }
 
-  /* wrapper holds the canvas and tiles in a row; center the whole group on the page */
-  .wrapper {
-    display: flex;
-    align-items: flex-end; /* bottom-align tiles with the canvas bottom */
-    justify-content: center; /* center the group horizontally */
-    gap: 6px; /* small gap so tiles are right next to the canvas */
-    margin: 20px auto; /* center wrapper in page */
-  }
+.wrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  margin: 20px auto;
+}
 
-  /* tiles arranged like keyboard: W above A S D */
-  .tiles {
-    display: grid;
-    grid-template-columns: repeat(3, 48px);
-    grid-auto-rows: 48px;
-    gap: 6px;
-    align-items: center;
-    justify-items: center;
-    margin-bottom: 0; /* ensure no extra offset so tile bottoms align with canvas */
-  }
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 48px);
+  grid-auto-rows: 48px;
+  gap: 6px;
+  align-items: center;
+  justify-items: center;
+  margin-bottom: 0;
+}
 
-  .tile {
-    width: 48px;
-    height: 48px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #000; /* changed to pure black */
-    color: #fff; /* pure white */
-    font: 20px sans-serif;
-    border: 1px solid #fff; /* pure white border for contrast */
-    box-sizing: border-box;
-    user-select: none;
-    border-radius: 0; /* sharp corners */
-  }
+.tile {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #fff;
+  font: 20px sans-serif;
+  border: 1px solid #fff;
+  box-sizing: border-box;
+  user-select: none;
+  border-radius: 0;
+}
 
-  /* place W above the center (S) key like a keyboard */
-  #tile-w { grid-column: 2; grid-row: 1; }
-  #tile-a { grid-column: 1; grid-row: 2; }
-  #tile-s { grid-column: 2; grid-row: 2; }
-  #tile-d { grid-column: 3; grid-row: 2; }
+#tile-w { grid-column: 2; grid-row: 1; }
+#tile-a { grid-column: 1; grid-row: 2; }
+#tile-s { grid-column: 2; grid-row: 2; }
+#tile-d { grid-column: 3; grid-row: 2; }
 
-  /* arrange arrow keys: Up centered above, Left Down Right on bottom row */
-  #tile-up    { grid-column: 2; grid-row: 1; }
-  #tile-left  { grid-column: 1; grid-row: 2; }
-  #tile-down  { grid-column: 2; grid-row: 2; }
-  #tile-right { grid-column: 3; grid-row: 2; }
+#tile-up    { grid-column: 2; grid-row: 1; }
+#tile-left  { grid-column: 1; grid-row: 2; }
+#tile-down  { grid-column: 2; grid-row: 2; }
+#tile-right { grid-column: 3; grid-row: 2; }
 
-  /* arrows UI (two-key combo shown as tiles) */
-  .arrows {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
-    /* allow arrows to take up most of the canvas width */
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0 40px;
-  }
-  /* big arrow tiles centered in canvas; majority of canvas size */
-  /* square tiles, fixed size 400x400 */
-  .big-arrow {
-    /* base size, actual size may be overridden by JS to fit canvas */
-    width: 400px;
-    height: 400px;
-    background: #000; /* pure black */
-    font-size: 180px;
-    line-height: 1;
-    border-radius: 0; /* sharp corners */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
+.arrows {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 40px;
+}
 
-  /* progress bar for combo timer */
-  .combo-ui {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    margin-left: 6px;
-    font: 12px sans-serif;
-    color: #fff; /* pure white */
-  }
-  .progress {
-    width: min(85%, 520px);
-    height: 14px;
-    background: #000; /* pure black */
-    border: 1px solid #fff; /* pure white */
-    box-sizing: border-box;
-    border-radius: 0; /* hard angles (was 6px) */
-    overflow: hidden;
-  }
-  .progress-fill {
-    width: 100%;
-    height: 100%;
-    background: #fff; /* pure white fill (no gradient) */
-    transform-origin: left;
-    transition: transform 0.1s linear;
-    border-radius: 0; /* ensure fill is also hard-edged */
-  }
+.big-arrow {
+  width: 400px;
+  height: 400px;
+  background: #000;
+  font-size: 180px;
+  line-height: 1;
+  border-radius: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.combo-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  font: 12px sans-serif;
+  color: #fff;
+}
+.progress {
+  width: min(85%, 520px);
+  height: 14px;
+  background: #000;
+  border: 1px solid #fff;
+  box-sizing: border-box;
+  border-radius: 0;
+  overflow: hidden;
+}
+.progress-fill {
+  width: 100%;
+  height: 100%;
+  background:#fff;
+  transform-origin: left;
+  transition: transform 0.1s linear;
+  border-radius: 0;
+}
 </style>
 </head>
 <body>
 
 <div class="wrapper">
-  <!-- WASD tiles exist in markup before the script runs -->
   <div id="tiles" class="tiles" aria-hidden="true">
     <div id="tile-w" class="tile" data-key="w" data-activecolor="#fff">W</div>
     <div id="tile-a" class="tile" data-key="a" data-activecolor="#fff">A</div>
@@ -141,16 +127,13 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     <div id="tile-d" class="tile" data-key="d" data-activecolor="#fff">D</div>
   </div>
 
-  <!-- canvas with overlay area for arrow UI -->
   <div class="game-wrap">
     <canvas id="game"></canvas>
     <div id="arrow-area" style="pointer-events:none;">
-      <!-- big arrows centered in canvas -->
       <div id="arrows" class="arrows" aria-hidden="true" style="display:none;">
         <div id="arrow-1" class="tile big-arrow" aria-hidden="true"></div>
         <div id="arrow-2" class="tile big-arrow" aria-hidden="true"></div>
       </div>
-      <!-- larger progress and status shown beneath the big arrows -->
       <div id="combo-ui" class="combo-ui" style="display:none; align-items:center;">
         <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
         <div id="combo-status" style="font-size:18px; margin-top:6px;">0 / 3</div>
@@ -158,9 +141,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; }
     </div>
   </div>
 
-  <!-- Arrow-key tiles to the right of the canvas (layout mirrors the WASD tiles) -->
   <div id="tiles-arrows" class="tiles" aria-hidden="true">
-    <!-- Up above Left Down Right like a keyboard -->
     <div id="tile-up" class="tile" data-key="ArrowUp">▲</div>
     <div id="tile-left" class="tile" data-key="ArrowLeft">◀</div>
     <div id="tile-down" class="tile" data-key="ArrowDown">▼</div>
@@ -174,37 +155,29 @@ const ctx = canvas.getContext('2d');
 
 const sprite = new Image();
 sprite.src = 'boo-mock.png';
-// person sprite (replaces the former blue square)
 const personSprite = new Image();
 personSprite.src = 'person-mock.png';
 
-/* ensure canvas fills the screen but leaves room for left/right tile groups */
 function resizeCanvas() {
-  // measure widths of left/right tile columns
   const leftTiles = document.getElementById('tiles');
   const rightTiles = document.getElementById('tiles-arrows');
   const leftW = leftTiles ? leftTiles.getBoundingClientRect().width : 0;
   const rightW = rightTiles ? rightTiles.getBoundingClientRect().width : 0;
-  // compute available width for canvas, leave small gutters
-  const gutter = 12; // combined gaps/margins
+  const gutter = 12;
   const availableWidth = Math.max(320, window.innerWidth - leftW - rightW - gutter - 40);
-  const availableHeight = Math.max(240, window.innerHeight - 40); // leave a bit vertical padding
+  const availableHeight = Math.max(240, window.innerHeight - 40);
   canvas.width = Math.floor(availableWidth);
   canvas.height = Math.floor(availableHeight);
 
-  // position the game-wrap inline-block so wrapper centering still works;
-  // adjust big arrow tile sizing to fit inside canvas (square)
   const bigSize = Math.max(64, Math.min(400, Math.floor(Math.min(canvas.width * 0.45, canvas.height * 0.6))));
   const arrow1 = document.getElementById('arrow-1');
   const arrow2 = document.getElementById('arrow-2');
   if (arrow1) { arrow1.style.width = `${bigSize}px`; arrow1.style.height = `${bigSize}px`; arrow1.style.fontSize = `${Math.floor(bigSize*0.45)}px`; }
   if (arrow2) { arrow2.style.width = `${bigSize}px`; arrow2.style.height = `${bigSize}px`; arrow2.style.fontSize = `${Math.floor(bigSize*0.45)}px`; }
 
-  // set progress bar width to equal the two tiles plus gap between them (gap defined in .arrows)
-  const gap = 20; // CSS gap between the two big arrow tiles
+  const gap = 20;
   const progressEl = document.querySelector('.progress');
   if (progressEl) {
-    // compute desired width and cap to fit canvas with some padding
     const desired = bigSize * 2 + gap;
     const maxAllowed = canvas.width - 40;
     const finalW = Math.max(64, Math.min(desired, maxAllowed));
@@ -213,21 +186,17 @@ function resizeCanvas() {
 }
 window.addEventListener('resize', () => {
   resizeCanvas();
-  // reposition player/person to appropriate spawn positions after resize
   resetScene();
 });
 
-/* player and person sizes remain defined, positions set in resetScene */
 const player = {
   x: 0, y: 0, vx: 0, vy: 0,
   width: 100, height: 100,
   speed: 400,
   facing: 'right',
-  accel: 2000 // pixels per second^2 (how quickly velocity moves toward input)
+  accel: 2000
 };
 
-/* new: person sprite (center-based coordinates), spawn bottom-left
-   x/y initialized in resetScene so they use the current canvas size */
 const person = {
   width: 150,
   height: 150,
@@ -242,23 +211,20 @@ const person = {
 
 const tileSize = 48;
 const tileGap = 6;
-const tilePadding = 10; // gap between tiles and the person
+const tilePadding = 10;
 
-// get DOM tiles container and items
 const tilesContainer = document.getElementById('tiles');
 const tileEls = {
   w: document.getElementById('tile-w'),
   a: document.getElementById('tile-a'),
   s: document.getElementById('tile-s'),
   d: document.getElementById('tile-d'),
-  // arrow key tiles (mapped by actual KeyboardEvent.key strings)
   ArrowUp:   document.getElementById('tile-up'),
   ArrowLeft: document.getElementById('tile-left'),
   ArrowDown: document.getElementById('tile-down'),
   ArrowRight:document.getElementById('tile-right'),
 };
 
-// arrow combo elements
 const arrowArea = document.getElementById('arrow-area');
 const arrowsEl = document.getElementById('arrows');
 const arrowEls = {
@@ -268,47 +234,39 @@ const arrowEls = {
 const progressFill = document.getElementById('progress-fill');
 const comboStatus = document.getElementById('combo-status');
 
-// arrow key list used for combos
 const arrowKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
 
 const keys = { w:false, a:false, s:false, d:false };
-// include arrow keys in tracking
 arrowKeys.forEach(k => keys[k] = false);
 
-// interaction state (must be defined before update() / event handlers use them)
 let interactionActive = false;
-let currentCombo = null; // array of two key names, e.g. ['ArrowLeft','ArrowUp']
-// replaced static comboDuration with per-level durations and currentLevel
-let currentLevel = 1; // 1..3
-const levelDurations = { 1: 5.0, 2: 3.0, 3: 2.0 }; // level 3 now 2s
-let comboDuration = levelDurations[currentLevel]; // will be refreshed when combos start
+let currentCombo = null;
+let currentLevel = 1;
+const levelDurations = { 1: 5.0, 2: 3.0, 3: 2.0 };
+let comboDuration = levelDurations[currentLevel];
 let comboTimeLeft = 0;
 let combosCompleted = 0;
-// prevents multiple counts for the same combo while keys remain held
 let comboAccepted = false;
 
-// helper to update document title with current level
 function updateLevelTitle() {
   document.title = `game - Level ${currentLevel}`;
 }
 
 window.addEventListener('keydown', e => {
   const raw = e.key || '';
-  const k = (raw.length === 1) ? raw.toLowerCase() : raw; // letters lowercased, arrows kept
+  const k = (raw.length === 1) ? raw.toLowerCase() : raw;
   if (k in keys) keys[k] = true;
 
-  // toggle tile visuals on keydown — switch to white background with black text for visibility
-  if (tileEls[k]) { 
-    tileEls[k].style.background = '#fff'; 
-    tileEls[k].style.color = '#000'; 
-    tileEls[k].style.border = '1px solid #000'; 
+  if (tileEls[k]) {
+    tileEls[k].style.background = '#fff';
+    tileEls[k].style.color = '#000';
+    tileEls[k].style.border = '1px solid #000';
   }
-  // if an arrow tile is shown and matches a displayed arrow key, also highlight it on down
   if (interactionActive && currentCombo) {
     for (let i=0;i<2;i++) {
-      if (currentCombo[i] === k) { 
-        arrowEls[i].style.background = '#fff'; 
-        arrowEls[i].style.color = '#000'; 
+      if (currentCombo[i] === k) {
+        arrowEls[i].style.background = '#fff';
+        arrowEls[i].style.color = '#000';
         arrowEls[i].style.border = '1px solid #000';
       }
     }
@@ -319,17 +277,16 @@ window.addEventListener('keyup', e => {
   const k = (raw.length === 1) ? raw.toLowerCase() : raw;
   if (k in keys) keys[k] = false;
 
-  // revert tile visuals on keyup (back to black bg, white text)
-  if (tileEls[k]) { 
-    tileEls[k].style.background = '#000'; 
-    tileEls[k].style.color = '#fff'; 
-    tileEls[k].style.border = '1px solid #fff'; 
+  if (tileEls[k]) {
+    tileEls[k].style.background = '#000';
+    tileEls[k].style.color = '#fff';
+    tileEls[k].style.border = '1px solid #fff';
   }
   if (interactionActive && currentCombo) {
     for (let i=0;i<2;i++) {
-      if (currentCombo[i] === k) { 
-        arrowEls[i].style.background = '#000'; 
-        arrowEls[i].style.color = '#fff'; 
+      if (currentCombo[i] === k) {
+        arrowEls[i].style.background = '#000';
+        arrowEls[i].style.color = '#fff';
         arrowEls[i].style.border = '1px solid #fff';
       }
     }
@@ -338,7 +295,6 @@ window.addEventListener('keyup', e => {
 
 let lastTime = performance.now();
 
-// helper: axis-aligned box overlap (both objects use center x,y and width/height)
 function rectsOverlap(a, b) {
   return Math.abs(a.x - b.x) < (a.width + b.width)/2 &&
          Math.abs(a.y - b.y) < (a.height + b.height)/2;
@@ -348,7 +304,6 @@ function pickCombo() {
   const a = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
   let b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)];
   if (b === a) {
-    // ensure distinct; pick again until different
     do { b = arrowKeys[Math.floor(Math.random()*arrowKeys.length)]; } while (b === a);
   }
   return [a,b];
@@ -364,105 +319,117 @@ function startInteraction() {
 }
 
 function startNextCombo() {
-  // set combo duration based on current level
   comboDuration = levelDurations[currentLevel] || 5.0;
   currentCombo = pickCombo();
   comboTimeLeft = comboDuration;
-  // ensure progress bar shows full immediately and starts counting down
   if (progressFill) {
     progressFill.style.transform = 'scaleX(1)';
   }
-  // mark this combo as not yet accepted
   comboAccepted = false;
-   flashState = false;
-   flashTimer = 0;
-   // show arrow labels (use simple symbols to represent arrows)
-   const labelMap = {
-     ArrowLeft: '<',
-     ArrowRight: '>',
-     ArrowUp: '^',
-     ArrowDown: 'v'
-   };
-   // show arrows container
-   if (arrowsEl) arrowsEl.style.display = 'flex';
-   // ensure individual arrow tiles are visible and set labels + readable colors
-   if (arrowEls[0]) { 
-     arrowEls[0].style.display = ''; 
-     arrowEls[0].textContent = labelMap[currentCombo[0]] || currentCombo[0]; 
-     arrowEls[0].style.background = '#000'; 
-     arrowEls[0].style.color = '#fff'; 
-     arrowEls[0].style.border = '1px solid #fff';
-   }
-   if (arrowEls[1]) { 
-     arrowEls[1].style.display = ''; 
-     arrowEls[1].textContent = labelMap[currentCombo[1]] || currentCombo[1]; 
-     arrowEls[1].style.background = '#000'; 
-     arrowEls[1].style.color = '#fff'; 
-     arrowEls[1].style.border = '1px solid #fff';
-   }
-   // ensure UI shown
-   showComboUI(true);
-   updateComboStatus();
+  let flashState = false;
+  let flashTimer = 0;
+  const labelMap = {
+    ArrowLeft: '<',
+    ArrowRight: '>',
+    ArrowUp: '^',
+    ArrowDown: 'v'
+  };
+  if (arrowsEl) arrowsEl.style.display = 'flex';
+  if (arrowEls[0]) {
+    arrowEls[0].style.display = '';
+    arrowEls[0].textContent = labelMap[currentCombo[0]] || currentCombo[0];
+    arrowEls[0].style.background = '#000';
+    arrowEls[0].style.color = '#fff';
+    arrowEls[0].style.border = '1px solid #fff';
+  }
+  if (arrowEls[1]) {
+    arrowEls[1].style.display = '';
+    arrowEls[1].textContent = labelMap[currentCombo[1]] || currentCombo[1];
+    arrowEls[1].style.background = '#000';
+    arrowEls[1].style.color = '#fff';
+    arrowEls[1].style.border = '1px solid #fff';
+  }
+  showComboUI(true);
+  updateComboStatus();
 }
 
 function showComboUI(show) {
   const node = document.getElementById('combo-ui');
   if (node) node.style.display = show ? 'flex' : 'none';
   if (arrowsEl) arrowsEl.style.display = show ? 'flex' : 'none';
-  if (arrowArea) arrowArea.style.display = show ? 'flex' : 'none'; // ensure overlay itself is shown/hidden
+  if (arrowArea) arrowArea.style.display = show ? 'flex' : 'none';
 }
 
-function endInteraction(reason) {
+function endInteraction(reason, opts = {}) {
+  const { alertMsg = null, resetSceneAfter = false } = opts;
+
   interactionActive = false;
   currentCombo = null;
   comboTimeLeft = 0;
-  // hide arrows container, combo UI and entire overlay
+
   if (arrowsEl) arrowsEl.style.display = 'none';
   if (arrowArea) arrowArea.style.display = 'none';
   showComboUI(false);
-  // clear individual arrow tiles so they are blank when next shown (black background + white text)
-  if (arrowEls[0]) { 
-    arrowEls[0].textContent = ''; 
-    arrowEls[0].style.background = '#000'; 
-    arrowEls[0].style.color = '#fff'; 
+
+  if (arrowEls[0]) {
+    arrowEls[0].textContent = '';
+    arrowEls[0].style.background = '#000';
+    arrowEls[0].style.color = '#fff';
     arrowEls[0].style.border = '1px solid #fff';
+    arrowEls[0].style.display = 'none';
   }
-  if (arrowEls[1]) { 
-    arrowEls[1].textContent = ''; 
-    arrowEls[1].style.background = '#000'; 
-    arrowEls[1].style.color = '#fff'; 
+  if (arrowEls[1]) {
+    arrowEls[1].textContent = '';
+    arrowEls[1].style.background = '#000';
+    arrowEls[1].style.color = '#fff';
     arrowEls[1].style.border = '1px solid #fff';
+    arrowEls[1].style.display = 'none';
   }
+
+  for (const k in tileEls) {
+    const el = tileEls[k];
+    if (el && el.style) {
+      el.style.background = '#000';
+      el.style.color = '#fff';
+      el.style.border = '1px solid #fff';
+    }
+  }
+
+  if (progressFill) progressFill.style.transform = 'scaleX(1)';
+  updateComboStatus();
+
   console.log('interaction ended:', reason || 'finished');
+
+  if (alertMsg) alert(alertMsg);
+  if (resetSceneAfter) resetScene();
 }
 
-// reset the scene to initial state (called after timeout alert)
+function handleTimeout() {
+  endInteraction('timeout', { alertMsg: 'Try again?', resetSceneAfter: true });
+}
+
 function resetScene() {
-  // stop interaction
   interactionActive = false;
   currentCombo = null;
   comboTimeLeft = 0;
   combosCompleted = 0;
   comboAccepted = false;
-  flashState = false;
-  flashTimer = 0;
-  // hide UI and overlay
+  let flashState = false;
+  let flashTimer = 0;
   if (arrowsEl) arrowsEl.style.display = 'none';
   if (arrowArea) arrowArea.style.display = 'none';
   const node = document.getElementById('combo-ui');
   if (node) node.style.display = 'none';
   if (progressFill) progressFill.style.transform = 'scaleX(1)';
   updateComboStatus();
-  // reset tile visuals
   for (const k in tileEls) {
     const el = tileEls[k];
-    if (el && el.style) { 
-      el.style.background = '#000'; 
-      el.style.color = '#fff'; 
-      el.style.border = '1px solid #fff'; 
+    if (el && el.style) {
+      el.style.background = '#000';
+      el.style.color = '#fff';
+      el.style.border = '1px solid #fff';
     }
   }
-  // clear individual arrow tiles/state as well (keep display untouched)
   if (arrowEls[0]) {
     arrowEls[0].textContent = '';
     arrowEls[0].style.background = '#000';
@@ -476,21 +443,17 @@ function resetScene() {
     arrowEls[1].style.border = '1px solid #fff';
   }
 
-  // release all keys
   for (const k in keys) keys[k] = false;
 
-  // reset player position and velocity to top-right with padding
   player.x = canvas.width - player.width/2 - 10;
   player.y = player.height/2 + 10;
   player.vx = 0;
   player.vy = 0;
   player.facing = 'right';
 
-  // reset person position to bottom-left with padding
   person.x = person.width/2 + 10;
   person.y = canvas.height - person.height/2 - 10;
 
-  // reset person movement state
   person.colliding = false;
   person.vx = 0;
   person.isMoving = false;
@@ -498,31 +461,6 @@ function resetScene() {
   person.moveTimeLeft = 0;
 }
 
-function handleTimeout() {
-  // ensure UI + overlay are fully hidden/cleared immediately
-  endInteraction('timeout');
-  if (arrowsEl) arrowsEl.style.display = 'none';
-  if (arrowArea) arrowArea.style.display = 'none';
-  showComboUI(false);
-  if (arrowEls[0]) { 
-    arrowEls[0].textContent = ''; 
-    arrowEls[0].style.background = '#000'; 
-    arrowEls[0].style.color = '#fff'; 
-    arrowEls[0].style.border = '1px solid #fff';
-  }
-  if (arrowEls[1]) { 
-    arrowEls[1].textContent = ''; 
-    arrowEls[1].style.background = '#000'; 
-    arrowEls[1].style.color = '#fff'; 
-    arrowEls[1].style.border = '1px solid #fff';
-  }
-
-  // single-button alert; OK resets the scene
-  alert('Try again?');
-  resetScene();
-}
-
-// check if both required keys are currently held
 function checkComboSuccess() {
   if (!currentCombo) return false;
   return !!(keys[currentCombo[0]] && keys[currentCombo[1]]);
@@ -532,23 +470,17 @@ function updateComboStatus() {
   comboStatus.textContent = `${combosCompleted} / 3`;
 }
 
-// integrate into existing update(dt)
 function update(dt) {
-  // Freeze movement while an interaction is active — only arrow keys are used during interaction
   if (!interactionActive) {
-    // --- replaced immediate-velocity block with inertia-based acceleration ---
-    // compute input vector
     let inputX = 0, inputY = 0;
     if (keys.w) inputY -= 1;
     if (keys.s) inputY += 1;
     if (keys.a) inputX -= 1;
     if (keys.d) inputX += 1;
 
-    // update facing based on horizontal input (prefer direct input)
     if (inputX < 0) player.facing = 'left';
     else if (inputX > 0) player.facing = 'right';
 
-    // compute target velocity in px/s (normalize diagonal)
     let targetVx = 0, targetVy = 0;
     const len = Math.hypot(inputX, inputY);
     if (len > 0) {
@@ -556,7 +488,6 @@ function update(dt) {
       targetVy = (inputY / len) * player.speed;
     }
 
-    // accelerate toward target velocity with a max acceleration per frame
     const maxDelta = player.accel * dt;
     const dvx = targetVx - player.vx;
     const dvy = targetVy - player.vy;
@@ -565,129 +496,98 @@ function update(dt) {
     if (Math.abs(dvy) > maxDelta) player.vy += Math.sign(dvy) * maxDelta;
     else player.vy = targetVy;
 
-    // integrate position using velocities (vx/vy are in px/s now)
     player.x += player.vx * dt;
     player.y += player.vy * dt;
 
-    // bounds
     player.x = Math.max(player.width/2, Math.min(canvas.width - player.width/2, player.x));
     player.y = Math.max(player.height/2, Math.min(canvas.height - player.height/2, player.y));
   } else {
-    // ensure velocity is zero while frozen
     player.vx = 0;
     player.vy = 0;
   }
 
-  // update person sporadic movement (paused during interaction)
   if (!interactionActive) {
     if (person.isMoving) {
-      // move while moveTimeLeft remains
       person.moveTimeLeft -= dt;
       person.x += person.vx * dt;
       if (person.moveTimeLeft <= 0) {
-        // stop move, reset timer until next move
         person.isMoving = false;
         person.vx = 0;
-        person.nextMoveIn = 1 + Math.random()*3.0; // idle 1-4s mostly
+        person.nextMoveIn = 1 + Math.random()*3.0;
       }
     } else {
-      // idle countdown
       person.nextMoveIn -= dt;
       if (person.nextMoveIn <= 0) {
-        // begin a short random move
         person.isMoving = true;
-        // direction: -1 left or +1 right
         const dir = Math.random() < 0.5 ? -1 : 1;
-        // short duration (0.15 - 0.6s)
         person.moveTimeLeft = 0.15 + Math.random() * 0.45;
-        // small speed variation
         const speed = person.moveSpeed * (0.6 + Math.random()*0.9);
         person.vx = dir * speed;
       }
     }
-    // keep person on canvas horizontally
     const halfW = person.width/2;
     person.x = Math.max(halfW, Math.min(canvas.width - halfW, person.x));
   }
 
-  // interaction update
   if (interactionActive && currentCombo) {
-     // decrement timer
-     comboTimeLeft -= dt;
-     const pct = Math.max(0, Math.min(1, comboTimeLeft / comboDuration));
-     progressFill.style.transform = `scaleX(${pct})`;
+    comboTimeLeft -= dt;
+    const pct = Math.max(0, Math.min(1, comboTimeLeft / comboDuration));
+    progressFill.style.transform = `scaleX(${pct})`;
 
-    // success check
     if (checkComboSuccess()) {
       if (!comboAccepted) {
         comboAccepted = true;
         combosCompleted++;
         updateComboStatus();
-        // brief success flash (use white bg with black text)
-        if (arrowEls[0]) { 
-          arrowEls[0].style.background = '#fff'; 
-          arrowEls[0].style.color = '#000'; 
+        if (arrowEls[0]) {
+          arrowEls[0].style.background = '#fff';
+          arrowEls[0].style.color = '#000';
           arrowEls[0].style.border = '1px solid #000';
         }
-        if (arrowEls[1]) { 
-          arrowEls[1].style.background = '#fff'; 
-          arrowEls[1].style.color = '#000'; 
+        if (arrowEls[1]) {
+          arrowEls[1].style.background = '#fff';
+          arrowEls[1].style.color = '#000';
           arrowEls[1].style.border = '1px solid #000';
         }
-        // reset for next combo or finish
         if (combosCompleted >= 3) {
-          // advance level or finish the game
           if (currentLevel < 3) {
             alert('boo! you scared them! advancing to the next level!');
             currentLevel++;
             updateLevelTitle();
-            // finalize this interaction and reset the scene for the new level
             endInteraction('success: level advanced');
             resetScene();
           } else {
-            // completed level 3
             alert('boo! you scared them! you beat the game!');
-            // cycle back to level 1 to allow replay
             currentLevel = 1;
             updateLevelTitle();
             endInteraction('success: game complete');
             resetScene();
           }
         } else {
-          // start next combo after a short delay to show success color
           setTimeout(() => {
             startNextCombo();
           }, 300);
         }
       }
     } else if (comboTimeLeft <= 0) {
-      // time ran out for this combo -> alert then reset scene (stay on same level)
       handleTimeout();
-      // leave additional loss handling to later
     }
   }
 
-  // collision check with person; log "boo!" only when collision begins
   const nowColliding = rectsOverlap(player, person);
   if (nowColliding && !person.colliding) {
-    // classify collision: compute penetration on each axis
     const dx = player.x - person.x;
     const dy = player.y - person.y;
     const overlapX = (player.width + person.width)/2 - Math.abs(dx);
     const overlapY = (player.height + person.height)/2 - Math.abs(dy);
-
-    // If vertical penetration is smaller than horizontal and player is above person -> top collision
     const isTopCollision = (overlapY <= overlapX) && (dy < 0);
 
     if (isTopCollision) {
-      // snap player to sit on top of person's head and freeze velocity
       player.y = person.y - (person.height + player.height) / 2;
       player.vx = 0;
       player.vy = 0;
-      // begin the arrow-key interaction
       startInteraction();
     } else {
-      // side collision -> immediate failure (same behavior as timeout)
       handleTimeout();
     }
   }
@@ -697,13 +597,10 @@ function update(dt) {
 function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // draw person (behind the ghost)
   ctx.drawImage(personSprite, person.x - person.width/2, person.y - person.height/2, person.width, person.height);
 
-  // draw flipped when facing left, otherwise normal
   if (player.facing === 'left') {
     ctx.save();
-    // translate to player's center, flip horizontally, draw centered at origin
     ctx.translate(player.x, player.y);
     ctx.scale(-1, 1);
     ctx.drawImage(sprite, -player.width/2, -player.height/2, player.width, player.height);
@@ -722,14 +619,11 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-/* wait for both images to load before starting the loop
-   ensure canvas is sized and scene reset before starting */
 let _assetsLoaded = 0;
 function _onAssetLoad() {
   _assetsLoaded++;
   if (_assetsLoaded === 2) {
     resizeCanvas();
-    // ensure title reflects current level on startup
     updateLevelTitle();
     resetScene();
     requestAnimationFrame(loop);
@@ -737,6 +631,9 @@ function _onAssetLoad() {
 }
 sprite.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
+</script>
+</body>
+</html>
 </script>
 </body>
 </html>
