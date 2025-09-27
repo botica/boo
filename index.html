@@ -80,7 +80,8 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
 .big-arrow {
   width: 400px;
   height: 400px;
-  background: #000;
+  /* make big arrow backgrounds translucent to match small tiles */
+  background: rgba(0,0,0,0.55);
   font-size: 180px;
   line-height: 1;
   border-radius: 0;
@@ -115,19 +116,32 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
   transition: transform 0.1s linear;
   border-radius: 0;
 }
+
+/* overlay arrow tile group centered on screen */
+#tiles-arrows {
+  /* position relative to .game-wrap so it aligns with the canvas bottom */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;                /* align with bottom of canvas */
+  z-index: 40;
+  pointer-events: auto;     /* allow clicks/hover on the tiles */
+}
+
+/* Make the small arrow tiles translucent so focus remains on the canvas */
+#tiles-arrows .tile {
+  background: rgba(0,0,0,0.55);
+  border-color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.9);
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  opacity: 0.5; /* make overlay tiles translucent */
+}
 </style>
 </head>
 <body>
 
 <div class="wrapper">
-  <div id="tiles" class="tiles" aria-hidden="true">
-    <div id="tile-w" class="tile" data-key="w" data-activecolor="#fff">W</div>
-    <div id="tile-a" class="tile" data-key="a" data-activecolor="#fff">A</div>
-    <div id="tile-s" class="tile" data-key="s" data-activecolor="#fff">S</div>
-    <div id="tile-d" class="tile" data-key="d" data-activecolor="#fff">D</div>
-  </div>
-
-  <div class="game-wrap">
+  <div class="game-wrap" style="position:relative;">
     <canvas id="game"></canvas>
     <div id="arrow-area" style="pointer-events:none;">
       <div id="arrows" class="arrows" aria-hidden="true" style="display:none;">
@@ -139,13 +153,14 @@ canvas { background:#000; display:block; image-rendering: pixelated; }
         <!-- combo counter removed; progress bar retained -->
       </div>
     </div>
-  </div>
 
-  <div id="tiles-arrows" class="tiles" aria-hidden="true">
-    <div id="tile-up" class="tile" data-key="ArrowUp">▲</div>
-    <div id="tile-left" class="tile" data-key="ArrowLeft">◀</div>
-    <div id="tile-down" class="tile" data-key="ArrowDown">▼</div>
-    <div id="tile-right" class="tile" data-key="ArrowRight">▶</div>
+    <!-- moved into .game-wrap so it overlays and lines up with the canvas bottom -->
+    <div id="tiles-arrows" class="tiles" aria-hidden="true">
+      <div id="tile-up" class="tile" data-key="ArrowUp">^</div>
+      <div id="tile-left" class="tile" data-key="ArrowLeft"><</div>
+      <div id="tile-down" class="tile" data-key="ArrowDown">v</div>
+      <div id="tile-right" class="tile" data-key="ArrowRight">></div>
+    </div>
   </div>
 </div>
 
@@ -159,10 +174,9 @@ const personSprite = new Image();
 personSprite.src = 'person-mock.png';
 
 function resizeCanvas() {
-  const leftTiles = document.getElementById('tiles');
-  const rightTiles = document.getElementById('tiles-arrows');
-  const leftW = leftTiles ? leftTiles.getBoundingClientRect().width : 0;
-  const rightW = rightTiles ? rightTiles.getBoundingClientRect().width : 0;
+  // overlayed tiles-arrows are fixed and should not reduce available canvas width
+  const leftW = 0;
+  const rightW = 0;
   const gutter = 12;
   const availableWidth = Math.max(320, window.innerWidth - leftW - rightW - gutter - 40);
   const availableHeight = Math.max(240, window.innerHeight - 40);
@@ -213,12 +227,7 @@ const tileSize = 48;
 const tileGap = 6;
 const tilePadding = 10;
 
-const tilesContainer = document.getElementById('tiles');
 const tileEls = {
-  w: document.getElementById('tile-w'),
-  a: document.getElementById('tile-a'),
-  s: document.getElementById('tile-s'),
-  d: document.getElementById('tile-d'),
   ArrowUp:   document.getElementById('tile-up'),
   ArrowLeft: document.getElementById('tile-left'),
   ArrowDown: document.getElementById('tile-down'),
@@ -235,7 +244,7 @@ const progressFill = document.getElementById('progress-fill');
 
 const arrowKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
 
-const keys = { w:false, a:false, s:false, d:false };
+const keys = {};
 arrowKeys.forEach(k => keys[k] = false);
 
 // Add: require keys to come up after a new combo is shown before it can be accepted
@@ -519,10 +528,10 @@ function updateComboStatus() {
 function update(dt) {
   if (!interactionActive) {
     let inputX = 0, inputY = 0;
-    if (keys.w) inputY -= 1;
-    if (keys.s) inputY += 1;
-    if (keys.a) inputX -= 1;
-    if (keys.d) inputX += 1;
+    if (keys['ArrowUp']) inputY -= 1;
+    if (keys['ArrowDown']) inputY += 1;
+    if (keys['ArrowLeft']) inputX -= 1;
+    if (keys['ArrowRight']) inputX += 1;
 
     if (inputX < 0) player.facing = 'left';
     else if (inputX > 0) player.facing = 'right';
