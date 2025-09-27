@@ -276,11 +276,19 @@ arrowKeys.forEach(k => keys[k] = false);
 // interaction state (must be defined before update() / event handlers use them)
 let interactionActive = false;
 let currentCombo = null; // array of two key names, e.g. ['ArrowLeft','ArrowUp']
-let comboDuration = 5.0; // seconds for each combo
+// replaced static comboDuration with per-level durations and currentLevel
+let currentLevel = 1; // 1..3
+const levelDurations = { 1: 5.0, 2: 3.0, 3: 2.0 }; // level 3 now 2s
+let comboDuration = levelDurations[currentLevel]; // will be refreshed when combos start
 let comboTimeLeft = 0;
 let combosCompleted = 0;
 // prevents multiple counts for the same combo while keys remain held
 let comboAccepted = false;
+
+// helper to update document title with current level
+function updateLevelTitle() {
+  document.title = `game - Level ${currentLevel}`;
+}
 
 window.addEventListener('keydown', e => {
   const raw = e.key || '';
@@ -338,6 +346,8 @@ function startInteraction() {
 }
 
 function startNextCombo() {
+  // set combo duration based on current level
+  comboDuration = levelDurations[currentLevel] || 5.0;
   currentCombo = pickCombo();
   comboTimeLeft = comboDuration;
   // ensure progress bar shows full immediately and starts counting down
@@ -369,15 +379,20 @@ function showComboUI(show) {
   const node = document.getElementById('combo-ui');
   if (node) node.style.display = show ? 'flex' : 'none';
   if (arrowsEl) arrowsEl.style.display = show ? 'flex' : 'none';
+  if (arrowArea) arrowArea.style.display = show ? 'flex' : 'none'; // ensure overlay itself is shown/hidden
 }
 
 function endInteraction(reason) {
   interactionActive = false;
   currentCombo = null;
   comboTimeLeft = 0;
-  arrowsEl.style.display = 'none';
+  // hide arrows container, combo UI and entire overlay
+  if (arrowsEl) arrowsEl.style.display = 'none';
+  if (arrowArea) arrowArea.style.display = 'none';
   showComboUI(false);
-  // simple logging for now; level progression/loss handling later
+  // clear individual arrow tiles so they are blank when next shown
+  if (arrowEls[0]) { arrowEls[0].textContent = ''; arrowEls[0].style.background = '#333'; }
+  if (arrowEls[1]) { arrowEls[1].textContent = ''; arrowEls[1].style.background = '#333'; }
   console.log('interaction ended:', reason || 'finished');
 }
 
@@ -391,8 +406,9 @@ function resetScene() {
   comboAccepted = false;
   flashState = false;
   flashTimer = 0;
-  // hide UI
-  arrowsEl.style.display = 'none';
+  // hide UI and overlay
+  if (arrowsEl) arrowsEl.style.display = 'none';
+  if (arrowArea) arrowArea.style.display = 'none';
   const node = document.getElementById('combo-ui');
   if (node) node.style.display = 'none';
   if (progressFill) progressFill.style.transform = 'scaleX(1)';
@@ -402,6 +418,10 @@ function resetScene() {
     const el = tileEls[k];
     if (el && el.style) el.style.background = '#333';
   }
+  // clear individual arrow tiles/state as well
+  if (arrowEls[0]) { arrowEls[0].textContent = ''; arrowEls[0].style.background = '#333'; }
+  if (arrowEls[1]) { arrowEls[1].textContent = ''; arrowEls[1].style.background = '#333'; }
+
   // release all keys
   for (const k in keys) keys[k] = false;
 
@@ -425,7 +445,14 @@ function resetScene() {
 }
 
 function handleTimeout() {
+  // ensure UI + overlay are fully hidden/cleared immediately
   endInteraction('timeout');
+  if (arrowsEl) arrowsEl.style.display = 'none';
+  if (arrowArea) arrowArea.style.display = 'none';
+  showComboUI(false);
+  if (arrowEls[0]) { arrowEls[0].textContent = ''; arrowEls[0].style.background = '#333'; }
+  if (arrowEls[1]) { arrowEls[1].textContent = ''; arrowEls[1].style.background = '#333'; }
+
   // single-button alert; OK resets the scene
   alert('Try again?');
   resetScene();
@@ -525,11 +552,23 @@ function update(dt) {
         arrowEls[1].style.background = '#6f6';
         // reset for next combo or finish
         if (combosCompleted >= 3) {
-          // announce success to the player
-          alert('boo! you scared them!');
-          endInteraction('success: 3 combos completed');
-          // reset scene after success screen
-          resetScene();
+          // advance level or finish the game
+          if (currentLevel < 3) {
+            alert('boo! you scared them! advancing to the next level!');
+            currentLevel++;
+            updateLevelTitle();
+            // finalize this interaction and reset the scene for the new level
+            endInteraction('success: level advanced');
+            resetScene();
+          } else {
+            // completed level 3
+            alert('boo! you scared them! you beat the game!');
+            // cycle back to level 1 to allow replay
+            currentLevel = 1;
+            updateLevelTitle();
+            endInteraction('success: game complete');
+            resetScene();
+          }
         } else {
           // start next combo after a short delay to show success color
           setTimeout(() => {
@@ -538,7 +577,7 @@ function update(dt) {
         }
       }
     } else if (comboTimeLeft <= 0) {
-      // time ran out for this combo -> alert then reset scene
+      // time ran out for this combo -> alert then reset scene (stay on same level)
       handleTimeout();
       // leave additional loss handling to later
     }
@@ -606,6 +645,8 @@ function _onAssetLoad() {
   _assetsLoaded++;
   if (_assetsLoaded === 2) {
     resizeCanvas();
+    // ensure title reflects current level on startup
+    updateLevelTitle();
     resetScene();
     requestAnimationFrame(loop);
   }
@@ -614,5 +655,4 @@ sprite.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
 </script>
 </body>
-</html>
 </html>
