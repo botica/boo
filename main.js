@@ -3,8 +3,16 @@ const ctx = canvas.getContext('2d');
 
 const sprite = new Image();
 sprite.src = 'boo-mock-2.png';
+const spriteAlt = new Image();
+spriteAlt.src = 'boo-mock-2-1.png';
 const personSprite = new Image();
 personSprite.src = 'person-mock.png';
+
+// sprite animation state (frames are same size)
+const spriteFrames = [sprite, spriteAlt];
+let spriteFrameIndex = 0;
+let spriteAnimTimer = 0;
+const spriteAnimInterval = 0.5; // seconds between frames
 
 function resizeCanvas() {
   // overlayed tiles-arrows are fixed and should not reduce available canvas width
@@ -385,6 +393,20 @@ function update(dt) {
     player.vy = 0;
   }
 
+  // Animate ghost sprite only while the player is moving
+  const playerIsMoving = Math.abs(player.vx) > 0.001 || Math.abs(player.vy) > 0.001;
+  if (playerIsMoving) {
+    spriteAnimTimer += dt;
+    while (spriteAnimTimer >= spriteAnimInterval) {
+      spriteAnimTimer -= spriteAnimInterval;
+      spriteFrameIndex = (spriteFrameIndex + 1) % spriteFrames.length;
+    }
+  } else {
+    // when stationary: stop advancing frames but keep the current frame visible.
+    // clear the timer so the interval restarts consistently when movement resumes.
+    spriteAnimTimer = 0;
+  }
+
   if (!interactionActive) {
     if (person.isMoving) {
       person.moveTimeLeft -= dt;
@@ -479,17 +501,20 @@ function draw() {
   ctx.lineWidth = 1;
   ctx.strokeRect(person.x - person.width/2, person.y - person.height/2, person.width, person.height);
 
+  // choose current frame (fallback to original sprite)
+  const currentSpriteImg = spriteFrames[spriteFrameIndex] || sprite;
+
   if (player.facing === 'left') {
     ctx.save();
     ctx.translate(player.x, player.y);
     ctx.scale(-1, 1);
-    ctx.drawImage(sprite, -player.width/2, -player.height/2, player.width, player.height);
+    ctx.drawImage(currentSpriteImg, -player.width/2, -player.height/2, player.width, player.height);
     ctx.strokeStyle = 'yellow';
     ctx.lineWidth = 1;
     ctx.strokeRect(-player.width/2, -player.height/2, player.width, player.height);
     ctx.restore();
   } else {
-    ctx.drawImage(sprite, player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+    ctx.drawImage(currentSpriteImg, player.x - player.width/2, player.y - player.height/2, player.width, player.height);
     ctx.strokeStyle = 'yellow';
     ctx.lineWidth = 1;
     ctx.strokeRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
@@ -508,7 +533,8 @@ function loop(now) {
 let _assetsLoaded = 0;
 function _onAssetLoad() {
   _assetsLoaded++;
-  if (_assetsLoaded === 2) {
+  // we now load 3 images: sprite, spriteAlt, personSprite
+  if (_assetsLoaded === 3) {
     resizeCanvas();
     updateLevelTitle();
     resetScene();
@@ -516,6 +542,7 @@ function _onAssetLoad() {
   }
 }
 sprite.onload = _onAssetLoad;
+spriteAlt.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
 
 // Add automation / click-press support for arrow tiles and combo arrows
