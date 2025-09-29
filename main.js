@@ -125,9 +125,13 @@ class AnimatedEntity {
     this.tempEndCallback = null;
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
-    this.currentState = this.defaultState;
-    this.frameIndex = 0;
-    this.frameTimer = 0;
+    
+    // Only reset to default state if we're not in a permanent state like 'dead'
+    if (this.currentState !== 'dead') {
+      this.currentState = this.defaultState;
+      this.frameIndex = 0;
+      this.frameTimer = 0;
+    }
     
     if (callback) callback();
   }
@@ -144,7 +148,8 @@ const ghostStates = [
   new AnimationState('moving', [sprite, spriteAlt], 0.4, true),
   new AnimationState('scaring', [spriteScare1, spriteScare2], 0.4, true),
   new AnimationState('laughing', [spriteLaugh1, spriteLaugh2], 0.4, true),
-  new AnimationState('swirling', [spriteSwirl1, spriteSwirl2], 0.4, true)
+  new AnimationState('swirling', [spriteSwirl1, spriteSwirl2], 0.4, true),
+  new AnimationState('dead', [], 0.4, false) // Empty frames array for invisible state
 ];
 
 // Create ghost entity
@@ -448,12 +453,18 @@ function handleTimeout() {
   showComboUI(false);
   animationInProgress = true;
   
+  // Show swirling for exactly 2 frames (800ms), then invisible for 1000ms
   ghostAnimator.setState('swirling', {
-    duration: 2800,
+    frameCount: 2,
     onComplete: () => {
-      animationInProgress = false;
-      endInteraction('timeout');
-      resetScene();
+      ghostAnimator.setState('dead', {
+        duration: 1000,
+        onComplete: () => {
+          animationInProgress = false;
+          endInteraction('timeout');
+          resetScene();
+        }
+      });
     }
   });
 }
@@ -688,12 +699,18 @@ function update(dt) {
       showComboUI(false);
       animationInProgress = true;
       
+      // Show swirling for exactly 2 frames (800ms), then invisible for 1000ms
       ghostAnimator.setState('swirling', {
-        duration: 2800,
+        frameCount: 2,
         onComplete: () => {
-          animationInProgress = false;
-          endInteraction('failed: side collision');
-          resetScene();
+          ghostAnimator.setState('dead', {
+            duration: 1000,
+            onComplete: () => {
+              animationInProgress = false;
+              endInteraction('failed: side collision');
+              resetScene();
+            }
+          });
         }
       });
     }
@@ -715,23 +732,26 @@ function draw() {
   ctx.strokeRect(person.x - person.width/2, person.y - person.height/2, person.width, person.height);
 
   // Get current ghost sprite frame
-  const currentSpriteImg = ghostAnimator.getCurrentFrame() || sprite;
+  const currentSpriteImg = ghostAnimator.getCurrentFrame();
 
-  // Draw player with proper facing direction
-  if (player.facing === 'left') {
-    ctx.save();
-    ctx.translate(player.x, player.y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(currentSpriteImg, -player.width/2, -player.height/2, player.width, player.height);
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-player.width/2, -player.height/2, player.width, player.height);
-    ctx.restore();
-  } else {
-    ctx.drawImage(currentSpriteImg, player.x - player.width/2, player.y - player.height/2, player.width, player.height);
-    ctx.strokeStyle = 'yellow';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+  // Only draw ghost if there's a valid sprite (not in dead state)
+  if (currentSpriteImg) {
+    // Draw player with proper facing direction
+    if (player.facing === 'left') {
+      ctx.save();
+      ctx.translate(player.x, player.y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(currentSpriteImg, -player.width/2, -player.height/2, player.width, player.height);
+      ctx.strokeStyle = 'yellow';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-player.width/2, -player.height/2, player.width, player.height);
+      ctx.restore();
+    } else {
+      ctx.drawImage(currentSpriteImg, player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+      ctx.strokeStyle = 'yellow';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
+    }
   }
 }
 
