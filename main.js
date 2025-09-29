@@ -344,6 +344,10 @@ function showComboUI(show) {
   if (node) node.style.display = show ? 'flex' : 'none';
   if (arrowsEl) arrowsEl.style.display = show ? 'flex' : 'none';
   if (arrowArea) arrowArea.style.display = show ? 'flex' : 'none';
+  
+  // Handle progress bar visibility
+  const progressEl = document.querySelector('.progress');
+  if (progressEl) progressEl.style.display = show ? 'flex' : 'none';
 }
 
 function endInteraction(reason, opts = {}) {
@@ -598,6 +602,9 @@ function update(dt) {
         }
         if (combosCompleted >= 3) {
           // success: advance or finish the game. show laughing animation for 3s instead of alert.
+          // Hide combo UI elements immediately before starting animation
+          showComboUI(false);
+          
           if (currentLevel < 3) {
             console.log('boo! you scared them! advancing to the next level!');
             currentLevel++;
@@ -626,6 +633,10 @@ function update(dt) {
       if (!comboAccepted) {
         comboAccepted = true;
         console.log('Try again?');
+        
+        // Hide combo UI elements immediately before starting animation
+        showComboUI(false);
+        
         // run swirl for exactly 6 frame advances and then end/reset
         scheduleTempAnimationSwap(swirlFrames, null, () => {
           endInteraction('timeout');
