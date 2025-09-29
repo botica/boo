@@ -2,17 +2,126 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
 const sprite = new Image();
-sprite.src = 'boo-mock-2.png';
+sprite.src = 'images/boo-mock-2.png';
 const spriteAlt = new Image();
-spriteAlt.src = 'boo-mock-2-1.png';
+spriteAlt.src = 'images/boo-mock-2-1.png';
+// scare state frames (used during the combo interaction)
+const spriteScare1 = new Image();
+spriteScare1.src = 'images/boo-scare-1.png';
+const spriteScare2 = new Image();
+spriteScare2.src = 'images/boo-scare-2.png';
+// laughing state frames (shown after successful level completion)
+const spriteLaugh1 = new Image();
+spriteLaugh1.src = 'images/boo-laugh-1.png';
+const spriteLaugh2 = new Image();
+spriteLaugh2.src = 'images/boo-laugh-2.png';
+// swirling state frames (shown after failed level completion)
+const spriteSwirl1 = new Image();
+spriteSwirl1.src = 'images/boo-swirl-1.png';
+const spriteSwirl2 = new Image();
+spriteSwirl2.src = 'images/boo-swirl-2.png';
 const personSprite = new Image();
-personSprite.src = 'person-mock.png';
+personSprite.src = 'images/person-mock.png';
 
 // sprite animation state (frames are same size)
 const spriteFrames = [sprite, spriteAlt];
+const scareFrames = [spriteScare1, spriteScare2];
+const laughFrames = [spriteLaugh1, spriteLaugh2];
+const swirlFrames = [spriteSwirl1, spriteSwirl2];
+// pointer to the active frame set (normal vs scare)
+let currentFrames = spriteFrames;
 let spriteFrameIndex = 0;
 let spriteAnimTimer = 0;
 const spriteAnimInterval = 0.5; // seconds between frames
+// pending timers for scheduled swaps / animation end
+let _pendingSwapTimeout = null;
+let _pendingEndTimeout = null;
+// temp-frame countdown (when we want to stop after N frame-advances)
+let _tempFrameCountdown = 0;
+let _tempEndCb = null;
+// when true, skip advancing frames for the current update tick (used after swaps)
+let _skipNextAdvance = false;
+// absolute (performance.now()) time when current temp animation should end, or 0
+let _tempEndTime = 0;
+
+function clearPendingAnimations() {
+  if (_pendingSwapTimeout) { clearTimeout(_pendingSwapTimeout); _pendingSwapTimeout = null; }
+  if (_pendingEndTimeout) { clearTimeout(_pendingEndTimeout); _pendingEndTimeout = null; }
+  // clear any frame-count based temp state as well
+  _tempFrameCountdown = 0;
+  _tempEndCb = null;
+  _skipNextAdvance = false;
+  _tempEndTime = 0;
+}
+
+// schedule switching to `frames` at the next frame-change boundary,
+// then keep that animation for durationMs (ms) and call endCb when done.
+function scheduleTempAnimationSwap(frames, durationMs, endCb, opts = {}) {
+  clearPendingAnimations();
+  // If immediate requested, perform swap synchronously (advance to next frame now)
+  if (opts && opts.immediate) {
+    // advance frame index once so swap aligns with the "next" frame visually
+    spriteFrameIndex = (spriteFrameIndex + 1) % ((frames && frames.length) ? frames.length : 1);
+    currentFrames = frames;
+    spriteAnimTimer = 0;
+    // prevent the update() loop from advancing the frame again this tick
+    _skipNextAdvance = true;
+
+    if (opts && Number.isInteger(opts.frameCount) && opts.frameCount > 0) {
+      // we've already displayed one frame by advancing above, so count remaining advances
+      _tempFrameCountdown = Math.max(0, opts.frameCount - 1);
+      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
+      // If countdown already zero (frameCount was 1), finish immediately
+      if (_tempFrameCountdown === 0) {
+        const cb = _tempEndCb;
+        clearPendingAnimations();
+        if (typeof cb === 'function') cb();
+      }
+      // no time-based end in frame-count mode
+    } else if (durationMs && durationMs > 0) {
+      // use time-based end marker (robust against cleared timeouts)
+      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
+      _tempEndTime = performance.now() + durationMs;
+    } else {
+      if (typeof endCb === 'function') endCb();
+    }
+    return;
+  }
+  // spriteAnimTimer is in seconds; compute ms until next boundary
+  const timeToNextSec = Math.max(0.0001, spriteAnimInterval - (spriteAnimTimer % spriteAnimInterval));
+  const timeToNextMs = Math.round(timeToNextSec * 1000);
+  _pendingSwapTimeout = setTimeout(() => {
+    _pendingSwapTimeout = null;
+    // advance frame index once so swap aligns with the frame change
+    spriteFrameIndex = (spriteFrameIndex + 1) % ((frames && frames.length) ? frames.length : 1);
+    currentFrames = frames;
+    // reset the timer so the new set animates cleanly from zero
+    spriteAnimTimer = 0;
+    // ensure the very next update does not immediately advance frames
+    _skipNextAdvance = true;
+
+    // If a frameCount is provided, use countdown mode (endCb will be called after
+    // that many frame-advances). Otherwise, fall back to durationMs timeout.
+    if (opts && Number.isInteger(opts.frameCount) && opts.frameCount > 0) {
+      // we advanced one frame above, so count remaining advances
+      _tempFrameCountdown = Math.max(0, opts.frameCount - 1);
+      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
+      // If countdown already zero (frameCount was 1), finish immediately
+      if (_tempFrameCountdown === 0) {
+        const cb = _tempEndCb;
+        clearPendingAnimations();
+        if (typeof cb === 'function') cb();
+        return;
+      }
+    } else if (durationMs && durationMs > 0) {
+      // use time-based end marker (robust against cleared timeouts)
+      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
+      _tempEndTime = performance.now() + durationMs;
+    } else {
+      if (typeof endCb === 'function') endCb();
+    }
+  }, timeToNextMs);
+}
 
 function resizeCanvas() {
   // overlayed tiles-arrows are fixed and should not reduce available canvas width
@@ -163,6 +272,12 @@ function startInteraction() {
   combosCompleted = 0;
   comboAccepted = false;
   usedCombos = [];
+  // clear any pending scheduled animations and enter scare immediately
+  clearPendingAnimations();
+  currentFrames = scareFrames;
+  spriteFrameIndex = 0;
+  // set timer so we don't get stuck showing only frame 0
+  spriteAnimTimer = spriteAnimInterval;
   showComboUI(true);
   startNextCombo();
 }
@@ -234,7 +349,11 @@ function showComboUI(show) {
 function endInteraction(reason, opts = {}) {
   const { alertMsg = null, resetSceneAfter = false } = opts;
 
+  // clear any pending scheduled animations to avoid races
+  clearPendingAnimations();
   interactionActive = false;
+  // restore normal frames when interaction ends
+  currentFrames = spriteFrames;
   currentCombo = null;
   comboTimeLeft = 0;
 
@@ -291,6 +410,11 @@ function resetScene() {
   combosCompleted = 0;
   comboAccepted = false;
   usedCombos = [];
+  // ensure normal frames after reset
+  clearPendingAnimations();
+  currentFrames = spriteFrames;
+  spriteFrameIndex = 0;
+  spriteAnimTimer = 0;
   let flashState = false;
   let flashTimer = 0;
   if (arrowsEl) arrowsEl.style.display = 'none';
@@ -358,6 +482,7 @@ function checkComboSuccess() {
 }
 
 function update(dt) {
+  const nowMs = performance.now();
   if (!interactionActive) {
     let inputX = 0, inputY = 0;
     if (keys['ArrowUp']) inputY -= 1;
@@ -393,18 +518,40 @@ function update(dt) {
     player.vy = 0;
   }
 
-  // Animate ghost sprite only while the player is moving
+  // Animate using the active frame set. Advance while moving or while interacting (scare flash).
   const playerIsMoving = Math.abs(player.vx) > 0.001 || Math.abs(player.vy) > 0.001;
-  if (playerIsMoving) {
+  const shouldAnimate = playerIsMoving || interactionActive;
+  const frameCount = (currentFrames && currentFrames.length) ? currentFrames.length : 1;
+  if (shouldAnimate) {
     spriteAnimTimer += dt;
-    while (spriteAnimTimer >= spriteAnimInterval) {
-      spriteAnimTimer -= spriteAnimInterval;
-      spriteFrameIndex = (spriteFrameIndex + 1) % spriteFrames.length;
+    // If we've just swapped frames to a new animation, skip advancing on this tick
+    if (_skipNextAdvance) {
+      _skipNextAdvance = false;
+    } else {
+      while (spriteAnimTimer >= spriteAnimInterval) {
+        spriteAnimTimer -= spriteAnimInterval;
+        spriteFrameIndex = (spriteFrameIndex + 1) % frameCount;
+        // if we're in a frame-counted temporary animation, decrement and finish when done
+        if (_tempFrameCountdown > 0) {
+          _tempFrameCountdown--;
+          if (_tempFrameCountdown === 0) {
+            const cb = _tempEndCb;
+            // clear pending timers/state first to avoid races
+            clearPendingAnimations();
+            if (typeof cb === 'function') cb();
+          }
+        }
+      }
     }
   } else {
-    // when stationary: stop advancing frames but keep the current frame visible.
-    // clear the timer so the interval restarts consistently when movement resumes.
+    // stationary and not interacting: stop advancing timer but keep visible frame
     spriteAnimTimer = 0;
+  }
+  // time-based termination for temp animation (robust/fallback)
+  if (_tempEndTime && nowMs >= _tempEndTime) {
+    const cb = _tempEndCb;
+    clearPendingAnimations();
+    if (typeof cb === 'function') cb();
   }
 
   if (!interactionActive) {
@@ -450,18 +597,24 @@ function update(dt) {
           arrowEls[1].style.border = '1px solid #000';
         }
         if (combosCompleted >= 3) {
+          // success: advance or finish the game. show laughing animation for 3s instead of alert.
           if (currentLevel < 3) {
-            alert('boo! you scared them! advancing to the next level!');
+            console.log('boo! you scared them! advancing to the next level!');
             currentLevel++;
             updateLevelTitle();
-            endInteraction('success: level advanced');
-            resetScene();
+            // schedule switch to laugh at the next frame change, run for 3s, then end/reset
+            scheduleTempAnimationSwap(laughFrames, 3000, () => {
+              endInteraction('success: level advanced');
+              resetScene();
+            });
           } else {
-            alert('boo! you scared them! you beat the game!');
+            console.log('boo! you scared them! you beat the game!');
             currentLevel = 1;
             updateLevelTitle();
-            endInteraction('success: game complete');
-            resetScene();
+            scheduleTempAnimationSwap(laughFrames, 3000, () => {
+              endInteraction('success: game complete');
+              resetScene();
+            });
           }
         } else {
           // Immediately start the next combo (remove the pause).
@@ -469,7 +622,16 @@ function update(dt) {
         }
       }
     } else if (comboTimeLeft <= 0) {
-      handleTimeout();
+      // on timeout/failure: only handle once — mark as accepted so we don't reschedule every frame
+      if (!comboAccepted) {
+        comboAccepted = true;
+        console.log('Try again?');
+        // run swirl for exactly 6 frame advances and then end/reset
+        scheduleTempAnimationSwap(swirlFrames, null, () => {
+          endInteraction('timeout');
+          resetScene();
+        }, { frameCount: 6, immediate: true });
+      }
     }
   }
 
@@ -501,8 +663,10 @@ function draw() {
   ctx.lineWidth = 1;
   ctx.strokeRect(person.x - person.width/2, person.y - person.height/2, person.width, person.height);
 
-  // choose current frame (fallback to original sprite)
-  const currentSpriteImg = spriteFrames[spriteFrameIndex] || sprite;
+  // choose current frame from the active set (fallback to base sprite)
+  const frameCount = (currentFrames && currentFrames.length) ? currentFrames.length : 0;
+  const idx = frameCount ? (spriteFrameIndex % frameCount) : 0;
+  const currentSpriteImg = frameCount ? (currentFrames[idx] || sprite) : sprite;
 
   if (player.facing === 'left') {
     ctx.save();
@@ -533,8 +697,8 @@ function loop(now) {
 let _assetsLoaded = 0;
 function _onAssetLoad() {
   _assetsLoaded++;
-  // we now load 3 images: sprite, spriteAlt, personSprite
-  if (_assetsLoaded === 3) {
+  // we now load 9 images: base(2) + scare(2) + laugh(2) + swirl(2) + person(1)
+  if (_assetsLoaded === 9) {
     resizeCanvas();
     updateLevelTitle();
     resetScene();
@@ -543,6 +707,12 @@ function _onAssetLoad() {
 }
 sprite.onload = _onAssetLoad;
 spriteAlt.onload = _onAssetLoad;
+spriteScare1.onload = _onAssetLoad;
+spriteScare2.onload = _onAssetLoad;
+spriteLaugh1.onload = _onAssetLoad;
+spriteLaugh2.onload = _onAssetLoad;
+spriteSwirl1.onload = _onAssetLoad;
+spriteSwirl2.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
 
 // Add automation / click-press support for arrow tiles and combo arrows
