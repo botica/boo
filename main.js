@@ -20,91 +20,144 @@ const spriteSwirl2 = new Image();
 spriteSwirl2.src = 'images/boo-swirl-2.png';
 const personSprite = new Image();
 personSprite.src = 'images/person-mock.png';
+const personSpriteAlt = new Image();
+personSpriteAlt.src = 'images/person-mock-1.png';
+const personScared = new Image();
+personScared.src = 'images/person-scared.png';
+const personScaredAlt = new Image();
+personScaredAlt.src = 'images/person-scared-1.png';
 
-// Organize animation frames
-const spriteFrames = [sprite, spriteAlt];
-const scareFrames = [spriteScare1, spriteScare2];
-const laughFrames = [spriteLaugh1, spriteLaugh2];
-const swirlFrames = [spriteSwirl1, spriteSwirl2];
-
-// Animation state
-let currentFrames = spriteFrames;
-let spriteFrameIndex = 0;
-let spriteAnimTimer = 0;
-const spriteAnimInterval = 0.5; // seconds between frames
-let _pendingSwapTimeout = null;
-let _pendingEndTimeout = null;
-let _tempFrameCountdown = 0;
-let _tempEndCb = null;
-let _skipNextAdvance = false;
-let _tempEndTime = 0;
-
-// Clear any pending animation timers and state
-function clearPendingAnimations() {
-  if (_pendingSwapTimeout) { clearTimeout(_pendingSwapTimeout); _pendingSwapTimeout = null; }
-  if (_pendingEndTimeout) { clearTimeout(_pendingEndTimeout); _pendingEndTimeout = null; }
-  _tempFrameCountdown = 0;
-  _tempEndCb = null;
-  _skipNextAdvance = false;
-  _tempEndTime = 0;
+// Animation system classes
+class AnimationState {
+  constructor(name, frames, interval = 0.4, loop = true) {
+    this.name = name;
+    this.frames = frames;
+    this.interval = interval; // seconds between frames
+    this.loop = loop;
+  }
 }
 
-// Schedule switching to a new animation sequence
-function scheduleTempAnimationSwap(frames, durationMs, endCb, opts = {}) {
-  clearPendingAnimations();
-  
-  if (opts && opts.immediate) {
-    // Perform swap synchronously
-    spriteFrameIndex = (spriteFrameIndex + 1) % ((frames && frames.length) ? frames.length : 1);
-    currentFrames = frames;
-    spriteAnimTimer = 0;
-    _skipNextAdvance = true;
-
-    if (opts && Number.isInteger(opts.frameCount) && opts.frameCount > 0) {
-      _tempFrameCountdown = Math.max(0, opts.frameCount - 1);
-      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
-      if (_tempFrameCountdown === 0) {
-        const cb = _tempEndCb;
-        clearPendingAnimations();
-        if (typeof cb === 'function') cb();
-      }
-    } else if (durationMs && durationMs > 0) {
-      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
-      _tempEndTime = performance.now() + durationMs;
-    } else {
-      if (typeof endCb === 'function') endCb();
+class AnimatedEntity {
+  constructor(states, defaultState = 'default') {
+    this.states = new Map();
+    this.defaultState = defaultState;
+    this.currentState = defaultState;
+    this.frameIndex = 0;
+    this.frameTimer = 0;
+    this.tempEndTime = 0;
+    this.tempEndCallback = null;
+    this.tempStateFrameCount = 0;
+    this.tempStateFramesPlayed = 0;
+    
+    // Add states to the entity
+    for (const state of states) {
+      this.states.set(state.name, state);
     }
-    return;
   }
   
-  // Calculate time until next animation frame boundary
-  const timeToNextSec = Math.max(0.0001, spriteAnimInterval - (spriteAnimTimer % spriteAnimInterval));
-  const timeToNextMs = Math.round(timeToNextSec * 1000);
-  
-  _pendingSwapTimeout = setTimeout(() => {
-    _pendingSwapTimeout = null;
-    spriteFrameIndex = (spriteFrameIndex + 1) % ((frames && frames.length) ? frames.length : 1);
-    currentFrames = frames;
-    spriteAnimTimer = 0;
-    _skipNextAdvance = true;
-
-    if (opts && Number.isInteger(opts.frameCount) && opts.frameCount > 0) {
-      _tempFrameCountdown = Math.max(0, opts.frameCount - 1);
-      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
-      if (_tempFrameCountdown === 0) {
-        const cb = _tempEndCb;
-        clearPendingAnimations();
-        if (typeof cb === 'function') cb();
-        return;
-      }
-    } else if (durationMs && durationMs > 0) {
-      _tempEndCb = (typeof endCb === 'function') ? endCb : null;
-      _tempEndTime = performance.now() + durationMs;
-    } else {
-      if (typeof endCb === 'function') endCb();
+  setState(stateName, options = {}) {
+    const { duration, frameCount, onComplete, immediate = false } = options;
+    
+    if (!this.states.has(stateName)) {
+      console.warn(`Animation state "${stateName}" not found`);
+      return;
     }
-  }, timeToNextMs);
+    
+    this.currentState = stateName;
+    this.frameTimer = immediate ? this.getCurrentState().interval : 0;
+    this.frameIndex = 0;
+    this.tempEndTime = 0;
+    this.tempEndCallback = onComplete || null;
+    this.tempStateFrameCount = 0;
+    this.tempStateFramesPlayed = 0;
+    
+    if (duration && duration > 0) {
+      this.tempEndTime = performance.now() + duration;
+    } else if (frameCount && frameCount > 0) {
+      this.tempStateFrameCount = frameCount;
+      this.tempStateFramesPlayed = 0;
+    }
+  }
+  
+  getCurrentState() {
+    return this.states.get(this.currentState) || this.states.get(this.defaultState);
+  }
+  
+  getCurrentFrame() {
+    const state = this.getCurrentState();
+    if (!state || !state.frames || state.frames.length === 0) return null;
+    return state.frames[this.frameIndex % state.frames.length];
+  }
+  
+  update(dt) {
+    const state = this.getCurrentState();
+    if (!state) return;
+    
+    this.frameTimer += dt;
+    
+    // Check if we should advance frame
+    if (this.frameTimer >= state.interval) {
+      this.frameTimer -= state.interval;
+      
+      if (state.frames && state.frames.length > 0) {
+        this.frameIndex = (this.frameIndex + 1) % state.frames.length;
+        
+        // Handle frame count limits
+        if (this.tempStateFrameCount > 0) {
+          this.tempStateFramesPlayed++;
+          if (this.tempStateFramesPlayed >= this.tempStateFrameCount) {
+            this._endTempState();
+            return;
+          }
+        }
+      }
+    }
+    
+    // Check time-based limits
+    if (this.tempEndTime > 0 && performance.now() >= this.tempEndTime) {
+      this._endTempState();
+    }
+  }
+  
+  _endTempState() {
+    const callback = this.tempEndCallback;
+    this.tempEndTime = 0;
+    this.tempEndCallback = null;
+    this.tempStateFrameCount = 0;
+    this.tempStateFramesPlayed = 0;
+    this.currentState = this.defaultState;
+    this.frameIndex = 0;
+    this.frameTimer = 0;
+    
+    if (callback) callback();
+  }
+  
+  isAnimating() {
+    const state = this.getCurrentState();
+    return state && state.frames && state.frames.length > 1;
+  }
 }
+
+// Create ghost animation states
+const ghostStates = [
+  new AnimationState('default', [sprite], 0.4, false), // Single frame, no animation
+  new AnimationState('moving', [sprite, spriteAlt], 0.4, true),
+  new AnimationState('scaring', [spriteScare1, spriteScare2], 0.4, true),
+  new AnimationState('laughing', [spriteLaugh1, spriteLaugh2], 0.4, true),
+  new AnimationState('swirling', [spriteSwirl1, spriteSwirl2], 0.4, true)
+];
+
+// Create ghost entity
+const ghostAnimator = new AnimatedEntity(ghostStates, 'default');
+
+// Create person animation states
+const personStates = [
+  new AnimationState('default', [personSprite, personSpriteAlt], 0.4, true),
+  new AnimationState('scared', [personScared, personScaredAlt], 0.4, true)
+];
+
+// Create person entity
+const personAnimator = new AnimatedEntity(personStates, 'default');
 
 // Adjust canvas and UI elements to fit window
 function resizeCanvas() {
@@ -265,10 +318,7 @@ function startInteraction() {
   comboAccepted = false;
   usedCombos = [];
   
-  clearPendingAnimations();
-  currentFrames = scareFrames;
-  spriteFrameIndex = 0;
-  spriteAnimTimer = spriteAnimInterval;
+  ghostAnimator.setState('scaring');
   showComboUI(true);
   startNextCombo();
 }
@@ -351,9 +401,8 @@ function showComboUI(show) {
 function endInteraction(reason, opts = {}) {
   const { resetSceneAfter = false } = opts;
 
-  clearPendingAnimations();
   interactionActive = false;
-  currentFrames = spriteFrames;
+  ghostAnimator.setState('default');
   currentCombo = null;
   comboTimeLeft = 0;
 
@@ -399,15 +448,14 @@ function handleTimeout() {
   showComboUI(false);
   animationInProgress = true;
   
-  currentFrames = swirlFrames;
-  spriteFrameIndex = 0;
-  spriteAnimTimer = 0;
-  
-  setTimeout(() => {
-    animationInProgress = false;
-    endInteraction('timeout');
-    resetScene();
-  }, 2800);
+  ghostAnimator.setState('swirling', {
+    duration: 2800,
+    onComplete: () => {
+      animationInProgress = false;
+      endInteraction('timeout');
+      resetScene();
+    }
+  });
 }
 
 // Reset the game scene
@@ -420,10 +468,8 @@ function resetScene() {
   comboAccepted = false;
   usedCombos = [];
   
-  clearPendingAnimations();
-  currentFrames = spriteFrames;
-  spriteFrameIndex = 0;
-  spriteAnimTimer = 0;
+  ghostAnimator.setState('default');
+  personAnimator.setState('default');
   
   // Hide UI elements
   showComboUI(false);
@@ -474,6 +520,12 @@ function checkComboSuccess() {
 function update(dt) {
   const nowMs = performance.now();
   
+  // Update ghost animation
+  ghostAnimator.update(dt);
+  
+  // Update person animation
+  personAnimator.update(dt);
+  
   // Handle player movement when not in interaction or animation
   if (!interactionActive && !animationInProgress) {
     let inputX = 0, inputY = 0;
@@ -507,45 +559,17 @@ function update(dt) {
     player.y += player.vy * dt;
     player.x = Math.max(player.width/2, Math.min(canvas.width - player.width/2, player.x));
     player.y = Math.max(player.height/2, Math.min(canvas.height - player.height/2, player.y));
+    
+    // Update ghost animation state based on movement
+    const playerIsMoving = Math.abs(player.vx) > 0.001 || Math.abs(player.vy) > 0.001;
+    if (playerIsMoving && ghostAnimator.currentState === 'default') {
+      ghostAnimator.setState('moving');
+    } else if (!playerIsMoving && ghostAnimator.currentState === 'moving') {
+      ghostAnimator.setState('default');
+    }
   } else {
     player.vx = 0;
     player.vy = 0;
-  }
-
-  // Handle sprite animation
-  const playerIsMoving = Math.abs(player.vx) > 0.001 || Math.abs(player.vy) > 0.001;
-  const shouldAnimate = playerIsMoving || interactionActive || animationInProgress;
-  const frameCount = (currentFrames && currentFrames.length) ? currentFrames.length : 1;
-  
-  if (shouldAnimate) {
-    spriteAnimTimer += dt;
-    if (_skipNextAdvance) {
-      _skipNextAdvance = false;
-    } else {
-      while (spriteAnimTimer >= spriteAnimInterval) {
-        spriteAnimTimer -= spriteAnimInterval;
-        spriteFrameIndex = (spriteFrameIndex + 1) % frameCount;
-        
-        // Handle frame countdown for temporary animations
-        if (_tempFrameCountdown > 0) {
-          _tempFrameCountdown--;
-          if (_tempFrameCountdown === 0) {
-            const cb = _tempEndCb;
-            clearPendingAnimations();
-            if (typeof cb === 'function') cb();
-          }
-        }
-      }
-    }
-  } else {
-    spriteAnimTimer = 0;
-  }
-  
-  // Check time-based termination for temporary animations
-  if (_tempEndTime && nowMs >= _tempEndTime) {
-    const cb = _tempEndCb;
-    clearPendingAnimations();
-    if (typeof cb === 'function') cb();
   }
 
   // Person movement when not in interaction
@@ -598,23 +622,32 @@ function update(dt) {
           showComboUI(false);
           animationInProgress = true;
           
+          // Make person scared when ghost laughs
+          personAnimator.setState('scared');
+          
           if (currentLevel < 3) {
             console.log('boo! you scared them! advancing to the next level!');
             currentLevel++;
             updateLevelTitle();
-            scheduleTempAnimationSwap(laughFrames, 2800, () => {
-              animationInProgress = false;
-              endInteraction('success: level advanced');
-              resetScene();
+            ghostAnimator.setState('laughing', {
+              duration: 2800,
+              onComplete: () => {
+                animationInProgress = false;
+                endInteraction('success: level advanced');
+                resetScene();
+              }
             });
           } else {
             console.log('boo! you scared them! you beat the game!');
             currentLevel = 1;
             updateLevelTitle();
-            scheduleTempAnimationSwap(laughFrames, 2800, () => {
-              animationInProgress = false;
-              endInteraction('success: game complete');
-              resetScene();
+            ghostAnimator.setState('laughing', {
+              duration: 2800,
+              onComplete: () => {
+                animationInProgress = false;
+                endInteraction('success: game complete');
+                resetScene();
+              }
             });
           }
         } else {
@@ -655,15 +688,14 @@ function update(dt) {
       showComboUI(false);
       animationInProgress = true;
       
-      currentFrames = swirlFrames;
-      spriteFrameIndex = 0;
-      spriteAnimTimer = 0;
-      
-      setTimeout(() => {
-        animationInProgress = false;
-        endInteraction('failed: side collision');
-        resetScene();
-      }, 2800);
+      ghostAnimator.setState('swirling', {
+        duration: 2800,
+        onComplete: () => {
+          animationInProgress = false;
+          endInteraction('failed: side collision');
+          resetScene();
+        }
+      });
     }
   }
   person.colliding = nowColliding;
@@ -673,16 +705,17 @@ function update(dt) {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Get current person sprite frame
+  const currentPersonImg = personAnimator.getCurrentFrame() || personSprite;
+
   // Draw person
-  ctx.drawImage(personSprite, person.x - person.width/2, person.y - person.height/2, person.width, person.height);
+  ctx.drawImage(currentPersonImg, person.x - person.width/2, person.y - person.height/2, person.width, person.height);
   ctx.strokeStyle = 'yellow';
   ctx.lineWidth = 1;
   ctx.strokeRect(person.x - person.width/2, person.y - person.height/2, person.width, person.height);
 
-  // Select current sprite frame
-  const frameCount = (currentFrames && currentFrames.length) ? currentFrames.length : 0;
-  const idx = frameCount ? (spriteFrameIndex % frameCount) : 0;
-  const currentSpriteImg = frameCount ? (currentFrames[idx] || sprite) : sprite;
+  // Get current ghost sprite frame
+  const currentSpriteImg = ghostAnimator.getCurrentFrame() || sprite;
 
   // Draw player with proper facing direction
   if (player.facing === 'left') {
@@ -716,8 +749,8 @@ function loop(now) {
 let _assetsLoaded = 0;
 function _onAssetLoad() {
   _assetsLoaded++;
-  // Start game when all 9 images are loaded
-  if (_assetsLoaded === 9) {
+  // Start game when all 12 images are loaded
+  if (_assetsLoaded === 12) {
     resizeCanvas();
     updateLevelTitle();
     resetScene();
@@ -734,6 +767,9 @@ spriteLaugh2.onload = _onAssetLoad;
 spriteSwirl1.onload = _onAssetLoad;
 spriteSwirl2.onload = _onAssetLoad;
 personSprite.onload = _onAssetLoad;
+personSpriteAlt.onload = _onAssetLoad;
+personScared.onload = _onAssetLoad;
+personScaredAlt.onload = _onAssetLoad;
 
 // Utility functions for simulating key presses
 function pressKey(k) {
