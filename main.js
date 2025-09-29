@@ -211,6 +211,8 @@ let combosCompleted = 0;
 let comboAccepted = false;
 let usedCombos = [];
 
+let animationInProgress = false; // Add this flag to track when an animation is playing
+
 function updateLevelTitle() {
   document.title = `game - Level ${currentLevel}`;
 }
@@ -363,7 +365,7 @@ function endInteraction(reason, opts = {}) {
 
   if (resetSceneAfter) {
     resetScene();
-    if (alertMsg) alert(alertMsg);
+    // Remove the alert message completely
     console.log('interaction ended:', reason || 'finished');
     return;
   }
@@ -400,15 +402,35 @@ function endInteraction(reason, opts = {}) {
 
   console.log('interaction ended:', reason || 'finished');
 
-  if (alertMsg) alert(alertMsg);
+  // Remove the alert message completely
 }
 
 function handleTimeout() {
-  endInteraction('timeout', { alertMsg: 'Try again?', resetSceneAfter: true });
+  // Remove the alert message and just run the swirling animation
+  // then reset the scene to the same level
+  
+  // Hide combo UI elements immediately
+  showComboUI(false);
+  
+  // Set animation flag to prevent player control
+  animationInProgress = true;
+  
+  // Make sure we initialize with the first frame and reset the animation timer
+  currentFrames = swirlFrames;
+  spriteFrameIndex = 0;
+  spriteAnimTimer = 0;
+  
+  // Use a simple timeout for consistency with shortened duration (2800ms)
+  setTimeout(() => {
+    animationInProgress = false;
+    endInteraction('timeout');
+    resetScene();
+  }, 2800);
 }
 
 function resetScene() {
   interactionActive = false;
+  animationInProgress = false; // Reset the animation flag when resetting the scene
   currentCombo = null;
   comboTimeLeft = 0;
   combosCompleted = 0;
@@ -487,7 +509,7 @@ function checkComboSuccess() {
 
 function update(dt) {
   const nowMs = performance.now();
-  if (!interactionActive) {
+  if (!interactionActive && !animationInProgress) {
     let inputX = 0, inputY = 0;
     if (keys['ArrowUp']) inputY -= 1;
     if (keys['ArrowDown']) inputY += 1;
@@ -524,7 +546,8 @@ function update(dt) {
 
   // Animate using the active frame set. Advance while moving or while interacting (scare flash).
   const playerIsMoving = Math.abs(player.vx) > 0.001 || Math.abs(player.vy) > 0.001;
-  const shouldAnimate = playerIsMoving || interactionActive;
+  // Update this condition to also animate when animationInProgress is true
+  const shouldAnimate = playerIsMoving || interactionActive || animationInProgress;
   const frameCount = (currentFrames && currentFrames.length) ? currentFrames.length : 1;
   if (shouldAnimate) {
     spriteAnimTimer += dt;
@@ -605,12 +628,16 @@ function update(dt) {
           // Hide combo UI elements immediately before starting animation
           showComboUI(false);
           
+          // Set animation flag to prevent player control
+          animationInProgress = true;
+          
           if (currentLevel < 3) {
             console.log('boo! you scared them! advancing to the next level!');
             currentLevel++;
             updateLevelTitle();
-            // schedule switch to laugh at the next frame change, run for 3s, then end/reset
-            scheduleTempAnimationSwap(laughFrames, 3000, () => {
+            // schedule switch to laugh at the next frame change, run for 2800ms then end/reset
+            scheduleTempAnimationSwap(laughFrames, 2800, () => {
+              animationInProgress = false; // Re-enable player control
               endInteraction('success: level advanced');
               resetScene();
             });
@@ -618,7 +645,8 @@ function update(dt) {
             console.log('boo! you scared them! you beat the game!');
             currentLevel = 1;
             updateLevelTitle();
-            scheduleTempAnimationSwap(laughFrames, 3000, () => {
+            scheduleTempAnimationSwap(laughFrames, 2800, () => {
+              animationInProgress = false; // Re-enable player control
               endInteraction('success: game complete');
               resetScene();
             });
@@ -637,11 +665,20 @@ function update(dt) {
         // Hide combo UI elements immediately before starting animation
         showComboUI(false);
         
-        // run swirl for exactly 6 frame advances and then end/reset
-        scheduleTempAnimationSwap(swirlFrames, null, () => {
+        // Set animation flag to prevent player control
+        animationInProgress = true;
+        
+        // Make sure we initialize with the first frame and reset the animation timer
+        currentFrames = swirlFrames;
+        spriteFrameIndex = 0;
+        spriteAnimTimer = 0;
+        
+        // Use a simple timeout with shorter duration (2800ms)
+        setTimeout(() => {
+          animationInProgress = false;
           endInteraction('timeout');
           resetScene();
-        }, { frameCount: 6, immediate: true });
+        }, 2800);
       }
     }
   }
@@ -660,7 +697,28 @@ function update(dt) {
       player.vy = 0;
       startInteraction();
     } else {
-      handleTimeout();
+      // Stop any movement
+      player.vx = 0;
+      player.vy = 0;
+      
+      // Hide combo UI elements immediately
+      showComboUI(false);
+      
+      // Set animation flag to prevent player control
+      animationInProgress = true;
+      
+      // Make sure we initialize with the first frame and reset the animation timer
+      // to ensure proper cycling between frames
+      currentFrames = swirlFrames;
+      spriteFrameIndex = 0;
+      spriteAnimTimer = 0;
+      
+      // Use a simple timeout with shorter duration (2800ms)
+      setTimeout(() => {
+        animationInProgress = false;
+        endInteraction('failed: side collision');
+        resetScene();
+      }, 2800);
     }
   }
   person.colliding = nowColliding;
