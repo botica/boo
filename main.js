@@ -18,6 +18,8 @@ const spriteSwirl1 = new Image();
 spriteSwirl1.src = 'images/boo-swirl-1.png';
 const spriteSwirl2 = new Image();
 spriteSwirl2.src = 'images/boo-swirl-2.png';
+
+// Person sprites for different levels
 const personSprite = new Image();
 personSprite.src = 'images/person-mock.png';
 const personSpriteAlt = new Image();
@@ -27,7 +29,16 @@ personScared.src = 'images/person-scared.png';
 const personScaredAlt = new Image();
 personScaredAlt.src = 'images/person-scared-1.png';
 
-// Animation system classes
+const businessSprite = new Image();
+businessSprite.src = 'images/business.png';
+const businessSpriteAlt = new Image();
+businessSpriteAlt.src = 'images/business-1.png';
+const businessScared = new Image();
+businessScared.src = 'images/business-scared.png';
+const businessScaredAlt = new Image();
+businessScaredAlt.src = 'images/business-scared-1.png';
+
+// Animation system
 class AnimationState {
   constructor(name, frames, interval = 0.4, loop = true) {
     this.name = name;
@@ -155,14 +166,62 @@ const ghostStates = [
 // Create ghost entity
 const ghostAnimator = new AnimatedEntity(ghostStates, 'default');
 
-// Create person animation states
-const personStates = [
-  new AnimationState('default', [personSprite, personSpriteAlt], 0.4, true),
-  new AnimationState('scared', [personScared, personScaredAlt], 0.4, true)
-];
+// Create person animation states - will be updated per level
+let personStates = [];
+let personAnimator = null;
 
-// Create person entity
-const personAnimator = new AnimatedEntity(personStates, 'default');
+// Function to update person animator for current level
+function updatePersonAnimatorForLevel() {
+  const config = levelConfig[currentLevel];
+  if (!config) return;
+  
+  personStates = [
+    new AnimationState('default', config.sprites.default, 0.4, true),
+    new AnimationState('scared', config.sprites.scared, 0.4, true)
+  ];
+  
+  personAnimator = new AnimatedEntity(personStates, 'default');
+}
+
+// Level configuration
+const MAX_LEVELS = 5;
+const levelConfig = {
+  1: {
+    comboDuration: 10.0,
+    sprites: {
+      default: [personSprite, personSpriteAlt],
+      scared: [personScared, personScaredAlt]
+    }
+  },
+  2: {
+    comboDuration: 8.0,
+    sprites: {
+      default: [businessSprite, businessSpriteAlt],
+      scared: [businessScared, businessScaredAlt]
+    }
+  },
+  3: {
+    comboDuration: 6.0,
+    sprites: {
+      default: [personSprite, personSpriteAlt], // Reuse for now
+      scared: [personScared, personScaredAlt]
+    }
+  },
+  4: {
+    comboDuration: 4.0,
+    sprites: {
+      default: [personSprite, personSpriteAlt], // Reuse for now
+      scared: [personScared, personScaredAlt]
+    }
+  },
+  5: {
+    comboDuration: 2.0,
+    sprites: {
+      default: [personSprite, personSpriteAlt], // Reuse for now
+      scared: [personScared, personScaredAlt]
+    }
+  }
+};
 
 // Adjust canvas and UI elements to fit window
 function resizeCanvas() {
@@ -251,7 +310,7 @@ let interactionActive = false;
 let currentCombo = null;
 let currentLevel = 1;
 const levelDurations = { 1: 5.0, 2: 3.0, 3: 2.0 };
-let comboDuration = levelDurations[currentLevel];
+let comboDuration = levelConfig[currentLevel].comboDuration;
 let comboTimeLeft = 0;
 let combosCompleted = 0;
 let comboAccepted = false;
@@ -330,7 +389,8 @@ function startInteraction() {
 
 // Begin the next combo challenge
 function startNextCombo() {
-  comboDuration = levelDurations[currentLevel] || 5.0;
+  const config = levelConfig[currentLevel];
+  comboDuration = config ? config.comboDuration : 5.0;
   
   // Generate all possible arrow key pairs (excluding same-key pairs)
   const all = [];
@@ -480,7 +540,12 @@ function resetScene() {
   usedCombos = [];
   
   ghostAnimator.setState('default');
-  personAnimator.setState('default');
+  
+  // Update person animator for current level and reset state
+  updatePersonAnimatorForLevel();
+  if (personAnimator) {
+    personAnimator.setState('default');
+  }
   
   // Hide UI elements
   showComboUI(false);
@@ -636,8 +701,8 @@ function update(dt) {
           // Make person scared when ghost laughs
           personAnimator.setState('scared');
           
-          if (currentLevel < 3) {
-            console.log('boo! you scared them! advancing to the next level!');
+          if (currentLevel < MAX_LEVELS) {
+            console.log(`boo! you scared them! advancing to level ${currentLevel + 1}!`);
             currentLevel++;
             updateLevelTitle();
             ghostAnimator.setState('laughing', {
@@ -765,12 +830,12 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-// Asset loading
+// Asset loading and game initialization
 let _assetsLoaded = 0;
 function _onAssetLoad() {
   _assetsLoaded++;
-  // Start game when all 12 images are loaded
-  if (_assetsLoaded === 12) {
+  // Start game when all 16 images are loaded (12 original + 4 business sprites)
+  if (_assetsLoaded === 16) {
     resizeCanvas();
     updateLevelTitle();
     resetScene();
@@ -790,8 +855,12 @@ personSprite.onload = _onAssetLoad;
 personSpriteAlt.onload = _onAssetLoad;
 personScared.onload = _onAssetLoad;
 personScaredAlt.onload = _onAssetLoad;
+businessSprite.onload = _onAssetLoad;
+businessSpriteAlt.onload = _onAssetLoad;
+businessScared.onload = _onAssetLoad;
+businessScaredAlt.onload = _onAssetLoad;
 
-// Utility functions for simulating key presses
+// Input utilities for touch/mobile support
 function pressKey(k) {
   if (!k) return;
   if (!(k in keys)) keys[k] = false;
