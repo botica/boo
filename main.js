@@ -158,6 +158,7 @@ const ghostStates = [
   new AnimationState('default', [sprite], 0.4, false), // Single frame, no animation
   new AnimationState('moving', [sprite, spriteAlt], 0.4, true),
   new AnimationState('scaring', [spriteScare1, spriteScare2], 0.4, true),
+  new AnimationState('angry', [spriteScare1, spriteScare2], 0.4, true), // New angry state for success
   new AnimationState('laughing', [spriteLaugh1, spriteLaugh2], 0.4, true),
   new AnimationState('swirling', [spriteSwirl1, spriteSwirl2], 0.4, true),
   new AnimationState('dead', [], 0.4, false) // Empty frames array for invisible state
@@ -316,7 +317,10 @@ let combosCompleted = 0;
 let comboAccepted = false;
 let usedCombos = [];
 let animationInProgress = false;
+let showBooText = false;
+let booTextTimer = 0;
 
+// Function to update the level title in the browser tab
 function updateLevelTitle() {
   document.title = `game - Level ${currentLevel}`;
 }
@@ -538,7 +542,10 @@ function resetScene() {
   combosCompleted = 0;
   comboAccepted = false;
   usedCombos = [];
+  showBooText = false;
+  booTextTimer = 0;
   
+  // Update ghost animation
   ghostAnimator.setState('default');
   
   // Update person animator for current level and reset state
@@ -601,6 +608,11 @@ function update(dt) {
   
   // Update person animation
   personAnimator.update(dt);
+  
+  // Update "BOO!" text timer
+  if (showBooText) {
+    booTextTimer += dt;
+  }
   
   // Handle player movement when not in interaction or animation
   if (!interactionActive && !animationInProgress) {
@@ -694,38 +706,48 @@ function update(dt) {
         }
         
         if (combosCompleted >= 3) {
-          // Success: show laugh animation and advance level or complete game
+          // Success: show angry animation, "BOO!" text, then laugh animation
           showComboUI(false);
           animationInProgress = true;
           
-          // Make person scared when ghost laughs
-          personAnimator.setState('scared');
+          // Start angry animation for exactly 2 frames and show "BOO!" text
+          showBooText = true;
+          booTextTimer = 0;
+          personAnimator.setState('scared'); // Make person scared immediately
           
-          if (currentLevel < MAX_LEVELS) {
-            console.log(`boo! you scared them! advancing to level ${currentLevel + 1}!`);
-            currentLevel++;
-            updateLevelTitle();
-            ghostAnimator.setState('laughing', {
-              duration: 2800,
-              onComplete: () => {
-                animationInProgress = false;
-                endInteraction('success: level advanced');
-                resetScene();
+          ghostAnimator.setState('angry', {
+            frameCount: 4,
+            onComplete: () => {
+              // Hide "BOO!" text and start laughing
+              showBooText = false;
+              
+              if (currentLevel < MAX_LEVELS) {
+                console.log(`boo! you scared them! advancing to level ${currentLevel + 1}!`);
+                currentLevel++;
+                updateLevelTitle();
+                ghostAnimator.setState('laughing', {
+                  duration: 2800,
+                  onComplete: () => {
+                    animationInProgress = false;
+                    endInteraction('success: level advanced');
+                    resetScene();
+                  }
+                });
+              } else {
+                console.log('boo! you scared them! you beat the game!');
+                currentLevel = 1;
+                updateLevelTitle();
+                ghostAnimator.setState('laughing', {
+                  duration: 2800,
+                  onComplete: () => {
+                    animationInProgress = false;
+                    endInteraction('success: game complete');
+                    resetScene();
+                  }
+                });
               }
-            });
-          } else {
-            console.log('boo! you scared them! you beat the game!');
-            currentLevel = 1;
-            updateLevelTitle();
-            ghostAnimator.setState('laughing', {
-              duration: 2800,
-              onComplete: () => {
-                animationInProgress = false;
-                endInteraction('success: game complete');
-                resetScene();
-              }
-            });
-          }
+            }
+          });
         } else {
           // Continue to next combo
           startNextCombo();
@@ -817,6 +839,25 @@ function draw() {
       ctx.lineWidth = 1;
       ctx.strokeRect(player.x - player.width/2, player.y - player.height/2, player.width, player.height);
     }
+  }
+
+  // Draw "BOO!" text if active
+  if (showBooText) {
+    ctx.save();
+    ctx.font = '48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Position "boo" above both sprites
+    const textX = (player.x + person.x) / 2;
+    const textY = Math.min(player.y, person.y) - 60;
+    
+    // Flash white and black at 0.5 second intervals for 2 seconds (4 frames total)
+    const flashPhase = Math.floor(booTextTimer / 0.5) % 2;
+    ctx.fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
+    
+    ctx.fillText('boo', textX, textY);
+    ctx.restore();
   }
 }
 
@@ -1018,4 +1059,11 @@ for (const k of Object.keys(tileEls)) {
 }
 
 attachComboArrow(arrowEls[0], 0);
+attachComboArrow(arrowEls[1], 1);
+for (const k of Object.keys(tileEls)) {
+  attachTilePress(tileEls[k], k);
+}
+
+attachComboArrow(arrowEls[0], 0);
+attachComboArrow(arrowEls[1], 1);
 attachComboArrow(arrowEls[1], 1);
