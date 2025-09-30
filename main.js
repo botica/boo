@@ -189,6 +189,8 @@ const MAX_LEVELS = 5;
 const levelConfig = {
   1: {
     comboDuration: 10.0,
+    hasWind: false,
+    hasGusts: true,
     sprites: {
       default: [personSprite, personSpriteAlt],
       scared: [personScared, personScaredAlt]
@@ -196,6 +198,8 @@ const levelConfig = {
   },
   2: {
     comboDuration: 8.0,
+    hasWind: true,
+    hasGusts: true,
     sprites: {
       default: [businessSprite, businessSpriteAlt],
       scared: [businessScared, businessScaredAlt]
@@ -203,6 +207,8 @@ const levelConfig = {
   },
   3: {
     comboDuration: 6.0,
+    hasWind: false,
+    hasGusts: false,
     sprites: {
       default: [personSprite, personSpriteAlt], // Reuse for now
       scared: [personScared, personScaredAlt]
@@ -210,6 +216,8 @@ const levelConfig = {
   },
   4: {
     comboDuration: 4.0,
+    hasWind: true,
+    hasGusts: true,
     sprites: {
       default: [personSprite, personSpriteAlt], // Reuse for now
       scared: [personScared, personScaredAlt]
@@ -217,6 +225,8 @@ const levelConfig = {
   },
   5: {
     comboDuration: 2.0,
+    hasWind: false,
+    hasGusts: true,
     sprites: {
       default: [personSprite, personSpriteAlt], // Reuse for now
       scared: [personScared, personScaredAlt]
@@ -266,7 +276,14 @@ const player = {
   width: 100, height: 100,
   speed: 800,
   facing: 'right',
-  accel: 3000
+  accel: 3000,
+  gustTimer: 0,
+  gustCycle: 0.8, // Faster cycle: 0.8 seconds instead of 2.0
+  gustStrength: 1.0, // multiplier for movement force
+  windVx: 0, // wind velocity x
+  windVy: 0, // wind velocity y
+  windTimer: 0, // timer for wind force changes
+  windChangeInterval: 0.3 // seconds between wind direction changes
 };
 
 const person = {
@@ -566,6 +583,11 @@ function resetScene() {
   player.vx = 0;
   player.vy = 0;
   player.facing = 'right';
+  player.gustTimer = 0;
+  player.gustStrength = 1.0;
+  player.windVx = 0;
+  player.windVy = 0;
+  player.windTimer = 0;
 
   // Reset person position and state
   person.x = person.width/2 + 10;
@@ -614,6 +636,59 @@ function update(dt) {
     booTextTimer += dt;
   }
   
+  // Update gust cycle for player movement
+  if (!interactionActive && !animationInProgress) {
+    const config = levelConfig[currentLevel];
+    if (config && config.hasGusts !== false) {
+      player.gustTimer += dt;
+      // Create cyclical gust strength using sine wave (0.2 to 1.8 multiplier range for greater magnitude)
+      player.gustStrength = 1.0 + 0.8 * Math.sin((player.gustTimer / player.gustCycle) * Math.PI * 2);
+    } else {
+      // No gusts effect, maintain steady movement
+      player.gustStrength = 1.0;
+    }
+  }
+  
+  // Update wind effect if current level has wind
+  const config = levelConfig[currentLevel];
+  if (config && config.hasWind && !interactionActive && !animationInProgress) {
+    player.windTimer += dt;
+    
+    // Change wind direction periodically
+    if (player.windTimer >= player.windChangeInterval) {
+      player.windTimer = 0;
+      
+      // Generate random wind force - level 4 has double strength
+      let windStrength;
+      if (currentLevel === 4) {
+        // Double strength for level 4: 270-720 pixels per second
+        windStrength = 270 + Math.random() * 450;
+      } else {
+        // Normal strength for level 2: 135-360 pixels per second
+        windStrength = 135 + Math.random() * 225;
+      }
+      
+      const windAngle = Math.random() * Math.PI * 2;
+      
+      // Bias toward horizontal movement (multiply vertical component by 0.3)
+      const windForceX = Math.cos(windAngle) * windStrength;
+      const windForceY = Math.sin(windAngle) * windStrength * 0.3;
+      
+      // Apply wind with some inertia (blend with existing wind velocity)
+      const windInertia = 0.7;
+      player.windVx = player.windVx * windInertia + windForceX * (1 - windInertia);
+      player.windVy = player.windVy * windInertia + windForceY * (1 - windInertia);
+    }
+    
+    // Apply wind decay over time (even slower decay for stronger persistent effect)
+    player.windVx *= 0.998;
+    player.windVy *= 0.998;
+  } else {
+    // No wind effect, gradually reduce any existing wind velocity
+    player.windVx *= 0.9;
+    player.windVy *= 0.9;
+  }
+  
   // Handle player movement when not in interaction or animation
   if (!interactionActive && !animationInProgress) {
     let inputX = 0, inputY = 0;
@@ -625,22 +700,28 @@ function update(dt) {
     if (inputX < 0) player.facing = 'left';
     else if (inputX > 0) player.facing = 'right';
 
-    // Calculate target velocity based on input
+    // Calculate target velocity based on input with gust strength applied
     let targetVx = 0, targetVy = 0;
     const len = Math.hypot(inputX, inputY);
     if (len > 0) {
-      targetVx = (inputX / len) * player.speed;
-      targetVy = (inputY / len) * player.speed;
+      const gustModifiedSpeed = player.speed * player.gustStrength;
+      targetVx = (inputX / len) * gustModifiedSpeed;
+      targetVy = (inputY / len) * gustModifiedSpeed;
     }
 
-    // Apply acceleration
-    const maxDelta = player.accel * dt;
+    // Apply acceleration with gust strength
+    const gustModifiedAccel = player.accel * player.gustStrength;
+    const maxDelta = gustModifiedAccel * dt;
     const dvx = targetVx - player.vx;
     const dvy = targetVy - player.vy;
     if (Math.abs(dvx) > maxDelta) player.vx += Math.sign(dvx) * maxDelta;
     else player.vx = targetVx;
     if (Math.abs(dvy) > maxDelta) player.vy += Math.sign(dvy) * maxDelta;
     else player.vy = targetVy;
+
+    // Apply wind effect to position
+    player.x += player.windVx * dt;
+    player.y += player.windVy * dt;
 
     // Update position with bounds checking
     player.x += player.vx * dt;
@@ -1059,11 +1140,4 @@ for (const k of Object.keys(tileEls)) {
 }
 
 attachComboArrow(arrowEls[0], 0);
-attachComboArrow(arrowEls[1], 1);
-for (const k of Object.keys(tileEls)) {
-  attachTilePress(tileEls[k], k);
-}
-
-attachComboArrow(arrowEls[0], 0);
-attachComboArrow(arrowEls[1], 1);
 attachComboArrow(arrowEls[1], 1);
