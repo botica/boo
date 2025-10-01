@@ -1,0 +1,137 @@
+/**
+ * AssetManager handles loading and managing all game sprites and images
+ */
+export class AssetManager {
+  constructor() {
+    this.sprites = {};
+    this.loadedCount = 0;
+    this.totalAssets = 0;
+    this.onAllAssetsLoaded = null;
+  }
+
+  /**
+   * Initialize and load all game assets
+   * @param {Function} callback - Called when all assets are loaded
+   */
+  async loadAssets(callback) {
+    this.onAllAssetsLoaded = callback;
+    
+    // Define all sprite paths
+    const assetPaths = {
+      // Ghost sprites
+      ghostDefault: 'images/boo-mock-2.png',
+      ghostAlt: 'images/boo-mock-2-1.png',
+      ghostScare1: 'images/boo-scare-1.png',
+      ghostScare2: 'images/boo-scare-2.png',
+      ghostLaugh1: 'images/boo-laugh-1.png',
+      ghostLaugh2: 'images/boo-laugh-2.png',
+      ghostSwirl1: 'images/boo-swirl-1.png',
+      ghostSwirl2: 'images/boo-swirl-2.png',
+      
+      // Person sprites
+      personDefault: 'images/person-mock.png',
+      personAlt: 'images/person-mock-1.png',
+      personScared: 'images/person-scared.png',
+      personScaredAlt: 'images/person-scared-1.png',
+      
+      // Business person sprites
+      businessDefault: 'images/business.png',
+      businessAlt: 'images/business-1.png',
+      businessScared: 'images/business-scared.png',
+      businessScaredAlt: 'images/business-scared-1.png'
+    };
+
+    this.totalAssets = Object.keys(assetPaths).length;
+
+    // Load all sprites
+    for (const [key, path] of Object.entries(assetPaths)) {
+      this.loadSprite(key, path);
+    }
+  }
+
+  /**
+   * Load a single sprite
+   * @param {string} key - Unique identifier for the sprite
+   * @param {string} path - Path to the image file
+   */
+  loadSprite(key, path) {
+    const image = new Image();
+    image.src = path;
+    
+    image.onload = () => {
+      this.loadedCount++;
+      if (this.loadedCount === this.totalAssets && this.onAllAssetsLoaded) {
+        this.onAllAssetsLoaded();
+      }
+    };
+
+    image.onerror = () => {
+      console.error(`Failed to load sprite: ${path}`);
+    };
+
+    this.sprites[key] = image;
+  }
+
+  /**
+   * Get a sprite by key
+   * @param {string} key - Sprite identifier
+   * @returns {HTMLImageElement} The loaded image
+   */
+  getSprite(key) {
+    return this.sprites[key];
+  }
+
+  /**
+   * Get multiple sprites by keys
+   * @param {string[]} keys - Array of sprite identifiers
+   * @returns {HTMLImageElement[]} Array of loaded images
+   */
+  getSprites(keys) {
+    return keys.map(key => this.sprites[key]).filter(sprite => sprite);
+  }
+
+  /**
+   * Check if all assets are loaded
+   * @returns {boolean} True if all assets are loaded
+   */
+  isLoaded() {
+    return this.loadedCount === this.totalAssets;
+  }
+
+  /**
+   * Get loading progress
+   * @returns {number} Progress as a percentage (0-100)
+   */
+  getProgress() {
+    return this.totalAssets > 0 ? (this.loadedCount / this.totalAssets) * 100 : 0;
+  }
+
+  /**
+   * Get sprite sets for different character types
+   */
+  getGhostSprites() {
+    return {
+      default: [this.sprites.ghostDefault],
+      moving: [this.sprites.ghostDefault, this.sprites.ghostAlt],
+      scaring: [this.sprites.ghostScare1, this.sprites.ghostScare2],
+      angry: [this.sprites.ghostScare1, this.sprites.ghostScare2],
+      laughing: [this.sprites.ghostLaugh1, this.sprites.ghostLaugh2],
+      swirling: [this.sprites.ghostSwirl1, this.sprites.ghostSwirl2],
+      dead: []
+    };
+  }
+
+  getPersonSprites() {
+    return {
+      default: [this.sprites.personDefault, this.sprites.personAlt],
+      scared: [this.sprites.personScared, this.sprites.personScaredAlt]
+    };
+  }
+
+  getBusinessSprites() {
+    return {
+      default: [this.sprites.businessDefault, this.sprites.businessAlt],
+      scared: [this.sprites.businessScared, this.sprites.businessScaredAlt]
+    };
+  }
+}
