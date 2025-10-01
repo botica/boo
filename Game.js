@@ -3,7 +3,6 @@ import { Player } from './entities/Player.js';
 import { Person } from './entities/Person.js';
 import { InputManager } from './input/InputManager.js';
 import { GameState } from './game/GameState.js';
-import { GameStateManager } from './game/GameStateManager.js';
 import { UIManager } from './ui/UIManager.js';
 import { Renderer } from './graphics/Renderer.js';
 import { Constants } from './config/Constants.js';
@@ -23,7 +22,6 @@ export class Game {
     this.assetManager = new AssetManager();
     this.renderer = new Renderer(this.canvas);
     this.gameState = new GameState();
-    this.gameStateManager = new GameStateManager();
     this.uiManager = new UIManager(this.canvas);
     this.inputManager = new InputManager();
     
@@ -79,10 +77,9 @@ export class Game {
     
     // Set up initial game state
     this.resetScene();
-    this.gameStateManager.updateLevelTitle();
+    this.gameState.updateLevelTitle();
     
     // Hide loading and start game loop
-    this.uiManager.hideLoading();
     this.start();
   }
 
@@ -167,7 +164,7 @@ export class Game {
     this.handleStateChanges(stateChanges);
     
     // Update entities
-    const levelConfig = this.gameStateManager.getCurrentLevelConfig();
+    const levelConfig = this.gameState.getCurrentLevelConfig();
     
     if (this.player) {
       this.player.update(
@@ -224,21 +221,20 @@ export class Game {
    */
   handleComboSuccess() {
     // Highlight successful combo in UI
-    this.uiManager.highlightSuccessfulCombo(this.gameState.currentCombo);
+    this.uiManager.highlightSuccessfulCombo();
     
-    // Process combo success in game state manager first (increments counter)
-    const advanceResult = this.gameStateManager.processComboSuccess();
-    
-    // Then process in game state (passing the new count)
-    const result = this.gameState.processComboSuccess(this.gameStateManager.combosCompleted);
+    // Process combo success
+    const result = this.gameState.processComboSuccess();
     
     switch (result) {
       case 'continue':
         this.startNextCombo();
         break;
-      case 'ready_for_level_advance':
-        // Determine if it's level complete or game complete
-        this.handleLevelComplete(advanceResult === 'game_complete');
+      case 'level_complete':
+        this.handleLevelComplete(false);
+        break;
+      case 'game_complete':
+        this.handleLevelComplete(true);
         break;
     }
   }
@@ -272,9 +268,6 @@ export class Game {
           onComplete: () => {
             this.gameState.endSuccessAnimation();
             this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
-            
-            // Sync game state level with game state manager
-            this.gameState.setCurrentLevel(this.gameStateManager.currentLevel);
             this.resetScene();
           }
         });
@@ -388,10 +381,9 @@ export class Game {
    */
   updateComboUI() {
     if (this.gameState.currentCombo) {
-      const symbols = this.gameStateManager.getComboDisplaySymbols(this.gameState.currentCombo);
+      const symbols = this.gameState.getComboDisplaySymbols(this.gameState.currentCombo);
       this.uiManager.updateComboDisplay(this.gameState.currentCombo, symbols);
       this.uiManager.resetProgress();
-      // Note: setCurrentCombo is now called explicitly in startNextCombo()
     }
   }
 
@@ -401,7 +393,6 @@ export class Game {
   resetScene() {
     // Reset game state
     this.gameState.reset();
-    this.gameStateManager.resetCombos();
     
     // Reset entities
     if (this.player) {
@@ -409,7 +400,7 @@ export class Game {
     }
     
     if (this.person) {
-      this.person.updateForLevel(this.gameStateManager.getCurrentLevelConfig());
+      this.person.updateForLevel(this.gameState.getCurrentLevelConfig());
       this.person.reset();
     }
     
@@ -448,10 +439,10 @@ export class Game {
    */
   getStats() {
     return {
-      level: this.gameStateManager.currentLevel,
+      level: this.gameState.currentLevel,
       interactionActive: this.gameState.interactionActive,
       animationInProgress: this.gameState.animationInProgress,
-      combosCompleted: this.gameStateManager.combosCompleted,
+      combosCompleted: this.gameState.combosCompleted,
       currentCombo: this.gameState.currentCombo,
       assetsLoaded: this.assetManager.isLoaded()
     };

@@ -1,5 +1,6 @@
 /**
- * UIManager handles all UI elements, progress bars, and visual feedback
+ * UIManager handles UI elements, progress bars, and visual feedback
+ * Simplified for single-developer use
  */
 import { Constants } from '../config/Constants.js';
 
@@ -7,25 +8,18 @@ export class UIManager {
   constructor(canvas) {
     this.canvas = canvas;
     
-    // UI element references
-    this.elements = {
-      arrowArea: document.getElementById('arrow-area'),
-      arrows: document.getElementById('arrows'),
-      comboUI: document.getElementById('combo-ui'),
-      progressFill: document.getElementById('progress-fill'),
-      progress: document.querySelector('.progress'),
-      arrow1: document.getElementById('arrow-1'),
-      arrow2: document.getElementById('arrow-2')
-    };
-
-    this.arrowEls = {
-      0: this.elements.arrow1,
-      1: this.elements.arrow2
-    };
+    // Cache UI element references
+    this.arrowArea = document.getElementById('arrow-area');
+    this.arrows = document.getElementById('arrows');
+    this.comboUI = document.getElementById('combo-ui');
+    this.progressFill = document.getElementById('progress-fill');
+    this.progress = document.querySelector('.progress');
+    this.arrow1 = document.getElementById('arrow-1');
+    this.arrow2 = document.getElementById('arrow-2');
   }
 
   /**
-   * Resize UI elements to fit the current canvas size
+   * Resize canvas and UI elements
    */
   resizeElements() {
     const availableWidth = Math.max(
@@ -50,44 +44,30 @@ export class UIManager {
       )
     );
     
-    // Resize arrow elements
-    if (this.elements.arrow1) { 
-      this.elements.arrow1.style.width = `${bigSize}px`; 
-      this.elements.arrow1.style.height = `${bigSize}px`; 
-      this.elements.arrow1.style.fontSize = `${Math.floor(bigSize * Constants.UI.ARROW_FONT_SCALE)}px`; 
-    }
-    if (this.elements.arrow2) { 
-      this.elements.arrow2.style.width = `${bigSize}px`; 
-      this.elements.arrow2.style.height = `${bigSize}px`; 
-      this.elements.arrow2.style.fontSize = `${Math.floor(bigSize * Constants.UI.ARROW_FONT_SCALE)}px`; 
-    }
+    // Resize arrows
+    const arrowStyle = `width:${bigSize}px; height:${bigSize}px; font-size:${Math.floor(bigSize * Constants.UI.ARROW_FONT_SCALE)}px`;
+    if (this.arrow1) this.arrow1.style.cssText += arrowStyle;
+    if (this.arrow2) this.arrow2.style.cssText += arrowStyle;
 
     // Resize progress bar
-    if (this.elements.progress) {
+    if (this.progress) {
       const desired = bigSize * 2 + Constants.UI.ARROW_GAP;
       const maxAllowed = this.canvas.width - Constants.UI.PROGRESS_MARGIN;
       const finalW = Math.max(Constants.UI.MIN_PROGRESS_WIDTH, Math.min(desired, maxAllowed));
-      this.elements.progress.style.width = `${finalW}px`;
+      this.progress.style.width = `${finalW}px`;
     }
   }
 
   /**
-   * Show or hide combo UI elements
+   * Show or hide combo UI
    * @param {boolean} show - Whether to show the UI
    */
   showComboUI(show) {
-    if (this.elements.comboUI) {
-      this.elements.comboUI.style.display = show ? 'flex' : 'none';
-    }
-    if (this.elements.arrows) {
-      this.elements.arrows.style.display = show ? 'flex' : 'none';
-    }
-    if (this.elements.arrowArea) {
-      this.elements.arrowArea.style.display = show ? 'flex' : 'none';
-    }
-    if (this.elements.progress) {
-      this.elements.progress.style.display = show ? 'flex' : 'none';
-    }
+    const display = show ? 'flex' : 'none';
+    if (this.comboUI) this.comboUI.style.display = display;
+    if (this.arrows) this.arrows.style.display = display;
+    if (this.arrowArea) this.arrowArea.style.display = display;
+    if (this.progress) this.progress.style.display = display;
   }
 
   /**
@@ -97,70 +77,53 @@ export class UIManager {
    */
   updateComboDisplay(combo, symbols) {
     if (!combo || !symbols) {
-      this.hideComboArrows();
+      if (this.arrows) this.arrows.style.display = 'none';
+      if (this.arrow1) this.arrow1.style.display = 'none';
+      if (this.arrow2) this.arrow2.style.display = 'none';
       return;
     }
 
-    // Show arrows container
-    if (this.elements.arrows) {
-      this.elements.arrows.style.display = 'flex';
+    if (this.arrows) this.arrows.style.display = 'flex';
+    
+    // Update arrow 1
+    if (this.arrow1 && symbols[0]) {
+      this.arrow1.style.display = '';
+      this.arrow1.textContent = symbols[0];
+      this.setArrowStyle(this.arrow1, false);
     }
-
-    // Update each arrow
-    for (let i = 0; i < 2; i++) {
-      const arrowEl = this.arrowEls[i];
-      if (arrowEl && i < symbols.length) {
-        arrowEl.style.display = '';
-        arrowEl.textContent = symbols[i];
-        this.resetArrowStyle(arrowEl);
-      }
-    }
-  }
-
-  /**
-   * Hide combo arrows
-   */
-  hideComboArrows() {
-    if (this.elements.arrows) {
-      this.elements.arrows.style.display = 'none';
-    }
-
-    // Hide individual arrows
-    for (let i = 0; i < 2; i++) {
-      const arrowEl = this.arrowEls[i];
-      if (arrowEl) {
-        arrowEl.textContent = '';
-        this.resetArrowStyle(arrowEl);
-        arrowEl.style.display = 'none';
-      }
+    
+    // Update arrow 2
+    if (this.arrow2 && symbols[1]) {
+      this.arrow2.style.display = '';
+      this.arrow2.textContent = symbols[1];
+      this.setArrowStyle(this.arrow2, false);
     }
   }
 
   /**
-   * Reset arrow visual style to default
-   * @param {HTMLElement} arrowEl - Arrow element
+   * Set arrow style (pressed or default)
+   * @param {HTMLElement} el - Arrow element
+   * @param {boolean} pressed - Whether pressed
    */
-  resetArrowStyle(arrowEl) {
-    if (arrowEl) {
-      arrowEl.style.background = '#000';
-      arrowEl.style.color = '#fff';
-      arrowEl.style.border = '1px solid #fff';
+  setArrowStyle(el, pressed) {
+    if (!el) return;
+    if (pressed) {
+      el.style.background = '#fff';
+      el.style.color = '#000';
+      el.style.border = '1px solid #000';
+    } else {
+      el.style.background = '#000';
+      el.style.color = '#fff';
+      el.style.border = '1px solid #fff';
     }
   }
 
   /**
-   * Highlight successful combo arrows
-   * @param {string[]} combo - Current combo keys
+   * Highlight successful combo
    */
-  highlightSuccessfulCombo(combo) {
-    for (let i = 0; i < 2; i++) {
-      const arrowEl = this.arrowEls[i];
-      if (arrowEl) {
-        arrowEl.style.background = '#fff';
-        arrowEl.style.color = '#000';
-        arrowEl.style.border = '1px solid #000';
-      }
-    }
+  highlightSuccessfulCombo() {
+    this.setArrowStyle(this.arrow1, true);
+    this.setArrowStyle(this.arrow2, true);
   }
 
   /**
@@ -168,8 +131,8 @@ export class UIManager {
    * @param {number} percentage - Progress percentage (0-1)
    */
   updateProgress(percentage) {
-    if (this.elements.progressFill) {
-      this.elements.progressFill.style.transform = `scaleX(${Math.max(0, Math.min(1, percentage))})`;
+    if (this.progressFill) {
+      this.progressFill.style.transform = `scaleX(${Math.max(0, Math.min(1, percentage))})`;
     }
   }
 
@@ -177,94 +140,21 @@ export class UIManager {
    * Reset progress bar to full
    */
   resetProgress() {
-    if (this.elements.progressFill) {
-      this.elements.progressFill.style.transform = 'scaleX(1)';
+    if (this.progressFill) {
+      this.progressFill.style.transform = 'scaleX(1)';
     }
   }
 
   /**
-   * Hide all UI elements
-   */
-  hideAll() {
-    this.showComboUI(false);
-    this.hideComboArrows();
-    
-    if (this.elements.arrowArea) {
-      this.elements.arrowArea.style.display = 'none';
-    }
-  }
-
-  /**
-   * Reset all UI elements to default state
+   * Reset all UI to default state
    */
   resetAll() {
-    this.hideAll();
+    this.showComboUI(false);
     this.resetProgress();
-    
-    // Reset all arrow styles
-    for (let i = 0; i < 2; i++) {
-      const arrowEl = this.arrowEls[i];
-      if (arrowEl) {
-        this.resetArrowStyle(arrowEl);
-        arrowEl.style.display = 'none';
-      }
-    }
-  }
-
-  /**
-   * Get combo arrow element by index
-   * @param {number} index - Arrow index (0 or 1)
-   * @returns {HTMLElement|null} Arrow element
-   */
-  getArrowElement(index) {
-    return this.arrowEls[index] || null;
-  }
-
-  /**
-   * Show game instructions or help text
-   * @param {string} text - Text to display
-   */
-  showInstructions(text) {
-    // This could be extended to show tutorial or help text
-    console.log('Instructions:', text);
-  }
-
-  /**
-   * Update UI for specific key press/release during combo
-   * @param {string} key - Key that was pressed/released
-   * @param {boolean} pressed - Whether key is pressed
-   * @param {string[]} currentCombo - Current combo keys
-   */
-  updateComboKeyFeedback(key, pressed, currentCombo) {
-    if (!currentCombo) return;
-
-    for (let i = 0; i < 2; i++) {
-      if (currentCombo[i] === key && this.arrowEls[i]) {
-        if (pressed) {
-          this.arrowEls[i].style.background = '#fff';
-          this.arrowEls[i].style.color = '#000';
-          this.arrowEls[i].style.border = '1px solid #000';
-        } else {
-          this.resetArrowStyle(this.arrowEls[i]);
-        }
-      }
-    }
-  }
-
-  /**
-   * Show loading state
-   * @param {number} progress - Loading progress (0-100)
-   */
-  showLoading(progress) {
-    // This could be extended to show asset loading progress
-    console.log(`Loading: ${progress.toFixed(1)}%`);
-  }
-
-  /**
-   * Hide loading state
-   */
-  hideLoading() {
-    // Hide loading indicators
-    console.log('Loading complete');
+    this.setArrowStyle(this.arrow1, false);
+    this.setArrowStyle(this.arrow2, false);
+    if (this.arrow1) this.arrow1.style.display = 'none';
+    if (this.arrow2) this.arrow2.style.display = 'none';
+    if (this.arrowArea) this.arrowArea.style.display = 'none';
   }
 }

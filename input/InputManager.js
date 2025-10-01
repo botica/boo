@@ -1,5 +1,6 @@
 /**
  * InputManager coordinates keyboard, touch, and combo input
+ * Simplified for single-developer use
  */
 import { GameConfig } from '../config/GameConfig.js';
 import { KeyboardHandler } from './KeyboardHandler.js';
@@ -18,7 +19,7 @@ export class InputManager {
     this.comboValidator = new ComboValidator(this.keyboardHandler, this.arrowKeys);
     this.touchHandler = new TouchHandler(this.keyboardHandler);
     
-    // UI element references
+    // Cache UI element references
     this.tileEls = {};
     this.arrowEls = {};
     
@@ -29,7 +30,7 @@ export class InputManager {
   }
 
   /**
-   * Initialize input system and bind event handlers
+   * Initialize input system
    */
   init() {
     this.bindKeyboardEvents();
@@ -49,7 +50,6 @@ export class InputManager {
    * Set up UI element references
    */
   setupUIElements() {
-    // Tile elements for visual feedback
     this.tileEls = {
       ArrowUp: document.getElementById('tile-up'),
       ArrowLeft: document.getElementById('tile-left'),
@@ -57,7 +57,6 @@ export class InputManager {
       ArrowRight: document.getElementById('tile-right'),
     };
 
-    // Arrow elements for combo display
     this.arrowEls = {
       0: document.getElementById('arrow-1'),
       1: document.getElementById('arrow-2'),
@@ -68,7 +67,6 @@ export class InputManager {
    * Bind touch and click events to UI elements
    */
   bindTouchEvents() {
-    // Attach handlers to tile elements
     for (const [key, element] of Object.entries(this.tileEls)) {
       if (element) {
         this.touchHandler.attachTilePress(
@@ -80,7 +78,6 @@ export class InputManager {
       }
     }
 
-    // Attach handlers to combo arrow elements
     this.touchHandler.attachComboArrow(
       this.arrowEls[0],
       () => this.currentCombo ? this.currentCombo[0] : null,
@@ -101,8 +98,7 @@ export class InputManager {
    */
   handleKeyDown(e) {
     const k = this.keyboardHandler.handleKeyDown(e);
-    this.updateTileVisual(k, true);
-    this.updateComboVisual(k, true);
+    this.updateVisual(k, true);
   }
 
   /**
@@ -111,8 +107,7 @@ export class InputManager {
    */
   handleKeyUp(e) {
     const k = this.keyboardHandler.handleKeyUp(e);
-    this.updateTileVisual(k, false);
-    this.updateComboVisual(k, false);
+    this.updateVisual(k, false);
   }
 
   /**
@@ -120,15 +115,7 @@ export class InputManager {
    * @param {string} key - Key that was pressed
    */
   onKeyPress(key) {
-    this.updateTileVisual(key, true);
-    this.updateComboVisual(key, true);
-    
-    // Dispatch keyboard event for consistency
-    try {
-      window.dispatchEvent(new KeyboardEvent('keydown', { key: key }));
-    } catch (e) {
-      // Ignore errors
-    }
+    this.updateVisual(key, true);
   }
 
   /**
@@ -136,56 +123,46 @@ export class InputManager {
    * @param {string} key - Key that was released
    */
   onKeyRelease(key) {
-    this.updateTileVisual(key, false);
-    this.updateComboVisual(key, false);
-    
-    try {
-      window.dispatchEvent(new KeyboardEvent('keyup', { key: key }));
-    } catch (e) {
-      // Ignore errors
-    }
+    this.updateVisual(key, false);
   }
 
   /**
-   * Update tile visual feedback
+   * Update visual feedback for key press/release
    * @param {string} key - Key name
    * @param {boolean} pressed - Whether key is pressed
    */
-  updateTileVisual(key, pressed) {
-    const element = this.tileEls[key];
-    if (element) {
-      if (pressed) {
-        element.style.background = '#fff';
-        element.style.color = '#000';
-        element.style.border = '1px solid #000';
-      } else {
-        element.style.background = '#000';
-        element.style.color = '#fff';
-        element.style.border = '1px solid #fff';
-      }
+  updateVisual(key, pressed) {
+    // Update tile visual
+    const tileEl = this.tileEls[key];
+    if (tileEl) {
+      this.setElementStyle(tileEl, pressed);
     }
-  }
 
-  /**
-   * Update combo arrow visual feedback
-   * @param {string} key - Key name
-   * @param {boolean} pressed - Whether key is pressed
-   */
-  updateComboVisual(key, pressed) {
-    if (!this.currentCombo) return;
-
-    for (let i = 0; i < 2; i++) {
-      if (this.currentCombo[i] === key && this.arrowEls[i]) {
-        if (pressed) {
-          this.arrowEls[i].style.background = '#fff';
-          this.arrowEls[i].style.color = '#000';
-          this.arrowEls[i].style.border = '1px solid #000';
-        } else {
-          this.arrowEls[i].style.background = '#000';
-          this.arrowEls[i].style.color = '#fff';
-          this.arrowEls[i].style.border = '1px solid #fff';
+    // Update combo arrow visual
+    if (this.currentCombo) {
+      for (let i = 0; i < 2; i++) {
+        if (this.currentCombo[i] === key && this.arrowEls[i]) {
+          this.setElementStyle(this.arrowEls[i], pressed);
         }
       }
+    }
+  }
+
+  /**
+   * Set element style (pressed or default)
+   * @param {HTMLElement} el - Element to style
+   * @param {boolean} pressed - Whether pressed
+   */
+  setElementStyle(el, pressed) {
+    if (!el) return;
+    if (pressed) {
+      el.style.background = '#fff';
+      el.style.color = '#000';
+      el.style.border = '1px solid #000';
+    } else {
+      el.style.background = '#000';
+      el.style.color = '#fff';
+      el.style.border = '1px solid #fff';
     }
   }
 
@@ -198,34 +175,19 @@ export class InputManager {
   }
 
   /**
-   * Reset key states
+   * Reset key states and visuals
    */
   resetKeys() {
     this.keyboardHandler.resetKeys();
-    this.resetVisuals();
-  }
-
-  /**
-   * Reset visual feedback
-   */
-  resetVisuals() {
+    
     // Reset tile styling
-    for (const k in this.tileEls) {
-      const el = this.tileEls[k];
-      if (el && el.style) {
-        el.style.background = '#000';
-        el.style.color = '#fff';
-        el.style.border = '1px solid #fff';
-      }
+    for (const el of Object.values(this.tileEls)) {
+      if (el) this.setElementStyle(el, false);
     }
 
     // Reset arrow styling
-    for (let i = 0; i < 2; i++) {
-      if (this.arrowEls[i]) {
-        this.arrowEls[i].style.background = '#000';
-        this.arrowEls[i].style.color = '#fff';
-        this.arrowEls[i].style.border = '1px solid #fff';
-      }
+    for (const el of Object.values(this.arrowEls)) {
+      if (el) this.setElementStyle(el, false);
     }
   }
 
