@@ -111,7 +111,7 @@ export class AssetManager {
    */
   getGhostSprites() {
     return {
-      default: [this.sprites.ghostDefault],
+      default: [this.sprites.ghostDefault, this.sprites.ghostAlt],
       moving: [this.sprites.ghostDefault, this.sprites.ghostAlt],
       scaring: [this.sprites.ghostScare1, this.sprites.ghostScare2],
       angry: [this.sprites.ghostScare1, this.sprites.ghostScare2],

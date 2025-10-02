@@ -160,7 +160,7 @@ export class AnimationFactory {
   static createGhostAnimations(sprites) {
     const interval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
     return [
-      new AnimationState('default', sprites.default, interval, false),
+      new AnimationState('default', sprites.default, interval, true),
       new AnimationState('moving', sprites.moving, interval, true),
       new AnimationState('scaring', sprites.scaring, interval, true),
       new AnimationState('angry', sprites.angry, interval, true),
