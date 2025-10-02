@@ -1,6 +1,5 @@
 /**
  * InputManager coordinates keyboard, touch, and combo input
- * Simplified for single-developer use
  */
 import { GameConfig } from '../config/GameConfig.js';
 import { KeyboardHandler } from './KeyboardHandler.js';

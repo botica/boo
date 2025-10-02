@@ -1,6 +1,5 @@
 /**
  * UIManager handles UI elements, progress bars, and visual feedback
- * Simplified for single-developer use
  */
 import { Constants } from '../config/Constants.js';
 

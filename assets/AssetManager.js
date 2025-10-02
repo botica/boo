@@ -19,8 +19,8 @@ export class AssetManager {
     // Define all sprite paths
     const assetPaths = {
       // Ghost sprites
-      ghostDefault: 'images/boo-mock-2.png',
-      ghostAlt: 'images/boo-mock-2-1.png',
+      ghostDefault: 'images/boo-inverse.png',
+      ghostAlt: 'images/boo-inverse-1.png',
       ghostScare1: 'images/boo-scare-1.png',
       ghostScare2: 'images/boo-scare-2.png',
       ghostLaugh1: 'images/boo-laugh-1.png',
