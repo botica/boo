@@ -18,20 +18,12 @@ export class UIManager {
   }
 
   /**
-   * Resize canvas and UI elements
+   * Resize UI elements based on current canvas dimensions
    */
   resizeElements() {
-    const availableWidth = Math.max(
-      Constants.UI.MIN_CANVAS_WIDTH, 
-      window.innerWidth - Constants.UI.CANVAS_PADDING
-    );
-    const availableHeight = Math.max(
-      Constants.UI.MIN_CANVAS_HEIGHT, 
-      window.innerHeight - Constants.UI.CANVAS_PADDING
-    );
-    this.canvas.width = Math.floor(availableWidth);
-    this.canvas.height = Math.floor(availableHeight);
-
+    // Canvas dimensions are now handled by the Game class
+    // This method only updates UI element sizes based on current canvas size
+    
     const bigSize = Math.max(
       Constants.UI.MIN_ARROW_SIZE, 
       Math.min(

@@ -75,5 +75,14 @@ export const Constants = {
   BOO_TEXT: {
     OFFSET_Y: 60,
     FONT_SIZE: 48
+  },
+
+  // Canvas configuration for responsive sizing
+  CANVAS: {
+    MIN_WIDTH: 500,
+    MAX_WIDTH: 1000,
+    ASPECT_RATIO: 16/10, // 16:10 aspect ratio for good gameplay space
+    get MIN_HEIGHT() { return Math.round(this.MIN_WIDTH / this.ASPECT_RATIO); },
+    get MAX_HEIGHT() { return Math.round(this.MAX_WIDTH / this.ASPECT_RATIO); }
   }
 };

@@ -1,5 +1,84 @@
-html, body { margin: 0; height: 100%; overflow: hidden; background-color: #010830; }
-canvas { background: black; display:block; image-rendering: pixelated; }
+html, body { 
+  margin: 0; 
+  height: 100%; 
+  overflow: hidden; 
+  background-color: black; 
+  font-family: sans-serif;
+}
+
+canvas { 
+  background: black; 
+  display: block; 
+  image-rendering: pixelated; 
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  border: 2px dotted white;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Game container for responsive layout */
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Warning for narrow screens */
+.narrow-screen-warning {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  text-align: center;
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.warning-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 400px;
+}
+
+.warning-content h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #fff;
+}
+
+.warning-content p {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.rotate-icon {
+  font-size: 48px;
+  margin: 20px 0;
+}
+
+/* Show warning on narrow screens (below minimum canvas width) */
+@media (max-width: 499px) {
+  .narrow-screen-warning {
+    display: block;
+  }
+  
+  .game-container {
+    display: none;
+  }
+}
 
 .game-wrap { position: relative; display: inline-block; }
 #arrow-area {
@@ -128,4 +207,29 @@ canvas { background: black; display:block; image-rendering: pixelated; }
   color: rgba(255,255,255,0.9);
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
   opacity: 0.5;
+}
+
+/* Responsive canvas sizing */
+@media (min-width: 500px) and (max-width: 1199px) {
+  #game {
+    width: clamp(500px, 80vw, 1000px);
+  }
+}
+
+@media (min-width: 1200px) {
+  #game {
+    width: 1000px;
+  }
+}
+
+/* Ensure wrapper adapts to responsive canvas */
+.wrapper {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.game-wrap {
+  width: fit-content;
+  margin: 0 auto;
 }

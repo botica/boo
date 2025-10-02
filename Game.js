@@ -115,6 +115,63 @@ export class Game {
    * Resize canvas and UI elements
    */
   resizeCanvas() {
+    const container = document.querySelector('.game-container');
+    if (!container) {
+      console.warn('Game container not found, falling back to window dimensions');
+      this.setCanvasDimensions();
+      return;
+    }
+    
+    // Calculate available space accounting for container padding
+    const containerWidth = container.clientWidth - 40; // Account for padding
+    const containerHeight = container.clientHeight - 40;
+    
+    // Determine canvas size based on container and constraints
+    let canvasWidth = Math.max(Constants.CANVAS.MIN_WIDTH, 
+                              Math.min(Constants.CANVAS.MAX_WIDTH, containerWidth));
+    let canvasHeight = Math.round(canvasWidth / Constants.CANVAS.ASPECT_RATIO);
+    
+    // Check if height fits, adjust if needed
+    if (canvasHeight > containerHeight) {
+      canvasHeight = containerHeight;
+      canvasWidth = Math.round(canvasHeight * Constants.CANVAS.ASPECT_RATIO);
+      canvasWidth = Math.max(Constants.CANVAS.MIN_WIDTH, 
+                            Math.min(Constants.CANVAS.MAX_WIDTH, canvasWidth));
+    }
+    
+    // Set canvas dimensions
+    this.canvas.width = canvasWidth;
+    this.canvas.height = canvasHeight;
+    this.canvas.style.width = canvasWidth + 'px';
+    this.canvas.style.height = canvasHeight + 'px';
+    
+    console.log(`Canvas resized: ${canvasWidth}x${canvasHeight}`);
+    
+    // Update UI elements
+    this.uiManager.resizeElements();
+  }
+  
+  /**
+   * Fallback method for setting canvas dimensions when container is not available
+   */
+  setCanvasDimensions() {
+    const viewportWidth = window.innerWidth - 40;
+    const viewportHeight = window.innerHeight - 40;
+    
+    let canvasWidth = Math.max(Constants.CANVAS.MIN_WIDTH, 
+                              Math.min(Constants.CANVAS.MAX_WIDTH, viewportWidth * 0.8));
+    let canvasHeight = Math.round(canvasWidth / Constants.CANVAS.ASPECT_RATIO);
+    
+    if (canvasHeight > viewportHeight * 0.8) {
+      canvasHeight = viewportHeight * 0.8;
+      canvasWidth = Math.round(canvasHeight * Constants.CANVAS.ASPECT_RATIO);
+    }
+    
+    this.canvas.width = canvasWidth;
+    this.canvas.height = canvasHeight;
+    this.canvas.style.width = canvasWidth + 'px';
+    this.canvas.style.height = canvasHeight + 'px';
+    
     this.uiManager.resizeElements();
   }
 

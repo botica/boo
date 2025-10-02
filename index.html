@@ -3,28 +3,42 @@
 <head>
 <meta charset="utf-8" />
 <title>boo!</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="wrapper">
-  <div class="game-wrap" style="position:relative;">
-    <canvas id="game"></canvas>
-    <div id="arrow-area" style="pointer-events:none;">
-      <div id="arrows" class="arrows" aria-hidden="true" style="display:none;">
-        <div id="arrow-1" class="tile big-arrow" aria-hidden="true"></div>
-        <div id="arrow-2" class="tile big-arrow" aria-hidden="true"></div>
-      </div>
-      <div id="combo-ui" class="combo-ui" style="display:none; align-items:center;">
-        <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
-      </div>
-    </div>
+<!-- Warning for narrow screens -->
+<div class="narrow-screen-warning">
+  <div class="warning-content">
+    <h2>Screen Too Narrow</h2>
+    <div class="rotate-icon">📱➡️📱</div>
+    <p>This game requires a minimum width of 500 pixels for the best experience.</p>
+    <p>Please rotate your device to landscape mode or use a wider screen.</p>
+  </div>
+</div>
 
-    <div id="tiles-arrows" class="tiles" aria-hidden="true">
-      <div id="tile-up" class="tile" data-key="ArrowUp">^</div>
-      <div id="tile-left" class="tile" data-key="ArrowLeft"><</div>
-      <div id="tile-down" class="tile" data-key="ArrowDown">v</div>
-      <div id="tile-right" class="tile" data-key="ArrowRight">></div>
+<!-- Game container -->
+<div class="game-container">
+  <div class="wrapper">
+    <div class="game-wrap" style="position:relative;">
+      <canvas id="game"></canvas>
+      <div id="arrow-area" style="pointer-events:none;">
+        <div id="arrows" class="arrows" aria-hidden="true" style="display:none;">
+          <div id="arrow-1" class="tile big-arrow" aria-hidden="true"></div>
+          <div id="arrow-2" class="tile big-arrow" aria-hidden="true"></div>
+        </div>
+        <div id="combo-ui" class="combo-ui" style="display:none; align-items:center;">
+          <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
+        </div>
+      </div>
+
+      <div id="tiles-arrows" class="tiles" aria-hidden="true">
+        <div id="tile-up" class="tile" data-key="ArrowUp">^</div>
+        <div id="tile-left" class="tile" data-key="ArrowLeft"><</div>
+        <div id="tile-down" class="tile" data-key="ArrowDown">v</div>
+        <div id="tile-right" class="tile" data-key="ArrowRight">></div>
+      </div>
     </div>
   </div>
 </div>
