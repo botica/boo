@@ -33,6 +33,9 @@ export class Game {
     this.lastTime = performance.now();
     this.isRunning = false;
     
+    // Level 5 escape tracking
+    this.level5EscapeTriggered = false;
+    
     // Bind methods to preserve context
     this.update = this.update.bind(this);
     this.draw = this.draw.bind(this);
@@ -235,6 +238,15 @@ export class Game {
     
     if (this.person) {
       this.person.update(dt, this.gameState.interactionActive);
+      
+      // Check if person has escaped off screen during level 5 victory
+      if (this.person.isEscaping && this.person.isOffScreen() && 
+          this.gameState.currentLevel === 5 && !this.level5EscapeTriggered) {
+        console.log('Person escaped off screen, completing level 5');
+        this.level5EscapeTriggered = true;
+        // Complete immediately when person is off screen
+        this.completeLevel5Victory();
+      }
     }
     
     // Handle combo input
@@ -288,9 +300,11 @@ export class Game {
         this.startNextCombo();
         break;
       case 'level_complete':
+        console.log('Level complete detected');
         this.handleLevelComplete(false);
         break;
       case 'game_complete':
+        console.log('Game complete detected');
         this.handleLevelComplete(true);
         break;
     }
@@ -314,7 +328,18 @@ export class Game {
   handleLevelComplete(gameComplete) {
     this.uiManager.showComboUI(false);
     
-    // Start success animation
+    console.log(`handleLevelComplete called: gameComplete=${gameComplete}, currentLevel=${this.gameState.currentLevel}`);
+    
+    // Special handling for level 5 (game complete) - person escapes
+    if (gameComplete && this.gameState.currentLevel === 5) {
+      console.log('Triggering level 5 victory');
+      this.handleLevel5Victory();
+      return;
+    }
+    
+    console.log('Using standard level complete animation');
+    
+    // Start success animation for other levels
     this.player.setAnimationState('angry', {
       frameCount: Constants.ANIMATION.ANGRY_FRAME_COUNT,
       onComplete: () => {
@@ -334,6 +359,57 @@ export class Game {
     // Make person scared immediately
     this.person.setAnimationState('scared');
     this.gameState.startSuccessAnimation();
+  }
+
+  /**
+   * Handle special level 5 victory with person escape animation
+   */
+  handleLevel5Victory() {
+    console.log('handleLevel5Victory started');
+    // Reset escape tracking flag
+    this.level5EscapeTriggered = false;
+    
+    // Start player angry animation first
+    this.player.setAnimationState('angry', {
+      frameCount: Constants.ANIMATION.ANGRY_FRAME_COUNT,
+      onComplete: () => {
+        console.log('Player angry animation complete, starting escape');
+        // Stop BOO text from showing during escape
+        this.gameState.showBooText = false;
+        
+        // After player gets angry, person starts escaping
+        this.person.startEscape();
+        
+        // Start player laughing while person escapes
+        this.player.setAnimationState('laughing', {
+          duration: Constants.ANIMATION.LAUGHING_DURATION * 2, // Shorter duration
+          onComplete: () => {
+            console.log('Player laughing animation complete');
+            // Check if person escaped, if not complete anyway
+            this.completeLevel5Victory();
+          }
+        });
+      }
+    });
+    
+    this.gameState.startSuccessAnimation();
+  }
+
+  /**
+   * Complete level 5 victory sequence and reset to level 1
+   */
+  completeLevel5Victory() {
+    // Prevent multiple calls - if we're not on level 5 anymore, we already completed
+    if (this.gameState.currentLevel !== 5) {
+      console.log('Level 5 victory already completed, skipping');
+      return;
+    }
+    
+    console.log('Completing level 5 victory');
+    this.gameState.endSuccessAnimation();
+    this.gameState.resetToLevel1(); // Reset to level 1 after escape
+    this.endInteraction('success: game complete - person escaped!');
+    this.resetScene();
   }
 
   /**
@@ -482,10 +558,20 @@ export class Game {
       this.renderer.drawPlayer(this.player);
     }
     
-    // Draw "BOO!" text if active
+    // Draw "BOO!" text if active (fixed position during level 5 escape)
     if (this.gameState.showBooText && this.player && this.person) {
-      const textX = (this.player.x + this.person.x) / 2;
-      const textY = Math.min(this.player.y, this.person.y) - Constants.BOO_TEXT.OFFSET_Y;
+      let textX, textY;
+      
+      if (this.person.isEscaping) {
+        // Keep BOO text at player position during escape
+        textX = this.player.x;
+        textY = this.player.y - Constants.BOO_TEXT.OFFSET_Y;
+      } else {
+        // Normal positioning between player and person
+        textX = (this.player.x + this.person.x) / 2;
+        textY = Math.min(this.player.y, this.person.y) - Constants.BOO_TEXT.OFFSET_Y;
+      }
+      
       this.renderer.drawBooText(textX, textY, this.gameState.booTextTimer);
     }
   }

@@ -33,6 +33,7 @@ export const Constants = {
     WIDTH: 150,
     HEIGHT: 150,
     MOVE_SPEED: 80,
+    ESCAPE_SPEED: 400,
     MOVE_WAIT_MIN: 1.0,
     MOVE_WAIT_MAX: 3.0,
     MOVE_DURATION_MIN: 0.15,
@@ -48,7 +49,8 @@ export const Constants = {
     SWIRL_FRAME_COUNT: 2,
     LAUGHING_DURATION: 2800,
     DEAD_DURATION: 1000,
-    BOO_TEXT_FLASH_INTERVAL: 0.5
+    BOO_TEXT_FLASH_INTERVAL: 0.5,
+    BOO_TEXT_DURATION: 1500 // Maximum time BOO text shows (ms)
   },
   
   // UI sizing

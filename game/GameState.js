@@ -3,6 +3,7 @@
  * Combines previous GameState and GameStateManager for simplicity
  */
 import { GameConfig } from '../config/GameConfig.js';
+import { Constants } from '../config/Constants.js';
 
 export class GameState {
   constructor() {
@@ -114,9 +115,10 @@ export class GameState {
         return 'level_complete';
       } else {
         console.log('boo! you scared them! you beat the game!');
-        this.currentLevel = 1;
-        this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
-        this.updateLevelTitle();
+        // Don't reset level here - let the game handle the reset after animation
+        // this.currentLevel = 1;
+        // this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
+        // this.updateLevelTitle();
         return 'game_complete';
       }
     } else {
@@ -146,6 +148,11 @@ export class GameState {
     // Update "BOO!" text timer
     if (this.showBooText) {
       this.booTextTimer += dt;
+      
+      // Hide BOO text after duration (in seconds)
+      if (this.booTextTimer >= Constants.ANIMATION.BOO_TEXT_DURATION / 1000) {
+        this.showBooText = false;
+      }
     }
     
     // Handle combo interaction
@@ -176,6 +183,15 @@ export class GameState {
     this.showBooText = false;
     this.booTextTimer = 0;
     this.combosCompleted = 0;
+  }
+
+  /**
+   * Reset level to 1 (used after game completion)
+   */
+  resetToLevel1() {
+    this.currentLevel = 1;
+    this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
+    this.updateLevelTitle();
   }
 
   /**

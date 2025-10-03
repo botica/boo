@@ -24,6 +24,10 @@ export class Person {
     this.moveTimeLeft = 0;
     this.moveSpeed = Constants.PERSON.MOVE_SPEED;
     
+    // Escape animation state
+    this.isEscaping = false;
+    this.escapeSpeed = Constants.PERSON.ESCAPE_SPEED;
+    
     // Collision state
     this.colliding = false;
     
@@ -61,8 +65,12 @@ export class Person {
       this.animator.update(dt);
     }
 
-    // Handle movement when not in interaction
-    if (!interactionActive) {
+    // Handle escape animation first (takes priority)
+    if (this.isEscaping) {
+      this.updateEscape(dt);
+    }
+    // Handle movement when not in interaction and not escaping
+    else if (!interactionActive) {
       this.updateMovement(dt);
     }
   }
@@ -95,8 +103,27 @@ export class Person {
       }
     }
     
-    // Keep person within bounds
-    CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
+    // Keep person within bounds (only when not escaping)
+    if (!this.isEscaping) {
+      CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
+    }
+  }
+
+  /**
+   * Update escape animation - person runs off screen to the right
+   * @param {number} dt - Delta time in seconds
+   */
+  updateEscape(dt) {
+    // Move right at escape speed
+    this.vx = this.escapeSpeed;
+    this.x += this.vx * dt;
+    
+    // Log position occasionally
+    if (Math.floor(performance.now() / 1000) % 2 === 0 && Math.floor(this.x) % 200 === 0) {
+      console.log(`Person escaping: x=${Math.floor(this.x)}, canvas width=${this.canvas.width}, off screen=${this.isOffScreen()}`);
+    }
+    
+    // No bounds checking during escape - allow movement off screen
   }
 
   /**
@@ -110,10 +137,35 @@ export class Person {
     this.nextMoveIn = MathUtils.random(Constants.PERSON.MOVE_WAIT_MIN, Constants.PERSON.MOVE_WAIT_MAX);
     this.moveTimeLeft = 0;
     this.colliding = false;
+    this.isEscaping = false;
     
     if (this.animator) {
       this.animator.setState('default');
     }
+  }
+
+  /**
+   * Start escape animation - person runs off screen in fear
+   */
+  startEscape() {
+    console.log('Person.startEscape called');
+    this.isEscaping = true;
+    this.isMoving = false;
+    this.vx = 0;
+    
+    // Set scared animation
+    if (this.animator) {
+      this.animator.setState('scared');
+      console.log('Person animation set to scared');
+    }
+  }
+
+  /**
+   * Check if person is completely off screen to the right
+   * @returns {boolean} True if person is completely off screen
+   */
+  isOffScreen() {
+    return this.x - this.width/2 > this.canvas.width;
   }
 
   /**
