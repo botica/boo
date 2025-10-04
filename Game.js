@@ -361,6 +361,12 @@ export class Game {
           duration: Constants.ANIMATION.LAUGHING_DURATION,
           onComplete: () => {
             this.gameState.endSuccessAnimation();
+            
+            // Advance level after laughing animation completes
+            if (!gameComplete) {
+              this.gameState.advanceToNextLevel();
+            }
+            
             this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
             this.resetScene();
           }

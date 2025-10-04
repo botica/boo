@@ -109,22 +109,28 @@ export class GameState {
       
       if (this.currentLevel < GameConfig.MAX_LEVELS) {
         console.log(`boo! you scared them! advancing to level ${this.currentLevel + 1}!`);
-        this.currentLevel++;
-        this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
-        this.updateLevelTitle();
+        // Don't increment level here - wait for animation to complete
         return 'level_complete';
       } else {
         console.log('boo! you scared them! you beat the game!');
-        // Don't reset level here - let the game handle the reset after animation
-        // this.currentLevel = 1;
-        // this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
-        // this.updateLevelTitle();
         return 'game_complete';
       }
     } else {
       // Continue to next combo
       this.startNextCombo();
       return 'continue';
+    }
+  }
+
+  /**
+   * Advance to the next level (called after animation completes)
+   */
+  advanceToNextLevel() {
+    if (this.currentLevel < GameConfig.MAX_LEVELS) {
+      this.currentLevel++;
+      this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
+      this.updateLevelTitle();
+      console.log(`Level advanced to ${this.currentLevel}`);
     }
   }
 
