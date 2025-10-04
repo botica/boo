@@ -11,31 +11,31 @@ export const GameConfig = {
       level: 1,
       comboDuration: 10.0,
       hasWind: false,
-      hasGusts: true
+      hasFloats: true
     },
     2: {
       level: 2,
       comboDuration: 8.0,
       hasWind: true,
-      hasGusts: true
+      hasFloats: true
     },
     3: {
       level: 3,
       comboDuration: 6.0,
       hasWind: false,
-      hasGusts: false
+      hasFloats: true
     },
     4: {
       level: 4,
       comboDuration: 4.0,
       hasWind: true,
-      hasGusts: true
+      hasFloats: true
     },
     5: {
       level: 5,
       comboDuration: 2.0,
       hasWind: false,
-      hasGusts: true
+      hasFloats: true
     }
   },
   

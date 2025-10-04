@@ -251,11 +251,11 @@ export class GameState {
   }
 
   /**
-   * Check if player should be affected by gusts
-   * @returns {boolean} True if gust effects should be applied
+   * Check if player should be affected by floats
+   * @returns {boolean} True if float effects should be applied
    */
-  hasGustEffect() {
+  hasFloatEffect() {
     const config = this.getCurrentLevelConfig();
-    return config && config.hasGusts !== false && !this.interactionActive && !this.animationInProgress;
+    return config && config.hasFloats !== false && !this.interactionActive && !this.animationInProgress;
   }
 }

@@ -24,10 +24,15 @@ export class Player {
     this.accel = Constants.PLAYER.ACCEL;
     this.facing = 'right';
     
-    // Wind and gust effects
-    this.gustTimer = 0;
-    this.gustCycle = Constants.PLAYER.GUST_CYCLE;
-    this.gustStrength = Constants.PLAYER.GUST_STRENGTH_BASE;
+    // Float effects
+    this.floatTimer = 0;
+    this.floatActive = false;
+    this.floatForce = 0;
+    this.floatDirection = { x: 0, y: 0 };
+    this.floatInitialSpeed = 0;
+    this.floatCurrentSpeed = 0;
+    this.keyPressStart = {};
+    this.keyPressStartTime = 0;
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
@@ -66,42 +71,46 @@ export class Player {
   }
 
   updateMovement(dt, input, levelConfig) {
-    // Update gust effects
-    this.updateGustEffects(dt, levelConfig);
+    // Update float effects
+    this.updateFloatEffects(dt, levelConfig);
     
     // Update wind effects
     this.updateWindEffects(dt, levelConfig);
     
-    // Handle input
-    let inputX = 0, inputY = 0;
-    if (input.keys['ArrowUp']) inputY -= 1;
-    if (input.keys['ArrowDown']) inputY += 1;
-    if (input.keys['ArrowLeft']) inputX -= 1;
-    if (input.keys['ArrowRight']) inputX += 1;
+    // Handle input for float system
+    this.handleFloatInput(input);
 
-    // Update facing direction
-    if (inputX < 0) this.facing = 'left';
-    else if (inputX > 0) this.facing = 'right';
+    // Apply float velocity if active
+    if (this.floatActive) {
+      this.vx = this.floatDirection.x * this.floatCurrentSpeed;
+      this.vy = this.floatDirection.y * this.floatCurrentSpeed;
+      
+      // Note: Bounds checking temporarily disabled to test float movement
+      // The existing CollisionDetector.clampToBounds will handle final positioning
+    } else {
+      // Normal movement when not floating - only vertical movement allowed
+      // Horizontal movement is handled exclusively by the float system
+      let inputX = 0, inputY = 0;
+      if (input.keys['ArrowUp']) inputY -= 1;
+      if (input.keys['ArrowDown']) inputY += 1;
+      // Note: ArrowLeft and ArrowRight are not processed for regular movement
 
-    // Calculate target velocity with gust strength
-    let targetVx = 0, targetVy = 0;
-    const len = Math.hypot(inputX, inputY);
-    if (len > 0) {
-      const gustModifiedSpeed = this.speed * this.gustStrength;
-      targetVx = (inputX / len) * gustModifiedSpeed;
-      targetVy = (inputY / len) * gustModifiedSpeed;
+      // Calculate target velocity (only vertical)
+      let targetVx = 0, targetVy = 0;
+      if (inputY !== 0) {
+        targetVy = inputY * this.speed;
+      }
+
+      // Apply acceleration
+      const maxDelta = this.accel * dt;
+      const dvx = targetVx - this.vx;
+      const dvy = targetVy - this.vy;
+      
+      if (Math.abs(dvx) > maxDelta) this.vx += Math.sign(dvx) * maxDelta;
+      else this.vx = targetVx;
+      if (Math.abs(dvy) > maxDelta) this.vy += Math.sign(dvy) * maxDelta;
+      else this.vy = targetVy;
     }
-
-    // Apply acceleration with gust strength
-    const gustModifiedAccel = this.accel * this.gustStrength;
-    const maxDelta = gustModifiedAccel * dt;
-    const dvx = targetVx - this.vx;
-    const dvy = targetVy - this.vy;
-    
-    if (Math.abs(dvx) > maxDelta) this.vx += Math.sign(dvx) * maxDelta;
-    else this.vx = targetVx;
-    if (Math.abs(dvy) > maxDelta) this.vy += Math.sign(dvy) * maxDelta;
-    else this.vy = targetVy;
 
     // Apply wind effect to position
     this.x += this.windVx * dt;
@@ -113,14 +122,131 @@ export class Player {
     CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
   }
 
-  updateGustEffects(dt, levelConfig) {
-    if (levelConfig && levelConfig.hasGusts !== false) {
-      this.gustTimer += dt;
-      this.gustStrength = Constants.PLAYER.GUST_STRENGTH_BASE + 
-                         Constants.PLAYER.GUST_STRENGTH_AMPLITUDE * 
-                         Math.sin((this.gustTimer / this.gustCycle) * Math.PI * 2);
-    } else {
-      this.gustStrength = Constants.PLAYER.GUST_STRENGTH_BASE;
+  handleFloatInput(input) {
+    const currentTime = Date.now() / 1000; // Convert to seconds
+    
+    // Update facing direction based on current key presses
+    if (input.keys['ArrowLeft']) {
+      this.facing = 'left';
+    } else if (input.keys['ArrowRight']) {
+      this.facing = 'right';
+    }
+    
+    // Check for new key presses - start float immediately
+    ['ArrowLeft', 'ArrowRight'].forEach(key => {
+      if (input.keys[key] && !this.keyPressStart[key] && !this.floatActive) {
+        // Key just pressed - start float immediately
+        this.keyPressStart[key] = currentTime;
+        this.startFloat(key, 'immediate');
+      } else if (!input.keys[key] && this.keyPressStart[key]) {
+        // Key released - store the total hold duration for the current float
+        if (this.floatActive && this.floatKey === key) {
+          this.totalHoldDuration = currentTime - this.keyPressStart[key];
+        }
+        this.keyPressStart[key] = null;
+      }
+    });
+  }
+
+  startFloat(key, mode) {
+    // Set direction based on key
+    const direction = key === 'ArrowLeft' ? -1 : 1;
+    
+    // Update facing direction
+    this.facing = direction > 0 ? 'right' : 'left';
+    
+    // Initialize float - always start with small float
+    this.floatActive = true;
+    this.floatTimer = 0;
+    this.floatMode = 'small'; // Track current float size
+    this.floatKey = key; // Track which key triggered this float
+    this.totalHoldDuration = undefined; // Reset hold duration tracking
+    
+    // Set horizontal direction, vertical will be updated in updateFloatEffects
+    this.floatDirection.x = direction;
+    this.floatDirection.y = -0.15; // Start going up
+    this.floatInitialSpeed = Constants.PLAYER.FLOAT_SMALL_FORCE;
+    this.floatCurrentSpeed = Constants.PLAYER.FLOAT_SMALL_FORCE;
+  }
+
+  updateFloatEffects(dt, levelConfig) {
+    if (levelConfig && levelConfig.hasFloats !== false) {
+      if (this.floatActive) {
+        this.floatTimer += dt;
+        
+        // Check if key is still held to determine if we should extend the float
+        const currentTime = Date.now() / 1000;
+        const keyStillHeld = this.keyPressStart[this.floatKey] !== null;
+        
+        // Use total hold duration (either ongoing or stored from key release)
+        let holdDuration;
+        if (keyStillHeld) {
+          holdDuration = currentTime - this.keyPressStart[this.floatKey];
+        } else if (this.totalHoldDuration !== undefined) {
+          holdDuration = this.totalHoldDuration;
+        } else {
+          holdDuration = 0;
+        }
+        
+        // Determine current float mode based on how long key was/is held
+        let targetMode = 'small';
+        let targetForce = Constants.PLAYER.FLOAT_SMALL_FORCE;
+        const targetDuration = Constants.PLAYER.FLOAT_DURATION; // Same duration for all
+        
+        if (holdDuration > Constants.PLAYER.FLOAT_MEDIUM_THRESHOLD) {
+          targetMode = 'large';
+          targetForce = Constants.PLAYER.FLOAT_LARGE_FORCE;
+        } else if (holdDuration > Constants.PLAYER.FLOAT_SMALL_THRESHOLD) {
+          targetMode = 'medium';
+          targetForce = Constants.PLAYER.FLOAT_MEDIUM_FORCE;
+        }
+        
+        // Smoothly transition to new force if mode changed
+        if (targetMode !== this.floatMode) {
+          this.floatMode = targetMode;
+          // Update the force immediately
+          this.floatInitialSpeed = targetForce;
+          this.floatCurrentSpeed = targetForce;
+        }
+        
+        // Calculate completion based on target duration
+        const progress = this.floatTimer / targetDuration;
+        if (progress >= 1.0) {
+          // Float is complete
+          this.floatActive = false;
+          this.vx = 0;
+          this.vy = 0;
+          // Clear any pending key presses to prevent immediate new float
+          this.keyPressStart = {};
+        } else {
+          // Start at full speed immediately, then slow down after a period
+          // Maintain full speed for first 30%, then decelerate
+          let speedMultiplier;
+          if (progress < 0.3) {
+            // Full speed for first 30% of duration
+            speedMultiplier = 1.0;
+          } else {
+            // After 30%, use steep deceleration
+            const decelerateProgress = (progress - 0.3) / 0.7; // Normalize remaining time
+            const easeFactor = Math.pow(1 - decelerateProgress, 2); // Quadratic ease-out
+            speedMultiplier = Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR + 
+                             (1 - Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR) * easeFactor;
+          }
+          
+          this.floatCurrentSpeed = this.floatInitialSpeed * speedMultiplier;
+          
+          // Calculate vertical component to create an arc
+          // Create a smooth arc: up first, then down (ending lower than start)
+          if (progress < 0.4) {
+            // Going up during first 40%
+            this.floatDirection.y = -0.12;
+          } else {
+            // Going down during remaining 60%, with increasing downward force
+            const downwardProgress = (progress - 0.4) / 0.6; // Normalize to 0-1
+            this.floatDirection.y = 0.24 * downwardProgress; // Twice the upward magnitude
+          }
+        }
+      }
     }
   }
 
@@ -181,8 +307,15 @@ export class Player {
     this.vx = 0;
     this.vy = 0;
     this.facing = 'right';
-    this.gustTimer = 0;
-    this.gustStrength = Constants.PLAYER.GUST_STRENGTH_BASE;
+    this.floatTimer = 0;
+    this.floatActive = false;
+    this.floatForce = 0;
+    this.floatDirection = { x: 0, y: 0 };
+    this.floatInitialSpeed = 0;
+    this.floatCurrentSpeed = 0;
+    this.floatMode = 'small';
+    this.floatKey = null;
+    this.keyPressStart = {};
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;

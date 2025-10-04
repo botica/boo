@@ -9,10 +9,15 @@ export const Constants = {
     SPEED: 800,
     ACCEL: 3000,
     
-    // Gust effects
-    GUST_CYCLE: 0.8,
-    GUST_STRENGTH_BASE: 1.0,
-    GUST_STRENGTH_AMPLITUDE: 0.8,
+    // Float effects
+    FLOAT_SMALL_FORCE: 200,
+    FLOAT_MEDIUM_FORCE: 450,
+    FLOAT_LARGE_FORCE: 1200,
+    FLOAT_SMALL_THRESHOLD: 0.05,
+    FLOAT_MEDIUM_THRESHOLD: 0.15,
+    FLOAT_VERTICAL_FORCE: 50,
+    FLOAT_DURATION: 0.5,
+    FLOAT_SLOWDOWN_FACTOR: 0.2,
     
     // Wind effects
     WIND_CHANGE_INTERVAL: 0.3,
