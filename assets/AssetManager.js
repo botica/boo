@@ -21,12 +21,12 @@ export class AssetManager {
       // Ghost sprites
       ghostDefault: 'images/boo-inverse.png',
       ghostAlt: 'images/boo-inverse-1.png',
-      ghostScare1: 'images/boo-scare-1.png',
-      ghostScare2: 'images/boo-scare-2.png',
+      ghostScare1: 'images/boo-angry-v2-0.png',
+      ghostScare2: 'images/boo-angry-v2-1.png',
       ghostLaugh1: 'images/boo-laugh-v2-0.png',
       ghostLaugh2: 'images/boo-laugh-v2-1.png',
-      ghostSwirl1: 'images/boo-swirl-1.png',
-      ghostSwirl2: 'images/boo-swirl-2.png',
+      ghostSwirl1: 'images/boo-swirl-v2-0.png',
+      ghostSwirl2: 'images/boo-swirl-v2-1.png',
       
       // Person sprites
       personDefault: 'images/person-mock.png',
