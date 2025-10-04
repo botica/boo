@@ -1,6 +1,7 @@
 import { AssetManager } from './assets/AssetManager.js';
 import { Player } from './entities/Player.js';
 import { Person } from './entities/Person.js';
+import { Moon } from './entities/Moon.js';
 import { InputManager } from './input/InputManager.js';
 import { GameState } from './game/GameState.js';
 import { UIManager } from './ui/UIManager.js';
@@ -28,6 +29,7 @@ export class Game {
     // Game entities (will be initialized after assets load)
     this.player = null;
     this.person = null;
+    this.moon = null;
     
     // Game loop tracking
     this.lastTime = performance.now();
@@ -77,6 +79,11 @@ export class Game {
     // Initialize game entities
     this.player = new Player(this.assetManager, this.canvas);
     this.person = new Person(this.assetManager, this.canvas);
+    
+    // Initialize moon (positioned in top left corner, size 50px)
+    const moonX = 20; // 20px margin from left edge
+    const moonY = 20; // 20px margin from top edge
+    this.moon = new Moon(this.assetManager, moonX, moonY);
     
     // Set up initial game state
     this.resetScene();
@@ -247,6 +254,11 @@ export class Game {
         // Complete immediately when person is off screen
         this.completeLevel5Victory();
       }
+    }
+    
+    // Update moon (only visible in level 1)
+    if (this.moon && this.gameState.currentLevel === 1) {
+      this.moon.update(dt);
     }
     
     // Handle combo input
@@ -537,6 +549,14 @@ export class Game {
       this.person.reset();
     }
     
+    // Reposition moon for current canvas size
+    if (this.moon) {
+      const moonX = 20; // 20px margin from left edge
+      const moonY = 20; // 20px margin from top edge
+      this.moon.x = moonX;
+      this.moon.y = moonY;
+    }
+    
     // Reset UI
     this.uiManager.resetAll();
     this.inputManager.resetKeys();
@@ -548,6 +568,11 @@ export class Game {
   draw() {
     // Clear screen
     this.renderer.clear();
+    
+    // Draw moon in background (only visible in level 1)
+    if (this.moon && this.gameState.currentLevel === 1) {
+      this.moon.render(this.renderer.ctx);
+    }
     
     // Draw entities
     if (this.person) {

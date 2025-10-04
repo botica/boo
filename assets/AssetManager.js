@@ -38,7 +38,11 @@ export class AssetManager {
       businessDefault: 'images/business.png',
       businessAlt: 'images/business-1.png',
       businessScared: 'images/business-scared.png',
-      businessScaredAlt: 'images/business-scared-1.png'
+      businessScaredAlt: 'images/business-scared-1.png',
+      
+      // Moon sprites
+      moon1: 'images/moon.png',
+      moon2: 'images/moon-1.png'
     };
 
     this.totalAssets = Object.keys(assetPaths).length;
@@ -132,6 +136,12 @@ export class AssetManager {
     return {
       default: [this.sprites.businessDefault, this.sprites.businessAlt],
       scared: [this.sprites.businessScared, this.sprites.businessScaredAlt]
+    };
+  }
+
+  getMoonSprites() {
+    return {
+      default: [this.sprites.moon1, this.sprites.moon2]
     };
   }
 }
