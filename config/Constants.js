@@ -4,8 +4,8 @@
 export const Constants = {
   // Player properties
   PLAYER: {
-    WIDTH: 200,
-    HEIGHT: 200,
+    WIDTH: 150,
+    HEIGHT: 150,
     SPEED: 800,
     ACCEL: 3000,
     

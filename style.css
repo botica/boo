@@ -12,9 +12,9 @@ canvas {
   image-rendering: pixelated; 
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  border: 2px dotted white;
-  max-width: 100%;
-  height: auto;
+  border: 1px dashed white;
+  width: 600px;
+  height: 400px;
 }
 
 /* Game container for responsive layout */
@@ -23,7 +23,6 @@ canvas {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -64,13 +63,9 @@ canvas {
   color: #fff;
 }
 
-.rotate-icon {
-  font-size: 48px;
-  margin: 20px 0;
-}
 
 /* Show warning on narrow screens (below minimum canvas width) */
-@media (max-width: 499px) {
+@media (max-width: 599px) {
   .narrow-screen-warning {
     display: block;
   }
@@ -101,8 +96,8 @@ canvas {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 6px;
-  margin: 20px auto;
+  gap: 0;
+  margin: 0 auto;
 }
 
 .tiles {
@@ -210,15 +205,17 @@ canvas {
 }
 
 /* Responsive canvas sizing */
-@media (min-width: 500px) and (max-width: 1199px) {
+@media (min-width: 600px) and (max-width: 1199px) {
   #game {
-    width: clamp(500px, 80vw, 1000px);
+    width: clamp(600px, 80vw, 1000px);
+    height: calc(clamp(600px, 80vw, 1000px) * 2 / 3);
   }
 }
 
 @media (min-width: 1200px) {
   #game {
     width: 1000px;
+    height: 667px;
   }
 }
 
