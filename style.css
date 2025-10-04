@@ -13,8 +13,6 @@ canvas {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   border: 1px dashed white;
-  width: 600px;
-  height: 400px;
   max-width: 1200px; /* increased from 1000px */
 }
 
@@ -206,14 +204,21 @@ canvas {
 }
 
 /* Responsive canvas sizing */
-@media (min-width: 600px) and (max-width: 1399px) {
+@media (max-width: 599px) {
+  #game {
+    width: 100%;
+    height: auto;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1439px) {
   #game {
     width: clamp(600px, 80vw, 1200px);
     height: calc(clamp(600px, 80vw, 1200px) * 2 / 3);
   }
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1440px) {
   #game {
     width: 1200px;
     height: 800px;
