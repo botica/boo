@@ -1,13 +1,10 @@
 /**
- * Main entry point
- * 
- * This file serves as a bootstrap that imports and initializes
- * the main Game class, which orchestrates all the modular components.
+ * main entry point
  */
 
 import { Game } from './Game.js';
 
-// Initialize and start the game
+// init the game
 let game;
 
 /**

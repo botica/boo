@@ -109,7 +109,7 @@ export class Game {
    * Connect input manager to UI manager for visual feedback
    */
   setupInputUIConnection() {
-    // Input manager now handles its own visual feedback
+    // Input manager handles its own visual feedback
     // We just need to provide it with the current combo from game state
   }
 

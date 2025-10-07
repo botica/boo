@@ -13,10 +13,9 @@ canvas {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   border: 1px dashed white;
-  max-width: 1200px; /* increased from 1000px */
+  max-width: 1200px;
 }
 
-/* Game container for responsive layout */
 .game-container {
   display: flex;
   justify-content: center;
@@ -25,7 +24,6 @@ canvas {
   box-sizing: border-box;
 }
 
-/* Warning for narrow screens */
 .narrow-screen-warning {
   display: none;
   position: fixed;
@@ -62,8 +60,6 @@ canvas {
   color: #fff;
 }
 
-
-/* Show warning on narrow screens (below minimum canvas width) */
 @media (max-width: 599px) {
   .narrow-screen-warning {
     display: block;
@@ -183,9 +179,7 @@ canvas {
   border-radius: 0;
 }
 
-/* overlay arrow tile group centered on screen */
 #tiles-arrows {
-  /* position relative to .game-wrap so it aligns with the canvas bottom */
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -194,7 +188,6 @@ canvas {
   pointer-events: auto;
 }
 
-/* Make the small arrow tiles translucent so focus remains on the canvas */
 #tiles-arrows .tile {
   background: rgba(0,0,0,0.55);
   border-color: rgba(255,255,255,0.6);
@@ -203,7 +196,6 @@ canvas {
   opacity: 0.5;
 }
 
-/* Responsive canvas sizing */
 @media (max-width: 599px) {
   #game {
     width: 100%;
@@ -225,7 +217,6 @@ canvas {
   }
 }
 
-/* Ensure wrapper adapts to responsive canvas */
 .wrapper {
   width: 100%;
   max-width: 1200px;
