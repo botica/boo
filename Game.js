@@ -2,6 +2,7 @@ import { AssetManager } from './assets/AssetManager.js';
 import { Player } from './entities/Player.js';
 import { Person } from './entities/Person.js';
 import { Moon } from './entities/Moon.js';
+import { Tree } from './entities/Tree.js';
 import { InputManager } from './input/InputManager.js';
 import { GameState } from './game/GameState.js';
 import { UIManager } from './ui/UIManager.js';
@@ -30,6 +31,7 @@ export class Game {
     this.player = null;
     this.person = null;
     this.moon = null;
+    this.tree = null;
     
     // Game loop tracking
     this.lastTime = performance.now();
@@ -84,6 +86,9 @@ export class Game {
     const moonX = 20; // 20px margin from left edge
     const moonY = 20; // 20px margin from top edge
     this.moon = new Moon(this.assetManager, moonX, moonY);
+    
+    // Initialize tree (positioned just right of center at bottom)
+    this.tree = new Tree(this.assetManager);
     
     // Set up initial game state
     this.resetScene();
@@ -259,6 +264,11 @@ export class Game {
     // Update moon (only visible in level 1)
     if (this.moon && this.gameState.currentLevel === 1) {
       this.moon.update(dt);
+    }
+    
+    // Update tree (visible on all levels)
+    if (this.tree) {
+      this.tree.update(dt);
     }
     
     // Handle combo input
@@ -563,6 +573,12 @@ export class Game {
       this.moon.y = moonY;
     }
     
+    // Reposition tree for current canvas size
+    if (this.tree) {
+      this.tree.x = this.canvas.width / 2 + 50;
+      this.tree.y = this.canvas.height - 100;
+    }
+    
     // Reset UI
     this.uiManager.resetAll();
     this.inputManager.resetKeys();
@@ -578,6 +594,11 @@ export class Game {
     // Draw moon in background (only visible in level 1)
     if (this.moon && this.gameState.currentLevel === 1) {
       this.moon.render(this.renderer.ctx);
+    }
+    
+    // Draw tree in background (visible on all levels)
+    if (this.tree) {
+      this.tree.render(this.renderer.ctx);
     }
     
     // Draw entities

@@ -42,7 +42,11 @@ export class AssetManager {
       
       // Moon sprites
       moon1: 'images/moon.png',
-      moon2: 'images/moon-1.png'
+      moon2: 'images/moon-1.png',
+      
+      // Tree sprites
+      tree1: 'images/tree.png',
+      tree2: 'images/tree-1.png'
     };
 
     this.totalAssets = Object.keys(assetPaths).length;
@@ -142,6 +146,12 @@ export class AssetManager {
   getMoonSprites() {
     return {
       default: [this.sprites.moon1, this.sprites.moon2]
+    };
+  }
+
+  getTreeSprites() {
+    return {
+      default: [this.sprites.tree1, this.sprites.tree2]
     };
   }
 }
