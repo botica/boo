@@ -11,8 +11,8 @@ export class Tree {
     // Position and size
     this.x = x;
     this.y = y;
-    this.width = 100;   // 100px square
-    this.height = 100;
+    this.width = Constants.TREE.WIDTH;
+    this.height = Constants.TREE.HEIGHT;
     
     // Initialize animation
     this.setupAnimation();

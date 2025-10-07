@@ -47,6 +47,18 @@ export const Constants = {
     MOVE_SPEED_VARIANCE_MAX: 0.9
   },
   
+  // Moon properties
+  MOON: {
+    WIDTH: 100,
+    HEIGHT: 100
+  },
+  
+  // Tree properties
+  TREE: {
+    WIDTH: 100,
+    HEIGHT: 100
+  },
+  
   // Animation timing
   ANIMATION: {
     DEFAULT_FRAME_INTERVAL: 0.4,
