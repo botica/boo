@@ -11,8 +11,8 @@ export class Moon {
     // Position and size
     this.x = x;
     this.y = y;
-    this.width = 100;   // 100px square as requested
-    this.height = 100;
+    this.width = Constants.MOON.WIDTH;
+    this.height = Constants.MOON.HEIGHT;
     
     // Initialize animation
     this.setupAnimation();
