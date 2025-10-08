@@ -164,9 +164,9 @@ export class Player {
     
     // Set horizontal direction, vertical will be updated in updateFloatEffects
     this.floatDirection.x = direction;
-    this.floatDirection.y = -0.15; // Start going up
-    this.floatInitialSpeed = Constants.PLAYER.FLOAT_SMALL_FORCE;
-    this.floatCurrentSpeed = Constants.PLAYER.FLOAT_SMALL_FORCE;
+    this.floatDirection.y = Constants.PLAYER.FLOAT_INITIAL_Y_DIRECTION;
+    this.floatInitialSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
+    this.floatCurrentSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
   }
 
   updateFloatEffects(dt, levelConfig) {
@@ -190,15 +190,16 @@ export class Player {
         
         // Determine current float mode based on how long key was/is held
         let targetMode = 'small';
-        let targetForce = Constants.PLAYER.FLOAT_SMALL_FORCE;
+        let targetForce = Constants.PLAYER.FLOAT_TIERS.small.force;
         const targetDuration = Constants.PLAYER.FLOAT_DURATION; // Same duration for all
         
-        if (holdDuration > Constants.PLAYER.FLOAT_MEDIUM_THRESHOLD) {
+        // Check tiers in descending order to find the appropriate tier
+        if (holdDuration > Constants.PLAYER.FLOAT_TIERS.large.threshold) {
           targetMode = 'large';
-          targetForce = Constants.PLAYER.FLOAT_LARGE_FORCE;
-        } else if (holdDuration > Constants.PLAYER.FLOAT_SMALL_THRESHOLD) {
+          targetForce = Constants.PLAYER.FLOAT_TIERS.large.force;
+        } else if (holdDuration > Constants.PLAYER.FLOAT_TIERS.medium.threshold) {
           targetMode = 'medium';
-          targetForce = Constants.PLAYER.FLOAT_MEDIUM_FORCE;
+          targetForce = Constants.PLAYER.FLOAT_TIERS.medium.force;
         }
         
         // Smoothly transition to new force if mode changed
@@ -220,14 +221,15 @@ export class Player {
           this.keyPressStart = {};
         } else {
           // Start at full speed immediately, then slow down after a period
-          // Maintain full speed for first 30%, then decelerate
+          // Maintain full speed for first portion, then decelerate
           let speedMultiplier;
-          if (progress < 0.3) {
-            // Full speed for first 30% of duration
+          if (progress < Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) {
+            // Full speed for first portion of duration
             speedMultiplier = 1.0;
           } else {
-            // After 30%, use steep deceleration
-            const decelerateProgress = (progress - 0.3) / 0.7; // Normalize remaining time
+            // After full speed period, use steep deceleration
+            const decelerateProgress = (progress - Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) / 
+                                      Constants.PLAYER.FLOAT_DECELERATION_RATIO; // Normalize remaining time
             const easeFactor = Math.pow(1 - decelerateProgress, 2); // Quadratic ease-out
             speedMultiplier = Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR + 
                              (1 - Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR) * easeFactor;
@@ -237,13 +239,14 @@ export class Player {
           
           // Calculate vertical component to create an arc
           // Create a smooth arc: up first, then down (ending lower than start)
-          if (progress < 0.4) {
-            // Going up during first 40%
-            this.floatDirection.y = -0.12;
+          if (progress < Constants.PLAYER.FLOAT_ARC_UP_RATIO) {
+            // Going up during first portion
+            this.floatDirection.y = Constants.PLAYER.FLOAT_ARC_UP_FORCE;
           } else {
-            // Going down during remaining 60%, with increasing downward force
-            const downwardProgress = (progress - 0.4) / 0.6; // Normalize to 0-1
-            this.floatDirection.y = 0.24 * downwardProgress; // Twice the upward magnitude
+            // Going down during remaining portion, with increasing downward force
+            const downwardProgress = (progress - Constants.PLAYER.FLOAT_ARC_UP_RATIO) / 
+                                    Constants.PLAYER.FLOAT_ARC_DOWN_RATIO; // Normalize to 0-1
+            this.floatDirection.y = Constants.PLAYER.FLOAT_ARC_DOWN_FORCE * downwardProgress;
           }
         }
       }
