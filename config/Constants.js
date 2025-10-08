@@ -13,15 +13,45 @@ export const Constants = {
     SPAWN_OFFSET_X: 10,
     SPAWN_OFFSET_Y: 10,
     
-    // Float effects
+    // Float effects - timing and speed curve
+    FLOAT_DURATION: 0.5,
+    FLOAT_SLOWDOWN_FACTOR: 0.2,
+    FLOAT_FULL_SPEED_RATIO: 0.3, // Maintain full speed for first 30% of duration
+    FLOAT_DECELERATION_RATIO: 0.7, // Decelerate during remaining 70%
+    
+    // Float arc parameters
+    FLOAT_INITIAL_Y_DIRECTION: -0.15, // Initial upward direction when starting float
+    FLOAT_ARC_UP_RATIO: 0.4, // Going up during first 40% of float
+    FLOAT_ARC_UP_FORCE: -0.12, // Upward vertical force
+    FLOAT_ARC_DOWN_RATIO: 0.6, // Going down during remaining 60%
+    FLOAT_ARC_DOWN_FORCE: 0.24, // Downward vertical force
+    
+    // Float tier system - 3 tiers based on key hold duration
+    FLOAT_TIERS: {
+      small: {
+        force: 200,
+        threshold: 0, // Always available
+        holdDurationMax: 0.05 // Up to 0.05s hold
+      },
+      medium: {
+        force: 450,
+        threshold: 0.05, // Requires > 0.05s hold
+        holdDurationMax: 0.15 // Up to 0.15s hold
+      },
+      large: {
+        force: 1200,
+        threshold: 0.15, // Requires > 0.15s hold
+        holdDurationMax: Infinity // Any hold > 0.15s
+      }
+    },
+    
+    // Legacy constants for backward compatibility (can be removed if not used elsewhere)
     FLOAT_SMALL_FORCE: 200,
     FLOAT_MEDIUM_FORCE: 450,
     FLOAT_LARGE_FORCE: 1200,
     FLOAT_SMALL_THRESHOLD: 0.05,
     FLOAT_MEDIUM_THRESHOLD: 0.15,
     FLOAT_VERTICAL_FORCE: 50,
-    FLOAT_DURATION: 0.5,
-    FLOAT_SLOWDOWN_FACTOR: 0.2,
     
     // Wind effects
     WIND_CHANGE_INTERVAL: 0.3,
