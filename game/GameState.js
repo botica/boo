@@ -20,7 +20,7 @@ export class GameState {
     this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
     this.comboTimeLeft = 0;
     this.comboAccepted = false;
-    this.usedCombos = [];
+    this.lastCombo = null;
     
     // Visual effects
     this.showBooText = false;
@@ -46,7 +46,7 @@ export class GameState {
     
     this.interactionActive = true;
     this.comboAccepted = false;
-    this.usedCombos = [];
+    this.lastCombo = null;
     
     this.startNextCombo();
   }
@@ -64,6 +64,7 @@ export class GameState {
 
   /**
    * Generate and start the next combo challenge
+   * Allows repeats within a level but not in immediate succession
    */
   startNextCombo() {
     const config = this.getCurrentLevelConfig();
@@ -78,15 +79,13 @@ export class GameState {
       }
     }
     
-    // Select a combo that hasn't been used recently
-    let remaining = all.filter(k => !this.usedCombos.includes(k));
-    if (remaining.length === 0) {
-      this.usedCombos = [];
-      remaining = all.slice();
-    }
+    // Filter out only the last combo to prevent immediate succession
+    let remaining = this.lastCombo 
+      ? all.filter(k => k !== this.lastCombo)
+      : all.slice();
     
     const chosen = remaining[Math.floor(Math.random() * remaining.length)];
-    this.usedCombos.push(chosen);
+    this.lastCombo = chosen;
     const parts = chosen.split('|');
     this.currentCombo = [parts[0], parts[1]];
     this.comboTimeLeft = this.comboDuration;
@@ -185,7 +184,7 @@ export class GameState {
     this.currentCombo = null;
     this.comboTimeLeft = 0;
     this.comboAccepted = false;
-    this.usedCombos = [];
+    this.lastCombo = null;
     this.showBooText = false;
     this.booTextTimer = 0;
     this.combosCompleted = 0;
