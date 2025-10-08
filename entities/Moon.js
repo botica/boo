@@ -5,7 +5,7 @@ import { Constants } from '../config/Constants.js';
  * Moon entity class - decorative animated background element
  */
 export class Moon {
-  constructor(assetManager, x = 0, y = 0) {
+  constructor(assetManager, x = Constants.MOON.OFFSET_X, y = Constants.MOON.OFFSET_Y) {
     this.assetManager = assetManager;
     
     // Position and size
