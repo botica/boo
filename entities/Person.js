@@ -130,8 +130,8 @@ export class Person {
    * Reset person to initial state
    */
   reset() {
-    this.x = this.width/2 + 10;
-    this.y = this.canvas.height - this.height/2 - 10;
+    this.x = this.width/2 + Constants.PERSON.SPAWN_OFFSET_X;
+    this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
     this.vx = 0;
     this.isMoving = false;
     this.nextMoveIn = MathUtils.random(Constants.PERSON.MOVE_WAIT_MIN, Constants.PERSON.MOVE_WAIT_MAX);

@@ -9,6 +9,10 @@ export const Constants = {
     SPEED: 800,
     ACCEL: 3000,
     
+    // Spawn position
+    SPAWN_OFFSET_X: 10,
+    SPAWN_OFFSET_Y: 10,
+    
     // Float effects
     FLOAT_SMALL_FORCE: 200,
     FLOAT_MEDIUM_FORCE: 450,
@@ -44,7 +48,11 @@ export const Constants = {
     MOVE_DURATION_MIN: 0.15,
     MOVE_DURATION_MAX: 0.45,
     MOVE_SPEED_VARIANCE_MIN: 0.6,
-    MOVE_SPEED_VARIANCE_MAX: 0.9
+    MOVE_SPEED_VARIANCE_MAX: 0.9,
+    
+    // Spawn position
+    SPAWN_OFFSET_X: 10,
+    SPAWN_OFFSET_Y: 10
   },
   
   // Moon properties
@@ -56,7 +64,11 @@ export const Constants = {
   // Tree properties
   TREE: {
     WIDTH: 100,
-    HEIGHT: 100
+    HEIGHT: 100,
+    
+    // Default spawn position offsets
+    DEFAULT_X_OFFSET: 50,
+    DEFAULT_Y_OFFSET: 100
   },
   
   // Animation timing

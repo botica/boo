@@ -5,7 +5,7 @@ import { Constants } from '../config/Constants.js';
  * Tree entity class - decorative animated background element
  */
 export class Tree {
-  constructor(assetManager, x = window.innerWidth / 2 + 50, y = window.innerHeight - 100) {
+  constructor(assetManager, x = window.innerWidth / 2 + Constants.TREE.DEFAULT_X_OFFSET, y = window.innerHeight - Constants.TREE.DEFAULT_Y_OFFSET) {
     this.assetManager = assetManager;
     
     // Position and size

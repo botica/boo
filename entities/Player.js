@@ -302,8 +302,8 @@ export class Player {
    * Reset player to initial state
    */
   reset() {
-    this.x = this.canvas.width - this.width/2 - 10;
-    this.y = this.height/2 + 10;
+    this.x = this.canvas.width - this.width/2 - Constants.PLAYER.SPAWN_OFFSET_X;
+    this.y = this.height/2 + Constants.PLAYER.SPAWN_OFFSET_Y;
     this.vx = 0;
     this.vy = 0;
     this.facing = 'right';
