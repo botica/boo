@@ -83,8 +83,8 @@ export class Game {
     this.person = new Person(this.assetManager, this.canvas);
     
     // Initialize moon (positioned in top left corner, size 50px)
-    const moonX = 20; // 20px margin from left edge
-    const moonY = 20; // 20px margin from top edge
+    const moonX = Constants.MOON.OFFSET_X;
+    const moonY = Constants.MOON.OFFSET_Y;
     this.moon = new Moon(this.assetManager, moonX, moonY);
     
     // Initialize tree (positioned just right of center at bottom)
@@ -567,8 +567,8 @@ export class Game {
     
     // Reposition moon for current canvas size
     if (this.moon) {
-      const moonX = 20; // 20px margin from left edge
-      const moonY = 20; // 20px margin from top edge
+      const moonX = Constants.MOON.OFFSET_X;
+      const moonY = Constants.MOON.OFFSET_Y;
       this.moon.x = moonX;
       this.moon.y = moonY;
     }

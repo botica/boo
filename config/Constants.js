@@ -58,7 +58,11 @@ export const Constants = {
   // Moon properties
   MOON: {
     WIDTH: 100,
-    HEIGHT: 100
+    HEIGHT: 100,
+    
+    // Position offsets
+    OFFSET_X: 20,
+    OFFSET_Y: 20
   },
   
   // Tree properties
