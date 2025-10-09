@@ -79,7 +79,7 @@ export class Renderer {
 
     const options = {
       flipX: player.facing === 'left',
-      debug: true // Show debug bounds
+      debug: false // Disable debug bounds
     };
 
     this.drawSprite(
@@ -106,7 +106,7 @@ export class Renderer {
       person.y,
       person.width,
       person.height,
-      { debug: true } // Show debug bounds
+      { debug: false } // Disable debug bounds
     );
   }
 
