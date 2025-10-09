@@ -12,16 +12,17 @@ canvas {
   image-rendering: pixelated; 
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  border: 1px dashed white;
+  border: 2px dashed white;
   max-width: 1200px;
 }
 
 .game-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
   box-sizing: border-box;
+  padding-top: 20px;
 }
 
 .narrow-screen-warning {
@@ -181,9 +182,8 @@ canvas {
 
 #tiles-arrows {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0;
+  right: 20px;
+  bottom: 20px;
   z-index: 40;
   pointer-events: auto;
 }

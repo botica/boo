@@ -19,13 +19,6 @@ export const Constants = {
     FLOAT_FULL_SPEED_RATIO: 0.3, // Maintain full speed for first 30% of duration
     FLOAT_DECELERATION_RATIO: 0.7, // Decelerate during remaining 70%
     
-    // Float arc parameters
-    FLOAT_INITIAL_Y_DIRECTION: -0.15, // Initial upward direction when starting float
-    FLOAT_ARC_UP_RATIO: 0.4, // Going up during first 40% of float
-    FLOAT_ARC_UP_FORCE: -0.12, // Upward vertical force
-    FLOAT_ARC_DOWN_RATIO: 0.6, // Going down during remaining 60%
-    FLOAT_ARC_DOWN_FORCE: 0.24, // Downward vertical force
-    
     // Float tier system - 3 tiers based on key hold duration
     FLOAT_TIERS: {
       small: {

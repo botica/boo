@@ -21,6 +21,7 @@ export class GameState {
     this.comboTimeLeft = 0;
     this.comboAccepted = false;
     this.lastCombo = null;
+    this.levelCombos = []; // Track all combos for current level
     
     // Visual effects
     this.showBooText = false;
@@ -47,6 +48,7 @@ export class GameState {
     this.interactionActive = true;
     this.comboAccepted = false;
     this.lastCombo = null;
+    this.levelCombos = []; // Reset combo history for new level
     
     this.startNextCombo();
   }
@@ -64,7 +66,7 @@ export class GameState {
 
   /**
    * Generate and start the next combo challenge
-   * Allows repeats within a level but not in immediate succession
+   * Prevents consecutive duplicate combos but allows non-consecutive duplicates
    */
   startNextCombo() {
     const config = this.getCurrentLevelConfig();
@@ -79,13 +81,18 @@ export class GameState {
       }
     }
     
-    // Filter out only the last combo to prevent immediate succession
+    // Filter out only the last combo to prevent consecutive duplicates
     let remaining = this.lastCombo 
       ? all.filter(k => k !== this.lastCombo)
       : all.slice();
     
     const chosen = remaining[Math.floor(Math.random() * remaining.length)];
+    
+    // Debug logging
+    console.log(`Previous combo: ${this.lastCombo}, Generated combo: ${chosen}`);
+    
     this.lastCombo = chosen;
+    this.levelCombos.push(chosen); // Track this combo for the level
     const parts = chosen.split('|');
     this.currentCombo = [parts[0], parts[1]];
     this.comboTimeLeft = this.comboDuration;
@@ -115,8 +122,7 @@ export class GameState {
         return 'game_complete';
       }
     } else {
-      // Continue to next combo
-      this.startNextCombo();
+      // Continue to next combo - don't start it here, let Game.js handle it
       return 'continue';
     }
   }
@@ -127,6 +133,9 @@ export class GameState {
   advanceToNextLevel() {
     if (this.currentLevel < GameConfig.MAX_LEVELS) {
       this.currentLevel++;
+      this.combosCompleted = 0; // Reset combo count for new level
+      this.levelCombos = []; // Clear combo history for new level
+      this.lastCombo = null; // Clear last combo for new level
       this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
       this.updateLevelTitle();
       console.log(`Level advanced to ${this.currentLevel}`);
@@ -185,6 +194,7 @@ export class GameState {
     this.comboTimeLeft = 0;
     this.comboAccepted = false;
     this.lastCombo = null;
+    this.levelCombos = []; // Clear combo history
     this.showBooText = false;
     this.booTextTimer = 0;
     this.combosCompleted = 0;

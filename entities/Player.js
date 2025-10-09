@@ -179,9 +179,9 @@ export class Player {
     this.floatKey = key; // Track which key triggered this float
     this.totalHoldDuration = undefined; // Reset hold duration tracking
     
-    // Set horizontal direction, vertical will be updated in updateFloatEffects
+    // Set horizontal direction, vertical movement is handled separately via acceleration
     this.floatDirection.x = direction;
-    this.floatDirection.y = Constants.PLAYER.FLOAT_INITIAL_Y_DIRECTION;
+    this.floatDirection.y = 0; // Not used for movement anymore
     this.floatInitialSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
     this.floatCurrentSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
   }
@@ -253,18 +253,6 @@ export class Player {
           }
           
           this.floatCurrentSpeed = this.floatInitialSpeed * speedMultiplier;
-          
-          // Calculate vertical component to create an arc (not used for movement anymore, kept for potential visual effects)
-          // Create a smooth arc: up first, then down (ending lower than start)
-          if (progress < Constants.PLAYER.FLOAT_ARC_UP_RATIO) {
-            // Going up during first portion
-            this.floatDirection.y = Constants.PLAYER.FLOAT_ARC_UP_FORCE;
-          } else {
-            // Going down during remaining portion, with increasing downward force
-            const downwardProgress = (progress - Constants.PLAYER.FLOAT_ARC_UP_RATIO) / 
-                                    Constants.PLAYER.FLOAT_ARC_DOWN_RATIO; // Normalize to 0-1
-            this.floatDirection.y = Constants.PLAYER.FLOAT_ARC_DOWN_FORCE * downwardProgress;
-          }
         }
       }
     }
