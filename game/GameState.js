@@ -1,12 +1,17 @@
 /**
  * GameState manages all game state including levels, combos, and interaction timing
- * Combines previous GameState and GameStateManager for simplicity
  */
 import { GameConfig } from '../config/GameConfig.js';
 import { Constants } from '../config/Constants.js';
 
 export class GameState {
   constructor() {
+    this.initializeState();
+  }
+
+  // =================== INITIALIZATION ===================
+
+  initializeState() {
     // Level state
     this.currentLevel = 1;
     this.combosCompleted = 0;
@@ -16,47 +21,63 @@ export class GameState {
     this.animationInProgress = false;
     
     // Combo state
-    this.currentCombo = null;
-    this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
-    this.comboTimeLeft = 0;
-    this.comboAccepted = false;
-    this.lastCombo = null;
-    this.levelCombos = []; // Track all combos for current level
+    this.resetComboState();
     
     // Visual effects
     this.showBooText = false;
     this.booTextTimer = 0;
     
-    // Arrow keys for combo generation
+    // Cache config data
     this.arrowKeys = GameConfig.arrowKeys;
+    this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
   }
 
-  /**
-   * Get current level configuration
-   * @returns {Object} Current level config
-   */
+  resetComboState() {
+    this.currentCombo = null;
+    this.comboTimeLeft = 0;
+    this.comboAccepted = false;
+    this.lastCombo = null;
+    this.levelCombos = [];
+  }
+
+  // =================== LEVEL MANAGEMENT ===================
+
   getCurrentLevelConfig() {
     return GameConfig.levelConfig[this.currentLevel];
   }
 
-  /**
-   * Start interaction mode
-   */
+  advanceToNextLevel() {
+    if (this.currentLevel < GameConfig.MAX_LEVELS) {
+      this.currentLevel++;
+      this.combosCompleted = 0;
+      this.resetComboState();
+      this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
+      this.updateLevelTitle();
+      console.log(`Level advanced to ${this.currentLevel}`);
+    }
+  }
+
+  resetToLevel1() {
+    this.currentLevel = 1;
+    this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
+    this.updateLevelTitle();
+  }
+
+  updateLevelTitle() {
+    document.title = `game - Level ${this.currentLevel}`;
+  }
+
+  // =================== INTERACTION MANAGEMENT ===================
+
   startInteraction() {
     if (this.interactionActive) return;
     
     this.interactionActive = true;
     this.comboAccepted = false;
-    this.lastCombo = null;
-    this.levelCombos = []; // Reset combo history for new level
-    
+    this.resetComboState();
     this.startNextCombo();
   }
 
-  /**
-   * End interaction mode
-   * @param {string} reason - Reason for ending interaction
-   */
   endInteraction(reason) {
     this.interactionActive = false;
     this.currentCombo = null;
@@ -64,15 +85,9 @@ export class GameState {
     console.log('Interaction ended:', reason || 'finished');
   }
 
-  /**
-   * Generate and start the next combo challenge
-   * Prevents consecutive duplicate combos but allows non-consecutive duplicates
-   */
-  startNextCombo() {
-    const config = this.getCurrentLevelConfig();
-    this.comboDuration = config ? config.comboDuration : 5.0;
-    
-    // Generate all possible arrow key pairs (excluding same-key pairs)
+  // =================== COMBO GENERATION ===================
+
+  generateAllCombos() {
     const all = [];
     for (const a of this.arrowKeys) {
       for (const b of this.arrowKeys) {
@@ -80,96 +95,111 @@ export class GameState {
         all.push(`${a}|${b}`);
       }
     }
+    return all;
+  }
+
+  selectRandomCombo(availableCombos) {
+    return availableCombos[Math.floor(Math.random() * availableCombos.length)];
+  }
+
+  startNextCombo() {
+    const config = this.getCurrentLevelConfig();
+    this.comboDuration = config ? config.comboDuration : 5.0;
+    
+    const allCombos = this.generateAllCombos();
     
     // Filter out only the last combo to prevent consecutive duplicates
-    let remaining = this.lastCombo 
-      ? all.filter(k => k !== this.lastCombo)
-      : all.slice();
+    const availableCombos = this.lastCombo 
+      ? allCombos.filter(combo => combo !== this.lastCombo)
+      : allCombos;
     
-    const chosen = remaining[Math.floor(Math.random() * remaining.length)];
+    const chosen = this.selectRandomCombo(availableCombos);
     
     // Debug logging
     console.log(`Previous combo: ${this.lastCombo}, Generated combo: ${chosen}`);
     
     this.lastCombo = chosen;
-    this.levelCombos.push(chosen); // Track this combo for the level
-    const parts = chosen.split('|');
-    this.currentCombo = [parts[0], parts[1]];
+    this.levelCombos.push(chosen);
+    this.currentCombo = chosen.split('|');
     this.comboTimeLeft = this.comboDuration;
     this.comboAccepted = false;
   }
 
-  /**
-   * Process combo success and handle level progression
-   * @returns {string} Result of combo completion ('continue', 'level_complete', 'game_complete')
-   */
+  // =================== COMBO PROCESSING ===================
+
   processComboSuccess() {
     this.comboAccepted = true;
     this.combosCompleted++;
     
     if (this.combosCompleted >= GameConfig.COMBOS_PER_LEVEL) {
-      // Level complete - check if advancing or game complete
-      this.showBooText = true;
-      this.booTextTimer = 0;
-      this.animationInProgress = true;
-      
-      if (this.currentLevel < GameConfig.MAX_LEVELS) {
-        console.log(`boo! you scared them! advancing to level ${this.currentLevel + 1}!`);
-        // Don't increment level here - wait for animation to complete
-        return 'level_complete';
-      } else {
-        console.log('boo! you scared them! you beat the game!');
-        return 'game_complete';
-      }
+      return this.handleLevelCompletion();
     } else {
-      // Continue to next combo - don't start it here, let Game.js handle it
       return 'continue';
     }
   }
 
-  /**
-   * Advance to the next level (called after animation completes)
-   */
-  advanceToNextLevel() {
+  handleLevelCompletion() {
+    this.showBooText = true;
+    this.booTextTimer = 0;
+    this.animationInProgress = true;
+    
     if (this.currentLevel < GameConfig.MAX_LEVELS) {
-      this.currentLevel++;
-      this.combosCompleted = 0; // Reset combo count for new level
-      this.levelCombos = []; // Clear combo history for new level
-      this.lastCombo = null; // Clear last combo for new level
-      this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
-      this.updateLevelTitle();
-      console.log(`Level advanced to ${this.currentLevel}`);
+      console.log(`boo! you scared them! advancing to level ${this.currentLevel + 1}!`);
+      return 'level_complete';
+    } else {
+      console.log('boo! you scared them! you beat the game!');
+      return 'game_complete';
     }
   }
 
-  /**
-   * Process combo timeout/failure
-   */
   processComboTimeout() {
     this.comboAccepted = true;
     this.animationInProgress = true;
     console.log('Try again?');
   }
 
-  /**
-   * Update game state
-   * @param {number} dt - Delta time in seconds
-   * @returns {Object} State changes that occurred
-   */
+  // =================== ANIMATION MANAGEMENT ===================
+
+  startSuccessAnimation() {
+    this.showBooText = true;
+    this.booTextTimer = 0;
+    this.animationInProgress = true;
+  }
+
+  endSuccessAnimation() {
+    this.showBooText = false;
+    this.animationInProgress = false;
+  }
+
+  startFailureAnimation() {
+    this.animationInProgress = true;
+  }
+
+  endFailureAnimation() {
+    this.animationInProgress = false;
+  }
+
+  // =================== UPDATE & RESET ===================
+
   update(dt) {
     const changes = {};
     
-    // Update "BOO!" text timer
+    this.updateBooText(dt);
+    this.updateComboTimer(dt, changes);
+    
+    return changes;
+  }
+
+  updateBooText(dt) {
     if (this.showBooText) {
       this.booTextTimer += dt;
-      
-      // Hide BOO text after duration (in seconds)
       if (this.booTextTimer >= Constants.ANIMATION.BOO_TEXT_DURATION / 1000) {
         this.showBooText = false;
       }
     }
-    
-    // Handle combo interaction
+  }
+
+  updateComboTimer(dt, changes) {
     if (this.interactionActive && this.currentCombo) {
       this.comboTimeLeft -= dt;
       const pct = Math.max(0, Math.min(1, this.comboTimeLeft / this.comboDuration));
@@ -180,95 +210,28 @@ export class GameState {
         changes.timeout = true;
       }
     }
-    
-    return changes;
   }
 
-  /**
-   * Reset game state to initial values (keeps current level)
-   */
   reset() {
     this.interactionActive = false;
     this.animationInProgress = false;
-    this.currentCombo = null;
-    this.comboTimeLeft = 0;
-    this.comboAccepted = false;
-    this.lastCombo = null;
-    this.levelCombos = []; // Clear combo history
+    this.resetComboState();
     this.showBooText = false;
     this.booTextTimer = 0;
     this.combosCompleted = 0;
   }
 
-  /**
-   * Reset level to 1 (used after game completion)
-   */
-  resetToLevel1() {
-    this.currentLevel = 1;
-    this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
-    this.updateLevelTitle();
-  }
+  // =================== UTILITY METHODS ===================
 
-  /**
-   * Start success animation sequence
-   */
-  startSuccessAnimation() {
-    this.showBooText = true;
-    this.booTextTimer = 0;
-    this.animationInProgress = true;
-  }
-
-  /**
-   * End success animation sequence
-   */
-  endSuccessAnimation() {
-    this.showBooText = false;
-    this.animationInProgress = false;
-  }
-
-  /**
-   * Start failure animation sequence
-   */
-  startFailureAnimation() {
-    this.animationInProgress = true;
-  }
-
-  /**
-   * End failure animation sequence
-   */
-  endFailureAnimation() {
-    this.animationInProgress = false;
-  }
-
-  /**
-   * Update browser title with current level
-   */
-  updateLevelTitle() {
-    document.title = `game - Level ${this.currentLevel}`;
-  }
-
-  /**
-   * Get combo display symbols
-   * @param {string[]} combo - Combo keys
-   * @returns {string[]} Display symbols for combo
-   */
   getComboDisplaySymbols(combo) {
     return combo.map(key => GameConfig.arrowSymbols[key] || key);
   }
 
-  /**
-   * Check if player should be affected by wind
-   * @returns {boolean} True if wind effects should be applied
-   */
   hasWindEffect() {
     const config = this.getCurrentLevelConfig();
     return config && config.hasWind && !this.interactionActive && !this.animationInProgress;
   }
 
-  /**
-   * Check if player should be affected by floats
-   * @returns {boolean} True if float effects should be applied
-   */
   hasFloatEffect() {
     const config = this.getCurrentLevelConfig();
     return config && config.hasFloats !== false && !this.interactionActive && !this.animationInProgress;
