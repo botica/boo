@@ -82,8 +82,25 @@ export class Player {
 
     // Apply float velocity if active
     if (this.floatActive) {
+      // Horizontal movement from float system
       this.vx = this.floatDirection.x * this.floatCurrentSpeed;
-      this.vy = this.floatDirection.y * this.floatCurrentSpeed;
+      
+      // Vertical movement with acceleration (same as normal movement)
+      let inputY = 0;
+      if (input.keys['ArrowUp']) inputY -= 1;
+      if (input.keys['ArrowDown']) inputY += 1;
+      
+      // Calculate target vertical velocity 
+      let targetVy = 0;
+      if (inputY !== 0) {
+        targetVy = inputY * this.speed;
+      }
+      
+      // Apply acceleration to vertical movement
+      const maxDelta = this.accel * dt;
+      const dvy = targetVy - this.vy;
+      if (Math.abs(dvy) > maxDelta) this.vy += Math.sign(dvy) * maxDelta;
+      else this.vy = targetVy;
       
       // Note: Bounds checking temporarily disabled to test float movement
       // The existing CollisionDetector.clampToBounds will handle final positioning
@@ -237,7 +254,7 @@ export class Player {
           
           this.floatCurrentSpeed = this.floatInitialSpeed * speedMultiplier;
           
-          // Calculate vertical component to create an arc
+          // Calculate vertical component to create an arc (not used for movement anymore, kept for potential visual effects)
           // Create a smooth arc: up first, then down (ending lower than start)
           if (progress < Constants.PLAYER.FLOAT_ARC_UP_RATIO) {
             // Going up during first portion

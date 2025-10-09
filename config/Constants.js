@@ -29,14 +29,14 @@ export const Constants = {
     // Float tier system - 3 tiers based on key hold duration
     FLOAT_TIERS: {
       small: {
-        force: 200,
+        force: 100,
         threshold: 0, // Always available
-        holdDurationMax: 0.05 // Up to 0.05s hold
+        holdDurationMax: 0.04 // Up to 0.05s hold
       },
       medium: {
-        force: 450,
+        force: 600,
         threshold: 0.05, // Requires > 0.05s hold
-        holdDurationMax: 0.15 // Up to 0.15s hold
+        holdDurationMax: 0.2 // Up to 0.2s hold
       },
       large: {
         force: 1200,
@@ -44,14 +44,7 @@ export const Constants = {
         holdDurationMax: Infinity // Any hold > 0.15s
       }
     },
-    
-    // Legacy constants for backward compatibility (can be removed if not used elsewhere)
-    FLOAT_SMALL_FORCE: 200,
-    FLOAT_MEDIUM_FORCE: 450,
-    FLOAT_LARGE_FORCE: 1200,
-    FLOAT_SMALL_THRESHOLD: 0.05,
-    FLOAT_MEDIUM_THRESHOLD: 0.15,
-    FLOAT_VERTICAL_FORCE: 50,
+
     
     // Wind effects
     WIND_CHANGE_INTERVAL: 0.3,
@@ -101,8 +94,8 @@ export const Constants = {
     HEIGHT: 100,
     
     // Default spawn position offsets
-    DEFAULT_X_OFFSET: 50,
-    DEFAULT_Y_OFFSET: 100
+    DEFAULT_X_OFFSET: 200,
+    DEFAULT_Y_OFFSET: 200
   },
   
   // Animation timing
