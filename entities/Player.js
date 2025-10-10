@@ -33,6 +33,10 @@ export class Player {
     this.floatCurrentSpeed = 0;
     this.keyPressStart = {};
     this.keyPressStartTime = 0;
+    
+    // Vertical float movement effect
+    this.floatVerticalOffset = 0;
+    this.floatVerticalVelocity = 0;
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
@@ -136,6 +140,7 @@ export class Player {
     // Update position with bounds checking
     this.x += this.vx * dt;
     this.y += this.vy * dt;
+    
     CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
   }
 
@@ -184,6 +189,10 @@ export class Player {
     this.floatDirection.y = 0; // Not used for movement anymore
     this.floatInitialSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
     this.floatCurrentSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
+    
+    // Initialize vertical float effect - quick upward movement at start
+    this.floatVerticalOffset = 0;
+    this.floatVerticalVelocity = -300; // Initial upward velocity (negative Y is up)
   }
 
   updateFloatEffects(dt, levelConfig) {
@@ -234,6 +243,8 @@ export class Player {
           this.floatActive = false;
           this.vx = 0;
           this.vy = 0;
+          this.floatVerticalOffset = 0;
+          this.floatVerticalVelocity = 0;
           // Clear any pending key presses to prevent immediate new float
           this.keyPressStart = {};
         } else {
@@ -253,6 +264,14 @@ export class Player {
           }
           
           this.floatCurrentSpeed = this.floatInitialSpeed * speedMultiplier;
+          
+          // Update vertical float effect
+          // Apply gravity-like effect to bring player back down
+          this.floatVerticalVelocity += 800 * dt; // Gravity acceleration downward
+          this.floatVerticalOffset += this.floatVerticalVelocity * dt;
+          
+          // Apply damping to prevent oscillation
+          this.floatVerticalVelocity *= 0.95;
         }
       }
     }
@@ -327,6 +346,8 @@ export class Player {
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
+    this.floatVerticalOffset = 0;
+    this.floatVerticalVelocity = 0;
     this.animator.setState('default');
   }
 
@@ -336,6 +357,14 @@ export class Player {
    */
   getCurrentFrame() {
     return this.animator.getCurrentFrame();
+  }
+
+  /**
+   * Get the effective Y position including vertical float effect
+   * @returns {number} Y position with float effect applied
+   */
+  getEffectiveY() {
+    return this.y + this.floatVerticalOffset;
   }
 
   /**

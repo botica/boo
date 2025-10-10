@@ -85,7 +85,7 @@ export class Renderer {
     this.drawSprite(
       currentSprite,
       player.x,
-      player.y,
+      player.getEffectiveY(),
       player.width,
       player.height,
       options
