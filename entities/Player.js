@@ -11,32 +11,31 @@ export class Player {
     this.canvas = canvas;
     this.assetManager = assetManager;
     
-    // Position and movement
+    // ===== BASIC PROPERTIES =====
     this.x = 0;
     this.y = 0;
     this.vx = 0;
     this.vy = 0;
     this.width = Constants.PLAYER.WIDTH;
     this.height = Constants.PLAYER.HEIGHT;
-    
-    // Movement properties
-    this.speed = Constants.PLAYER.SPEED;
-    this.accel = Constants.PLAYER.ACCEL;
     this.facing = 'right';
     
-    // Float effects
+    // ===== FLOAT SYSTEM =====
     this.floatTimer = 0;
     this.floatActive = false;
-    this.floatForce = 0;
     this.floatDirection = { x: 0, y: 0 };
     this.floatInitialSpeed = 0;
     this.floatCurrentSpeed = 0;
+    this.floatMode = 'small';
+    this.floatKey = null;
     this.keyPressStart = {};
-    this.keyPressStartTime = 0;
+    this.totalHoldDuration = undefined;
     
-    // Vertical float movement effect
+    // ===== VERTICAL FLOAT EFFECT =====
     this.floatVerticalOffset = 0;
     this.floatVerticalVelocity = 0;
+    
+    // ===== WIND SYSTEM =====
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
@@ -52,6 +51,8 @@ export class Player {
     this.animator = new AnimatedEntity(states, 'default');
   }
 
+  // =================== MAIN UPDATE METHODS ===================
+  
   /**
    * Update player logic
    * @param {number} dt - Delta time in seconds
@@ -61,10 +62,8 @@ export class Player {
    * @param {boolean} animationInProgress - Whether animation is playing
    */
   update(dt, input, levelConfig, interactionActive, animationInProgress) {
-    // Update animation
     this.animator.update(dt);
 
-    // Handle movement when not in interaction or animation
     if (!interactionActive && !animationInProgress) {
       this.updateMovement(dt, input, levelConfig);
       this.updateAnimationState();
@@ -75,104 +74,80 @@ export class Player {
   }
 
   updateMovement(dt, input, levelConfig) {
-    // Update float effects
     this.updateFloatEffects(dt, levelConfig);
-    
-    // Update wind effects
     this.updateWindEffects(dt, levelConfig);
-    
-    // Handle input for float system
     this.handleFloatInput(input);
+    this.handleVerticalMovement(input);
+    this.updatePosition(dt);
+  }
 
-    // Apply float velocity if active
-    if (this.floatActive) {
-      // Horizontal movement from float system
-      this.vx = this.floatDirection.x * this.floatCurrentSpeed;
-      
-      // Vertical movement with inertia
-      let inputY = 0;
-      if (input.keys['ArrowUp']) inputY -= 1;
-      if (input.keys['ArrowDown']) inputY += 1;
-      
-      // Calculate target velocity
-      let targetVy = 0;
-      if (inputY !== 0) {
-        targetVy = inputY * Constants.PLAYER.VERTICAL_SPEED;
-      }
-      
-      // Apply inertia - instantly reach target when key pressed, gradually slow when released
-      if (inputY !== 0) {
-        this.vy = targetVy; // Instant response when key is pressed
-      } else {
-        this.vy *= Constants.PLAYER.VERTICAL_INERTIA; // Gradual slowdown when key released
-      }
-      
-      // Note: Bounds checking temporarily disabled to test float movement
-      // The existing CollisionDetector.clampToBounds will handle final positioning
+  // =================== MOVEMENT HANDLING ===================
+  
+  handleVerticalMovement(input) {
+    let inputY = 0;
+    if (input.keys['ArrowUp']) inputY -= 1;
+    if (input.keys['ArrowDown']) inputY += 1;
+    
+    let targetVy = 0;
+    if (inputY !== 0) {
+      targetVy = inputY * Constants.PLAYER.VERTICAL_SPEED;
+    }
+    
+    // Apply inertia
+    if (inputY !== 0) {
+      this.vy = targetVy; // Instant response when key is pressed
     } else {
-      // Normal movement when not floating - only vertical movement allowed
-      // Horizontal movement is handled exclusively by the float system
-      let inputX = 0, inputY = 0;
-      if (input.keys['ArrowUp']) inputY -= 1;
-      if (input.keys['ArrowDown']) inputY += 1;
-      // Note: ArrowLeft and ArrowRight are not processed for regular movement
+      this.vy *= Constants.PLAYER.VERTICAL_INERTIA; // Gradual slowdown when key released
+    }
+  }
 
-      // Calculate target velocity (only vertical) - with inertia
-      let targetVx = 0, targetVy = 0;
-      if (inputY !== 0) {
-        targetVy = inputY * Constants.PLAYER.VERTICAL_SPEED;
-      }
-
-      // Set horizontal velocity directly, apply inertia to vertical
-      this.vx = targetVx;
-      if (inputY !== 0) {
-        this.vy = targetVy; // Instant response when key is pressed
-      } else {
-        this.vy *= Constants.PLAYER.VERTICAL_INERTIA; // Gradual slowdown when key released
-      }
+  updatePosition(dt) {
+    // Set horizontal velocity from float system
+    if (this.floatActive) {
+      this.vx = this.floatDirection.x * this.floatCurrentSpeed;
+    } else {
+      this.vx = 0; // No horizontal movement when not floating
     }
 
-    // Apply wind effect to position
+    // Apply wind effect
     this.x += this.windVx * dt;
     this.y += this.windVy * dt;
 
-    // Update position with bounds checking
+    // Update position
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     
-    // Custom bounds checking that accounts for vertical float offset
+    this.applyBoundsChecking();
+  }
+
+  applyBoundsChecking() {
     if (this.floatActive && this.floatVerticalOffset !== 0) {
-      // Check if the visual position (with float effect) would go out of bounds
+      // Custom bounds checking for float effect
       const effectiveY = this.y + this.floatVerticalOffset;
       const halfH = this.height / 2;
       
-      // If visual position would be above screen, adjust base position
       if (effectiveY - halfH < 0) {
         this.y = halfH - this.floatVerticalOffset;
-      }
-      // If visual position would be below screen, adjust base position  
-      else if (effectiveY + halfH > this.canvas.height) {
+      } else if (effectiveY + halfH > this.canvas.height) {
         this.y = this.canvas.height - halfH - this.floatVerticalOffset;
       }
       
-      // Still apply normal horizontal bounds checking
+      // Horizontal bounds
       const halfW = this.width / 2;
       this.x = Math.max(halfW, Math.min(this.canvas.width - halfW, this.x));
     } else {
-      // Normal bounds checking when not floating
+      // Normal bounds checking
       CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
     }
   }
 
+  // =================== FLOAT SYSTEM ===================
+  
   handleFloatInput(input) {
-    const currentTime = Date.now() / 1000; // Convert to seconds
+    const currentTime = this.getCurrentTime();
     
     // Update facing direction based on current key presses
-    if (input.keys['ArrowLeft']) {
-      this.facing = 'left';
-    } else if (input.keys['ArrowRight']) {
-      this.facing = 'right';
-    }
+    this.updateFacingDirection(input);
     
     // Check for new key presses - start float immediately
     ['ArrowLeft', 'ArrowRight'].forEach(key => {
@@ -188,6 +163,18 @@ export class Player {
         this.keyPressStart[key] = null;
       }
     });
+  }
+  
+  updateFacingDirection(input) {
+    if (input.keys['ArrowLeft']) {
+      this.facing = 'left';
+    } else if (input.keys['ArrowRight']) {
+      this.facing = 'right';
+    }
+  }
+  
+  getCurrentTime() {
+    return Date.now() / Constants.PLAYER.TIME_SCALE;
   }
 
   startFloat(key, mode) {
@@ -221,91 +208,111 @@ export class Player {
         this.floatTimer += dt;
         
         // Check if key is still held to determine if we should extend the float
-        const currentTime = Date.now() / 1000;
+        const currentTime = this.getCurrentTime();
         const keyStillHeld = this.keyPressStart[this.floatKey] !== null;
         
         // Use total hold duration (either ongoing or stored from key release)
-        let holdDuration;
-        if (keyStillHeld) {
-          holdDuration = currentTime - this.keyPressStart[this.floatKey];
-        } else if (this.totalHoldDuration !== undefined) {
-          holdDuration = this.totalHoldDuration;
-        } else {
-          holdDuration = 0;
-        }
+        const holdDuration = this.calculateHoldDuration(currentTime, keyStillHeld);
         
         // Determine current float mode based on how long key was/is held
-        let targetMode = 'small';
-        let targetForce = Constants.PLAYER.FLOAT_TIERS.small.force;
+        const { targetMode, targetForce } = this.determineFloatTier(holdDuration);
         const targetDuration = Constants.PLAYER.FLOAT_DURATION; // Same duration for all
         
-        // Check tiers in descending order to find the appropriate tier
-        if (holdDuration > Constants.PLAYER.FLOAT_TIERS.large.threshold) {
-          targetMode = 'large';
-          targetForce = Constants.PLAYER.FLOAT_TIERS.large.force;
-        }
-        // Note: small tier is the default (targetMode = 'small', targetForce = small.force)
-        
         // Smoothly transition to new force if mode changed
-        if (targetMode !== this.floatMode) {
-          this.floatMode = targetMode;
-          // Smoothly interpolate to new force instead of jumping immediately
-          this.floatInitialSpeed = targetForce;
-          // Don't update floatCurrentSpeed immediately - let it interpolate below
-        }
-        
-        // Smooth interpolation towards target force
-        const interpolationSpeed = Constants.PLAYER.FLOAT_TIER_INTERPOLATION_SPEED;
-        const speedDifference = targetForce - this.floatCurrentSpeed;
-        const maxChange = interpolationSpeed * dt;
-        
-        if (Math.abs(speedDifference) > maxChange) {
-          this.floatCurrentSpeed += Math.sign(speedDifference) * maxChange;
-        } else {
-          this.floatCurrentSpeed = targetForce;
-        }
+        this.updateFloatMode(targetMode, targetForce, dt);
         
         // Calculate completion based on target duration
         const progress = this.floatTimer / targetDuration;
         if (progress >= 1.0) {
-          // Float is complete
-          this.floatActive = false;
-          this.vx = 0;
-          this.vy = 0;
-          this.floatVerticalOffset = 0;
-          this.floatVerticalVelocity = 0;
-          // Clear any pending key presses to prevent immediate new float
-          this.keyPressStart = {};
+          this.endFloat();
         } else {
-          // Start at full speed immediately, then slow down after a period
-          // Maintain full speed for first portion, then decelerate
-          let speedMultiplier;
-          if (progress < Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) {
-            // Full speed for first portion of duration
-            speedMultiplier = 1.0;
-          } else {
-            // After full speed period, use steep deceleration
-            const decelerateProgress = (progress - Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) / 
-                                      Constants.PLAYER.FLOAT_DECELERATION_RATIO; // Normalize remaining time
-            const easeFactor = Math.pow(1 - decelerateProgress, 2); // Quadratic ease-out
-            speedMultiplier = Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR + 
-                             (1 - Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR) * easeFactor;
-          }
-          
-          this.floatCurrentSpeed = this.floatInitialSpeed * speedMultiplier;
-          
-          // Update vertical float effect
-          // Apply gravity-like effect to bring player back down
-          this.floatVerticalVelocity += Constants.PLAYER.FLOAT_VERTICAL_GRAVITY * dt;
-          this.floatVerticalOffset += this.floatVerticalVelocity * dt;
-          
-          // Apply damping to prevent oscillation
-          this.floatVerticalVelocity *= Constants.PLAYER.FLOAT_VERTICAL_DAMPING;
+          this.updateFloatSpeed(progress);
+          this.updateVerticalFloatEffect(dt);
         }
       }
     }
   }
+  
+  calculateHoldDuration(currentTime, keyStillHeld) {
+    if (keyStillHeld) {
+      return currentTime - this.keyPressStart[this.floatKey];
+    } else if (this.totalHoldDuration !== undefined) {
+      return this.totalHoldDuration;
+    }
+    return 0;
+  }
+  
+  determineFloatTier(holdDuration) {
+    let targetMode = 'small';
+    let targetForce = Constants.PLAYER.FLOAT_TIERS.small.force;
+    
+    // Check tiers in descending order to find the appropriate tier
+    if (holdDuration > Constants.PLAYER.FLOAT_TIERS.large.threshold) {
+      targetMode = 'large';
+      targetForce = Constants.PLAYER.FLOAT_TIERS.large.force;
+    }
+    
+    return { targetMode, targetForce };
+  }
+  
+  updateFloatMode(targetMode, targetForce, dt) {
+    // Smoothly transition to new force if mode changed
+    if (targetMode !== this.floatMode) {
+      this.floatMode = targetMode;
+      this.floatInitialSpeed = targetForce;
+    }
+    
+    // Smooth interpolation towards target force
+    const interpolationSpeed = Constants.PLAYER.FLOAT_TIER_INTERPOLATION_SPEED;
+    const speedDifference = targetForce - this.floatCurrentSpeed;
+    const maxChange = interpolationSpeed * dt;
+    
+    if (Math.abs(speedDifference) > maxChange) {
+      this.floatCurrentSpeed += Math.sign(speedDifference) * maxChange;
+    } else {
+      this.floatCurrentSpeed = targetForce;
+    }
+  }
+  
+  updateFloatSpeed(progress) {
+    // Start at full speed immediately, then slow down after a period
+    let speedMultiplier;
+    if (progress < Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) {
+      // Full speed for first portion of duration
+      speedMultiplier = 1.0;
+    } else {
+      // After full speed period, use steep deceleration
+      const decelerateProgress = (progress - Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) / 
+                                Constants.PLAYER.FLOAT_DECELERATION_RATIO;
+      const easeFactor = Math.pow(1 - decelerateProgress, 2); // Quadratic ease-out
+      speedMultiplier = Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR + 
+                       (1 - Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR) * easeFactor;
+    }
+    
+    this.floatCurrentSpeed = this.floatInitialSpeed * speedMultiplier;
+  }
+  
+  updateVerticalFloatEffect(dt) {
+    // Apply gravity-like effect to bring player back down
+    this.floatVerticalVelocity += Constants.PLAYER.FLOAT_VERTICAL_GRAVITY * dt;
+    this.floatVerticalOffset += this.floatVerticalVelocity * dt;
+    
+    // Apply damping to prevent oscillation
+    this.floatVerticalVelocity *= Constants.PLAYER.FLOAT_VERTICAL_DAMPING;
+  }
+  
+  endFloat() {
+    this.floatActive = false;
+    this.vx = 0;
+    this.vy = 0;
+    this.floatVerticalOffset = 0;
+    this.floatVerticalVelocity = 0;
+    // Clear any pending key presses to prevent immediate new float
+    this.keyPressStart = {};
+  }
 
+  // =================== WIND SYSTEM ===================
+  
   updateWindEffects(dt, levelConfig) {
     if (levelConfig && levelConfig.hasWind) {
       this.windTimer += dt;
@@ -345,8 +352,11 @@ export class Player {
     }
   }
 
+  // =================== ANIMATION & UTILITY METHODS ===================
+  
   updateAnimationState() {
-    const playerIsMoving = Math.abs(this.vx) > 0.001 || Math.abs(this.vy) > 0.001;
+    const playerIsMoving = Math.abs(this.vx) > Constants.PLAYER.MOVEMENT_THRESHOLD || 
+                          Math.abs(this.vy) > Constants.PLAYER.MOVEMENT_THRESHOLD;
     if (playerIsMoving && this.animator.currentState === 'default') {
       this.animator.setState('moving');
     } else if (!playerIsMoving && this.animator.currentState === 'moving') {
@@ -358,25 +368,34 @@ export class Player {
    * Reset player to initial state
    */
   reset() {
+    // Position and basic movement
     this.x = this.canvas.width - this.width/2 - Constants.PLAYER.SPAWN_OFFSET_X;
     this.y = this.height/2 + Constants.PLAYER.SPAWN_OFFSET_Y;
     this.vx = 0;
     this.vy = 0;
     this.facing = 'right';
+    
+    // Float system
     this.floatTimer = 0;
     this.floatActive = false;
-    this.floatForce = 0;
     this.floatDirection = { x: 0, y: 0 };
     this.floatInitialSpeed = 0;
     this.floatCurrentSpeed = 0;
     this.floatMode = 'small';
     this.floatKey = null;
     this.keyPressStart = {};
+    this.totalHoldDuration = undefined;
+    
+    // Vertical float effect
+    this.floatVerticalOffset = 0;
+    this.floatVerticalVelocity = 0;
+    
+    // Wind system
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
-    this.floatVerticalOffset = 0;
-    this.floatVerticalVelocity = 0;
+    
+    // Animation
     this.animator.setState('default');
   }
 

@@ -41,6 +41,12 @@ export const Constants = {
     FLOAT_VERTICAL_GRAVITY: 400, // Downward acceleration
     FLOAT_VERTICAL_DAMPING: 0.88, // Velocity damping to prevent oscillation
     
+    // Movement detection threshold
+    MOVEMENT_THRESHOLD: 0.001, // Minimum velocity to be considered "moving"
+    
+    // Time calculation
+    TIME_SCALE: 1000, // Milliseconds to seconds conversion
+    
     // ===== WIND SYSTEM =====
     WIND_CHANGE_INTERVAL: 0.3,
     WIND_INERTIA: 0.7,
