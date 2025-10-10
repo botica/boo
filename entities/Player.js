@@ -192,7 +192,7 @@ export class Player {
     
     // Initialize vertical float effect - quick upward movement at start
     this.floatVerticalOffset = 0;
-    this.floatVerticalVelocity = -300; // Initial upward velocity (negative Y is up)
+    this.floatVerticalVelocity = Constants.PLAYER.FLOAT_VERTICAL_INITIAL_VELOCITY;
   }
 
   updateFloatEffects(dt, levelConfig) {
@@ -267,11 +267,11 @@ export class Player {
           
           // Update vertical float effect
           // Apply gravity-like effect to bring player back down
-          this.floatVerticalVelocity += 800 * dt; // Gravity acceleration downward
+          this.floatVerticalVelocity += Constants.PLAYER.FLOAT_VERTICAL_GRAVITY * dt;
           this.floatVerticalOffset += this.floatVerticalVelocity * dt;
           
           // Apply damping to prevent oscillation
-          this.floatVerticalVelocity *= 0.95;
+          this.floatVerticalVelocity *= Constants.PLAYER.FLOAT_VERTICAL_DAMPING;
         }
       }
     }

@@ -22,22 +22,26 @@ export const Constants = {
     // Float tier system - 3 tiers based on key hold duration
     FLOAT_TIERS: {
       small: {
-        force: 100,
+        force: 333,
         threshold: 0, // Always available
         holdDurationMax: 0.04 // Up to 0.05s hold
       },
       medium: {
-        force: 600,
+        force: 1000,
         threshold: 0.05, // Requires > 0.05s hold
-        holdDurationMax: 0.2 // Up to 0.2s hold
+        holdDurationMax: 0.3 // Up to 0.2s hold
       },
       large: {
-        force: 1200,
+        force: 2200,
         threshold: 0.15, // Requires > 0.15s hold
         holdDurationMax: Infinity // Any hold > 0.15s
       }
     },
 
+    // Vertical float effect constants
+    FLOAT_VERTICAL_INITIAL_VELOCITY: -400, // Initial upward velocity (negative Y is up)
+    FLOAT_VERTICAL_GRAVITY: 1000, // Downward acceleration
+    FLOAT_VERTICAL_DAMPING: 0.95, // Velocity damping to prevent oscillation
     
     // Wind effects
     WIND_CHANGE_INTERVAL: 0.3,
