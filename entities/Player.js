@@ -243,10 +243,8 @@ export class Player {
         if (holdDuration > Constants.PLAYER.FLOAT_TIERS.large.threshold) {
           targetMode = 'large';
           targetForce = Constants.PLAYER.FLOAT_TIERS.large.force;
-        } else if (holdDuration > Constants.PLAYER.FLOAT_TIERS.medium.threshold) {
-          targetMode = 'medium';
-          targetForce = Constants.PLAYER.FLOAT_TIERS.medium.force;
         }
+        // Note: small tier is the default (targetMode = 'small', targetForce = small.force)
         
         // Smoothly transition to new force if mode changed
         if (targetMode !== this.floatMode) {

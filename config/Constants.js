@@ -2,53 +2,46 @@
  * Game constants for physics, timing, and visual properties
  */
 export const Constants = {
-  // Player properties
+  // =================== PLAYER CONSTANTS ===================
   PLAYER: {
+    // Basic properties
     WIDTH: 150,
     HEIGHT: 150,
-    SPEED: 800,
-    VERTICAL_SPEED: 300, // Independent vertical movement speed
-    VERTICAL_INERTIA: 0.96, // How much vertical velocity is retained when key is released (0.0 = instant stop, 1.0 = no slowdown)
-    ACCEL: 3000,
     
     // Spawn position
     SPAWN_OFFSET_X: 10,
     SPAWN_OFFSET_Y: 10,
     
-    // Float effects - timing and speed curve
-    FLOAT_DURATION: 0.5,
-    FLOAT_SLOWDOWN_FACTOR: 0.2,
-    FLOAT_FULL_SPEED_RATIO: 0.3, // Maintain full speed for first 30% of duration
-    FLOAT_DECELERATION_RATIO: 0.7, // Decelerate during remaining 70%
+    // Movement speeds
+    VERTICAL_SPEED: 150,
+    ACCEL: 1500,
+    VERTICAL_INERTIA: 0.97, // How much vertical velocity is retained when key is released
+
     
-    // Float tier system - 3 tiers based on key hold duration
+    // Float tier system - 2 tiers based on key hold duration
     FLOAT_TIERS: {
       small: {
-        force: 300,
+        force: 250,
         threshold: 0, // Always available
-        holdDurationMax: 0.04 // Up to 0.05s hold
-      },
-      medium: {
-        force: 800,
-        threshold: 0.06, // Requires > 0.05s hold
-        holdDurationMax: 0.3 // Up to 0.2s hold
+        holdDurationMax: 0.075
       },
       large: {
-        force: 1700,
-        threshold: 0.2, // Requires > 0.15s hold
-        holdDurationMax: Infinity // Any hold > 0.15s
+        force: 750,
+        threshold: 0.1, // Requires > 0.1s hold
+        holdDurationMax: Infinity
       }
     },
 
-    // Vertical float effect constants
-    FLOAT_VERTICAL_INITIAL_VELOCITY: -400, // Initial upward velocity (negative Y is up)
-    FLOAT_VERTICAL_GRAVITY: 1000, // Downward acceleration
-    FLOAT_VERTICAL_DAMPING: 0.95, // Velocity damping to prevent oscillation
+    FLOAT_DURATION: 0.4,
+    FLOAT_SLOWDOWN_FACTOR: 0.5,
+    FLOAT_FULL_SPEED_RATIO: 0.3, // Maintain full speed for first 30% of duration
+    FLOAT_DECELERATION_RATIO: 0.7, // Decelerate during remaining 70%
+    FLOAT_TIER_INTERPOLATION_SPEED: 600, // How fast to transition between tiers (pixels/second)
+    FLOAT_VERTICAL_INITIAL_VELOCITY: -200, // Initial upward velocity (negative Y is up)
+    FLOAT_VERTICAL_GRAVITY: 400, // Downward acceleration
+    FLOAT_VERTICAL_DAMPING: 0.88, // Velocity damping to prevent oscillation
     
-    // Float tier transition constants
-    FLOAT_TIER_INTERPOLATION_SPEED: 2000, // How fast to transition between tiers (pixels/second)
-    
-    // Wind effects
+    // ===== WIND SYSTEM =====
     WIND_CHANGE_INTERVAL: 0.3,
     WIND_INERTIA: 0.7,
     WIND_DECAY: 0.998,
@@ -62,7 +55,7 @@ export const Constants = {
     WIND_Y_FACTOR: 0.3
   },
   
-  // Person properties
+  // =================== OTHER ENTITY CONSTANTS ===================
   PERSON: {
     WIDTH: 150,
     HEIGHT: 150,
@@ -80,27 +73,21 @@ export const Constants = {
     SPAWN_OFFSET_Y: 10
   },
   
-  // Moon properties
   MOON: {
     WIDTH: 100,
     HEIGHT: 100,
-    
-    // Position offsets
     OFFSET_X: 20,
     OFFSET_Y: 20
   },
   
-  // Tree properties
   TREE: {
     WIDTH: 100,
     HEIGHT: 100,
-    
-    // Default spawn position offsets
     DEFAULT_X_OFFSET: 200,
     DEFAULT_Y_OFFSET: 200
   },
   
-  // Animation timing
+  // =================== VISUAL & UI CONSTANTS ===================
   ANIMATION: {
     DEFAULT_FRAME_INTERVAL: 0.4,
     ANGRY_FRAME_COUNT: 4,
@@ -111,7 +98,6 @@ export const Constants = {
     BOO_TEXT_DURATION: 1500 // Maximum time BOO text shows (ms)
   },
   
-  // UI sizing
   UI: {
     MIN_CANVAS_WIDTH: 320,
     MIN_CANVAS_HEIGHT: 240,
@@ -126,12 +112,6 @@ export const Constants = {
     PROGRESS_MARGIN: 40
   },
   
-  // Touch interaction
-  TOUCH: {
-    CLICK_DURATION: 120 // ms
-  },
-  
-  // Visual effects
   BOO_TEXT: {
     OFFSET_Y: 60,
     FONT_SIZE: 48
@@ -144,5 +124,10 @@ export const Constants = {
     ASPECT_RATIO: 16/10, // 16:10 aspect ratio for good gameplay space
     get MIN_HEIGHT() { return Math.round(this.MIN_WIDTH / this.ASPECT_RATIO); },
     get MAX_HEIGHT() { return Math.round(this.MAX_WIDTH / this.ASPECT_RATIO); }
+  },
+  
+  // =================== INPUT CONSTANTS ===================
+  TOUCH: {
+    CLICK_DURATION: 120 // ms
   }
 };
