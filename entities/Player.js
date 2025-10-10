@@ -140,7 +140,28 @@ export class Player {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     
-    CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
+    // Custom bounds checking that accounts for vertical float offset
+    if (this.floatActive && this.floatVerticalOffset !== 0) {
+      // Check if the visual position (with float effect) would go out of bounds
+      const effectiveY = this.y + this.floatVerticalOffset;
+      const halfH = this.height / 2;
+      
+      // If visual position would be above screen, adjust base position
+      if (effectiveY - halfH < 0) {
+        this.y = halfH - this.floatVerticalOffset;
+      }
+      // If visual position would be below screen, adjust base position  
+      else if (effectiveY + halfH > this.canvas.height) {
+        this.y = this.canvas.height - halfH - this.floatVerticalOffset;
+      }
+      
+      // Still apply normal horizontal bounds checking
+      const halfW = this.width / 2;
+      this.x = Math.max(halfW, Math.min(this.canvas.width - halfW, this.x));
+    } else {
+      // Normal bounds checking when not floating
+      CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
+    }
   }
 
   handleFloatInput(input) {
