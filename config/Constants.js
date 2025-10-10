@@ -40,6 +40,7 @@ export const Constants = {
     FLOAT_VERTICAL_INITIAL_VELOCITY: -200, // Initial upward velocity (negative Y is up)
     FLOAT_VERTICAL_GRAVITY: 400, // Downward acceleration
     FLOAT_VERTICAL_DAMPING: 0.88, // Velocity damping to prevent oscillation
+    FLOAT_HORIZONTAL_INERTIA: 0.94, // Horizontal velocity decay after float ends (higher = slower decay, more pronounced glide)
     
     // Movement detection threshold
     MOVEMENT_THRESHOLD: 0.001, // Minimum velocity to be considered "moving"

@@ -30,6 +30,7 @@ export class Player {
     this.floatKey = null;
     this.keyPressStart = {};
     this.totalHoldDuration = undefined;
+    this.floatResidualVx = 0; // Horizontal velocity that persists after float ends
     
     // ===== VERTICAL FLOAT EFFECT =====
     this.floatVerticalOffset = 0;
@@ -105,8 +106,11 @@ export class Player {
     // Set horizontal velocity from float system
     if (this.floatActive) {
       this.vx = this.floatDirection.x * this.floatCurrentSpeed;
+      this.floatResidualVx = this.vx; // Store current velocity for inertia after float ends
     } else {
-      this.vx = 0; // No horizontal movement when not floating
+      // Apply inertia to residual float velocity (gradual slowdown)
+      this.floatResidualVx *= Constants.PLAYER.FLOAT_HORIZONTAL_INERTIA;
+      this.vx = this.floatResidualVx;
     }
 
     // Apply wind effect
@@ -303,7 +307,7 @@ export class Player {
   
   endFloat() {
     this.floatActive = false;
-    this.vx = 0;
+    // Don't zero vx immediately - let inertia handle the deceleration
     this.vy = 0;
     this.floatVerticalOffset = 0;
     this.floatVerticalVelocity = 0;
@@ -385,6 +389,7 @@ export class Player {
     this.floatKey = null;
     this.keyPressStart = {};
     this.totalHoldDuration = undefined;
+    this.floatResidualVx = 0;
     
     // Vertical float effect
     this.floatVerticalOffset = 0;
