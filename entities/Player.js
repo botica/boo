@@ -89,22 +89,23 @@ export class Player {
       // Horizontal movement from float system
       this.vx = this.floatDirection.x * this.floatCurrentSpeed;
       
-      // Vertical movement with acceleration (same as normal movement)
+      // Vertical movement with inertia
       let inputY = 0;
       if (input.keys['ArrowUp']) inputY -= 1;
       if (input.keys['ArrowDown']) inputY += 1;
       
-      // Calculate target vertical velocity 
+      // Calculate target velocity
       let targetVy = 0;
       if (inputY !== 0) {
-        targetVy = inputY * this.speed;
+        targetVy = inputY * Constants.PLAYER.VERTICAL_SPEED;
       }
       
-      // Apply acceleration to vertical movement
-      const maxDelta = this.accel * dt;
-      const dvy = targetVy - this.vy;
-      if (Math.abs(dvy) > maxDelta) this.vy += Math.sign(dvy) * maxDelta;
-      else this.vy = targetVy;
+      // Apply inertia - instantly reach target when key pressed, gradually slow when released
+      if (inputY !== 0) {
+        this.vy = targetVy; // Instant response when key is pressed
+      } else {
+        this.vy *= Constants.PLAYER.VERTICAL_INERTIA; // Gradual slowdown when key released
+      }
       
       // Note: Bounds checking temporarily disabled to test float movement
       // The existing CollisionDetector.clampToBounds will handle final positioning
@@ -116,21 +117,19 @@ export class Player {
       if (input.keys['ArrowDown']) inputY += 1;
       // Note: ArrowLeft and ArrowRight are not processed for regular movement
 
-      // Calculate target velocity (only vertical)
+      // Calculate target velocity (only vertical) - with inertia
       let targetVx = 0, targetVy = 0;
       if (inputY !== 0) {
-        targetVy = inputY * this.speed;
+        targetVy = inputY * Constants.PLAYER.VERTICAL_SPEED;
       }
 
-      // Apply acceleration
-      const maxDelta = this.accel * dt;
-      const dvx = targetVx - this.vx;
-      const dvy = targetVy - this.vy;
-      
-      if (Math.abs(dvx) > maxDelta) this.vx += Math.sign(dvx) * maxDelta;
-      else this.vx = targetVx;
-      if (Math.abs(dvy) > maxDelta) this.vy += Math.sign(dvy) * maxDelta;
-      else this.vy = targetVy;
+      // Set horizontal velocity directly, apply inertia to vertical
+      this.vx = targetVx;
+      if (inputY !== 0) {
+        this.vy = targetVy; // Instant response when key is pressed
+      } else {
+        this.vy *= Constants.PLAYER.VERTICAL_INERTIA; // Gradual slowdown when key released
+      }
     }
 
     // Apply wind effect to position
@@ -231,8 +230,19 @@ export class Player {
         // Smoothly transition to new force if mode changed
         if (targetMode !== this.floatMode) {
           this.floatMode = targetMode;
-          // Update the force immediately
+          // Smoothly interpolate to new force instead of jumping immediately
           this.floatInitialSpeed = targetForce;
+          // Don't update floatCurrentSpeed immediately - let it interpolate below
+        }
+        
+        // Smooth interpolation towards target force
+        const interpolationSpeed = Constants.PLAYER.FLOAT_TIER_INTERPOLATION_SPEED;
+        const speedDifference = targetForce - this.floatCurrentSpeed;
+        const maxChange = interpolationSpeed * dt;
+        
+        if (Math.abs(speedDifference) > maxChange) {
+          this.floatCurrentSpeed += Math.sign(speedDifference) * maxChange;
+        } else {
           this.floatCurrentSpeed = targetForce;
         }
         

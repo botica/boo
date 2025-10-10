@@ -7,6 +7,8 @@ export const Constants = {
     WIDTH: 150,
     HEIGHT: 150,
     SPEED: 800,
+    VERTICAL_SPEED: 300, // Independent vertical movement speed
+    VERTICAL_INERTIA: 0.96, // How much vertical velocity is retained when key is released (0.0 = instant stop, 1.0 = no slowdown)
     ACCEL: 3000,
     
     // Spawn position
@@ -22,18 +24,18 @@ export const Constants = {
     // Float tier system - 3 tiers based on key hold duration
     FLOAT_TIERS: {
       small: {
-        force: 333,
+        force: 300,
         threshold: 0, // Always available
         holdDurationMax: 0.04 // Up to 0.05s hold
       },
       medium: {
-        force: 1000,
-        threshold: 0.05, // Requires > 0.05s hold
+        force: 800,
+        threshold: 0.06, // Requires > 0.05s hold
         holdDurationMax: 0.3 // Up to 0.2s hold
       },
       large: {
-        force: 2200,
-        threshold: 0.15, // Requires > 0.15s hold
+        force: 1700,
+        threshold: 0.2, // Requires > 0.15s hold
         holdDurationMax: Infinity // Any hold > 0.15s
       }
     },
@@ -42,6 +44,9 @@ export const Constants = {
     FLOAT_VERTICAL_INITIAL_VELOCITY: -400, // Initial upward velocity (negative Y is up)
     FLOAT_VERTICAL_GRAVITY: 1000, // Downward acceleration
     FLOAT_VERTICAL_DAMPING: 0.95, // Velocity damping to prevent oscillation
+    
+    // Float tier transition constants
+    FLOAT_TIER_INTERPOLATION_SPEED: 2000, // How fast to transition between tiers (pixels/second)
     
     // Wind effects
     WIND_CHANGE_INTERVAL: 0.3,
