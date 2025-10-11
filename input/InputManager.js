@@ -7,48 +7,34 @@ import { TouchHandler } from './TouchHandler.js';
 import { ComboValidator } from './ComboValidator.js';
 
 export class InputManager {
-  constructor(assetManager = null) {
-    // Arrow keys for movement and combos
+  constructor() {
     this.arrowKeys = GameConfig.arrowKeys;
-    this.assetManager = assetManager;
     
-    // Initialize sub-systems
     this.keyboardHandler = new KeyboardHandler();
     this.keyboardHandler.initKeys(this.arrowKeys);
     
     this.comboValidator = new ComboValidator(this.keyboardHandler, this.arrowKeys);
     this.touchHandler = new TouchHandler(this.keyboardHandler);
     
-    // Cache UI element references
     this.tileEls = {};
     this.arrowEls = {};
     
-    // Current combo for visual feedback
     this.currentCombo = null;
     
     this.init();
   }
 
-  /**
-   * Initialize input system
-   */
   init() {
     this.bindKeyboardEvents();
     this.setupUIElements();
     this.bindTouchEvents();
   }
 
-  /**
-   * Bind keyboard event handlers
-   */
   bindKeyboardEvents() {
     window.addEventListener('keydown', (e) => this.handleKeyDown(e));
     window.addEventListener('keyup', (e) => this.handleKeyUp(e));
   }
 
-  /**
-   * Set up UI element references
-   */
   setupUIElements() {
     this.tileEls = {
       ArrowUp: document.getElementById('tile-up'),
@@ -61,55 +47,8 @@ export class InputManager {
       0: document.getElementById('arrow-1'),
       1: document.getElementById('arrow-2'),
     };
-
-    // No need to initialize tile images - they're already set in HTML
   }
 
-  /**
-   * Initialize small arrow tile images
-   */
-  initializeTileImages() {
-    for (const [key, element] of Object.entries(this.tileEls)) {
-      if (element) {
-        // Try to use preloaded images from AssetManager first
-        if (this.assetManager) {
-          const spriteKey = this.getArrowSpriteKey(key, 'small');
-          const sprite = this.assetManager.getSprite(spriteKey);
-          if (sprite) {
-            element.style.backgroundImage = `url('${sprite.src}')`;
-            element.style.backgroundSize = 'contain';
-            element.style.backgroundRepeat = 'no-repeat';
-            element.style.backgroundPosition = 'center';
-            element.textContent = ''; // Clear any text content
-            continue;
-          }
-        }
-        
-        // Fallback to direct path
-        if (GameConfig.arrowImages.small[key]) {
-          const imagePath = GameConfig.arrowImages.small[key];
-          element.style.backgroundImage = `url('${imagePath}')`;
-          element.style.backgroundSize = 'contain';
-          element.style.backgroundRepeat = 'no-repeat';
-          element.style.backgroundPosition = 'center';
-          element.textContent = ''; // Clear any text content
-        }
-      }
-    }
-  }
-
-  /**
-   * Get sprite key for arrow from AssetManager
-   */
-  getArrowSpriteKey(arrowKey, size) {
-    const direction = arrowKey.replace('Arrow', '').toLowerCase();
-    const sizeKey = size === 'large' ? 'Large' : 'Small';
-    return `arrow${direction.charAt(0).toUpperCase() + direction.slice(1)}${sizeKey}`;
-  }
-
-  /**
-   * Bind touch and click events to UI elements
-   */
   bindTouchEvents() {
     for (const [key, element] of Object.entries(this.tileEls)) {
       if (element) {

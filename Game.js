@@ -24,8 +24,8 @@ export class Game {
     this.assetManager = new AssetManager();
     this.renderer = new Renderer(this.canvas);
     this.gameState = new GameState();
-    this.uiManager = new UIManager(this.canvas, this.assetManager);
-    this.inputManager = new InputManager(this.assetManager);
+    this.uiManager = new UIManager(this.canvas);
+    this.inputManager = new InputManager();
     
     // Game entities (will be initialized after assets load)
     this.player = null;
@@ -161,9 +161,6 @@ export class Game {
     this.canvas.style.height = canvasHeight + 'px';
     
     console.log(`Canvas resized: ${canvasWidth}x${canvasHeight}`);
-    
-    // Update UI elements
-    this.uiManager.resizeElements();
   }
   
   /**
@@ -186,8 +183,6 @@ export class Game {
     this.canvas.height = canvasHeight;
     this.canvas.style.width = canvasWidth + 'px';
     this.canvas.style.height = canvasHeight + 'px';
-    
-    this.uiManager.resizeElements();
   }
 
   /**

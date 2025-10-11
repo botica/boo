@@ -11,7 +11,6 @@ export class Player {
     this.canvas = canvas;
     this.assetManager = assetManager;
     
-    // ===== BASIC PROPERTIES =====
     this.x = 0;
     this.y = 0;
     this.vx = 0;
@@ -20,7 +19,6 @@ export class Player {
     this.height = Constants.PLAYER.HEIGHT;
     this.facing = 'right';
     
-    // ===== FLOAT SYSTEM =====
     this.floatTimer = 0;
     this.floatActive = false;
     this.floatDirection = { x: 0, y: 0 };
@@ -30,19 +28,16 @@ export class Player {
     this.floatKey = null;
     this.keyPressStart = {};
     this.totalHoldDuration = undefined;
-    this.floatResidualVx = 0; // Horizontal velocity that persists after float ends
+    this.floatResidualVx = 0;
     
-    // ===== VERTICAL FLOAT EFFECT =====
     this.floatVerticalOffset = 0;
     this.floatVerticalVelocity = 0;
     
-    // ===== WIND SYSTEM =====
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
     this.windChangeInterval = Constants.PLAYER.WIND_CHANGE_INTERVAL;
     
-    // Initialize animation
     this.setupAnimation();
   }
 
@@ -52,16 +47,6 @@ export class Player {
     this.animator = new AnimatedEntity(states, 'default');
   }
 
-  // =================== MAIN UPDATE METHODS ===================
-  
-  /**
-   * Update player logic
-   * @param {number} dt - Delta time in seconds
-   * @param {Object} input - Input state
-   * @param {Object} levelConfig - Current level configuration
-   * @param {boolean} interactionActive - Whether player is in interaction mode
-   * @param {boolean} animationInProgress - Whether animation is playing
-   */
   update(dt, input, levelConfig, interactionActive, animationInProgress) {
     this.animator.update(dt);
 
@@ -82,8 +67,6 @@ export class Player {
     this.updatePosition(dt);
   }
 
-  // =================== MOVEMENT HANDLING ===================
-  
   handleVerticalMovement(input) {
     let inputY = 0;
     if (input.keys['ArrowUp']) inputY -= 1;
@@ -94,30 +77,25 @@ export class Player {
       targetVy = inputY * Constants.PLAYER.VERTICAL_SPEED;
     }
     
-    // Apply inertia
     if (inputY !== 0) {
-      this.vy = targetVy; // Instant response when key is pressed
+      this.vy = targetVy;
     } else {
-      this.vy *= Constants.PLAYER.VERTICAL_INERTIA; // Gradual slowdown when key released
+      this.vy *= Constants.PLAYER.VERTICAL_INERTIA;
     }
   }
 
   updatePosition(dt) {
-    // Set horizontal velocity from float system
     if (this.floatActive) {
       this.vx = this.floatDirection.x * this.floatCurrentSpeed;
-      this.floatResidualVx = this.vx; // Store current velocity for inertia after float ends
+      this.floatResidualVx = this.vx;
     } else {
-      // Apply inertia to residual float velocity (gradual slowdown)
       this.floatResidualVx *= Constants.PLAYER.FLOAT_HORIZONTAL_INERTIA;
       this.vx = this.floatResidualVx;
     }
 
-    // Apply wind effect
     this.x += this.windVx * dt;
     this.y += this.windVy * dt;
 
-    // Update position
     this.x += this.vx * dt;
     this.y += this.vy * dt;
     
@@ -126,7 +104,6 @@ export class Player {
 
   applyBoundsChecking() {
     if (this.floatActive && this.floatVerticalOffset !== 0) {
-      // Custom bounds checking for float effect
       const effectiveY = this.y + this.floatVerticalOffset;
       const halfH = this.height / 2;
       
@@ -136,31 +113,23 @@ export class Player {
         this.y = this.canvas.height - halfH - this.floatVerticalOffset;
       }
       
-      // Horizontal bounds
       const halfW = this.width / 2;
       this.x = Math.max(halfW, Math.min(this.canvas.width - halfW, this.x));
     } else {
-      // Normal bounds checking
       CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
     }
   }
 
-  // =================== FLOAT SYSTEM ===================
-  
   handleFloatInput(input) {
     const currentTime = this.getCurrentTime();
     
-    // Update facing direction based on current key presses
     this.updateFacingDirection(input);
     
-    // Check for new key presses - start float immediately
     ['ArrowLeft', 'ArrowRight'].forEach(key => {
       if (input.keys[key] && !this.keyPressStart[key] && !this.floatActive) {
-        // Key just pressed - start float immediately
         this.keyPressStart[key] = currentTime;
         this.startFloat(key, 'immediate');
       } else if (!input.keys[key] && this.keyPressStart[key]) {
-        // Key released - store the total hold duration for the current float
         if (this.floatActive && this.floatKey === key) {
           this.totalHoldDuration = currentTime - this.keyPressStart[key];
         }
@@ -185,20 +154,17 @@ export class Player {
     const direction = key === 'ArrowLeft' ? -1 : 1;
     this.facing = direction > 0 ? 'right' : 'left';
     
-    // Initialize float state
     this.floatActive = true;
     this.floatTimer = 0;
     this.floatMode = 'small';
     this.floatKey = key;
     this.totalHoldDuration = undefined;
     
-    // Set movement parameters
     this.floatDirection.x = direction;
     this.floatDirection.y = 0;
     this.floatInitialSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
     this.floatCurrentSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
     
-    // Initialize vertical effect
     this.floatVerticalOffset = 0;
     this.floatVerticalVelocity = 0;
   }
@@ -208,20 +174,15 @@ export class Player {
       if (this.floatActive) {
         this.floatTimer += dt;
         
-        // Check if key is still held to determine if we should extend the float
         const currentTime = this.getCurrentTime();
         const keyStillHeld = this.keyPressStart[this.floatKey] !== null;
         
-        // Use total hold duration (either ongoing or stored from key release)
         const holdDuration = this.calculateHoldDuration(currentTime, keyStillHeld);
         
-        // Determine current float mode based on how long key was/is held
         const { targetMode, targetForce, targetDuration } = this.determineFloatTier(holdDuration);
         
-        // Smoothly transition to new force if mode changed
         this.updateFloatMode(targetMode, targetForce, dt);
         
-        // Calculate completion based on target duration
         const progress = this.floatTimer / targetDuration;
         if (progress >= 1.0) {
           this.endFloat();
@@ -247,7 +208,6 @@ export class Player {
     let targetForce = Constants.PLAYER.FLOAT_TIERS.small.force;
     let targetDuration = Constants.PLAYER.FLOAT_TIERS.small.duration;
     
-    // Check tiers in descending order to find the appropriate tier
     if (holdDuration > Constants.PLAYER.FLOAT_TIERS.large.threshold) {
       targetMode = 'large';
       targetForce = Constants.PLAYER.FLOAT_TIERS.large.force;
@@ -258,13 +218,11 @@ export class Player {
   }
   
   updateFloatMode(targetMode, targetForce, dt) {
-    // Smoothly transition to new force if mode changed
     if (targetMode !== this.floatMode) {
       this.floatMode = targetMode;
       this.floatInitialSpeed = targetForce;
     }
     
-    // Smooth interpolation towards target force
     const interpolationSpeed = Constants.PLAYER.FLOAT_TIER_INTERPOLATION_SPEED;
     const speedDifference = targetForce - this.floatCurrentSpeed;
     const maxChange = interpolationSpeed * dt;
@@ -277,16 +235,13 @@ export class Player {
   }
   
   updateFloatSpeed(progress) {
-    // Start at full speed immediately, then slow down after a period
     let speedMultiplier;
     if (progress < Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) {
-      // Full speed for first portion of duration
       speedMultiplier = 1.0;
     } else {
-      // After full speed period, use steep deceleration
       const decelerateProgress = (progress - Constants.PLAYER.FLOAT_FULL_SPEED_RATIO) / 
                                 Constants.PLAYER.FLOAT_DECELERATION_RATIO;
-      const easeFactor = Math.pow(1 - decelerateProgress, 2); // Quadratic ease-out
+      const easeFactor = Math.pow(1 - decelerateProgress, 2);
       speedMultiplier = Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR + 
                        (1 - Constants.PLAYER.FLOAT_SLOWDOWN_FACTOR) * easeFactor;
     }
@@ -351,8 +306,6 @@ export class Player {
     }
   }
 
-  // =================== ANIMATION & UTILITY METHODS ===================
-  
   updateAnimationState() {
     const playerIsMoving = Math.abs(this.vx) > Constants.PLAYER.MOVEMENT_THRESHOLD || 
                           Math.abs(this.vy) > Constants.PLAYER.MOVEMENT_THRESHOLD;
@@ -363,18 +316,13 @@ export class Player {
     }
   }
 
-  /**
-   * Reset player to initial state
-   */
   reset() {
-    // Position and basic movement
     this.x = this.canvas.width - this.width/2 - Constants.PLAYER.SPAWN_OFFSET_X;
     this.y = this.height/2 + Constants.PLAYER.SPAWN_OFFSET_Y;
     this.vx = 0;
     this.vy = 0;
     this.facing = 'right';
     
-    // Float system
     this.floatTimer = 0;
     this.floatActive = false;
     this.floatDirection = { x: 0, y: 0 };
@@ -386,40 +334,24 @@ export class Player {
     this.totalHoldDuration = undefined;
     this.floatResidualVx = 0;
     
-    // Vertical float effect
     this.floatVerticalOffset = 0;
     this.floatVerticalVelocity = 0;
     
-    // Wind system
     this.windVx = 0;
     this.windVy = 0;
     this.windTimer = 0;
     
-    // Animation
     this.animator.setState('default');
   }
 
-  /**
-   * Get current sprite frame
-   * @returns {HTMLImageElement|null} Current sprite frame
-   */
   getCurrentFrame() {
     return this.animator.getCurrentFrame();
   }
 
-  /**
-   * Get the effective Y position including vertical float effect
-   * @returns {number} Y position with float effect applied
-   */
   getEffectiveY() {
     return this.y + this.floatVerticalOffset;
   }
 
-  /**
-   * Set animation state
-   * @param {string} state - Animation state name
-   * @param {Object} options - Animation options
-   */
   setAnimationState(state, options = {}) {
     this.animator.setState(state, options);
   }

@@ -205,7 +205,6 @@ canvas {
 }
 
 #tiles-arrows {
-  /* Override to ensure tiles-overlay works */
   display: grid !important;
 }
 

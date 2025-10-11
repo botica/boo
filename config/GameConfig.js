@@ -2,7 +2,6 @@
  * Game configuration including level settings and key mappings
  */
 export const GameConfig = {
-  // Level configuration
   MAX_LEVELS: 5,
   COMBOS_PER_LEVEL: 3,
   
@@ -49,7 +48,6 @@ export const GameConfig = {
     }
   },
   
-  // Key mappings
   arrowKeys: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
   
   // Arrow key display images
@@ -68,7 +66,6 @@ export const GameConfig = {
     }
   },
   
-  // Arrow key display symbols (kept for backwards compatibility)
   arrowSymbols: {
     ArrowLeft: '<',
     ArrowRight: '>',
