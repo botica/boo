@@ -11,31 +11,41 @@ export const GameConfig = {
       level: 1,
       comboDuration: 10.0,
       hasWind: false,
-      hasFloats: true
+      hasFloats: true,
+      showMoon: true,
+      showTree: true
     },
     2: {
       level: 2,
       comboDuration: 8.0,
       hasWind: true,
-      hasFloats: true
+      hasFloats: true,
+      showMoon: true,
+      showTree: true
     },
     3: {
       level: 3,
       comboDuration: 6.0,
       hasWind: false,
-      hasFloats: true
+      hasFloats: true,
+      showMoon: true,
+      showTree: true
     },
     4: {
       level: 4,
       comboDuration: 4.0,
       hasWind: true,
-      hasFloats: true
+      hasFloats: true,
+      showMoon: true,
+      showTree: true
     },
     5: {
       level: 5,
       comboDuration: 2.0,
       hasWind: false,
-      hasFloats: true
+      hasFloats: true,
+      showMoon: false,
+      showTree: false
     }
   },
   

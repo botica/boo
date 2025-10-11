@@ -13,7 +13,7 @@ export const Constants = {
     SPAWN_OFFSET_Y: 10,
     
     // Movement speeds
-    VERTICAL_SPEED: 150,
+    VERTICAL_SPEED: 200, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
     ACCEL: 1500,
     VERTICAL_INERTIA: 0.97, // How much vertical velocity is retained when key is released
 
@@ -21,26 +21,27 @@ export const Constants = {
     // Float tier system - 2 tiers based on key hold duration
     FLOAT_TIERS: {
       small: {
-        force: 250,
+        force: 350, // Horizontal speed
         threshold: 0, // Always available
-        holdDurationMax: 0.075
+        holdDurationMax: 0.075,
+        duration: 0.35, // Float duration in seconds
+        hopHeight: 20 // Vertical hop height in pixels - ADJUST THIS FOR SMALL FLOAT HEIGHT
       },
       large: {
-        force: 750,
-        threshold: 0.1, // Requires > 0.1s hold
-        holdDurationMax: Infinity
+        force: 850, // Horizontal speed (increased from 950 for faster movement)
+        threshold: 0.08, // Requires > 0.1s hold (changed back)
+        holdDurationMax: Infinity,
+        duration: 0.6, // Float duration in seconds
+        hopHeight: 44 // Vertical hop height in pixels - ADJUST THIS FOR LARGE FLOAT HEIGHT
       }
     },
 
-    FLOAT_DURATION: 0.4,
-    FLOAT_SLOWDOWN_FACTOR: 0.5,
-    FLOAT_FULL_SPEED_RATIO: 0.3, // Maintain full speed for first 30% of duration
-    FLOAT_DECELERATION_RATIO: 0.7, // Decelerate during remaining 70%
-    FLOAT_TIER_INTERPOLATION_SPEED: 600, // How fast to transition between tiers (pixels/second)
-    FLOAT_VERTICAL_INITIAL_VELOCITY: -200, // Initial upward velocity (negative Y is up)
-    FLOAT_VERTICAL_GRAVITY: 400, // Downward acceleration
-    FLOAT_VERTICAL_DAMPING: 0.88, // Velocity damping to prevent oscillation
-    FLOAT_HORIZONTAL_INERTIA: 0.94, // Horizontal velocity decay after float ends (higher = slower decay, more pronounced glide)
+    FLOAT_DURATION: 0.4, // Default fallback
+    FLOAT_SLOWDOWN_FACTOR: 0.45, // How much to slow down during deceleration
+    FLOAT_FULL_SPEED_RATIO: 0.25, // Maintain full speed for first 25% of duration (reduced from 35%)
+    FLOAT_DECELERATION_RATIO: 0.75, // Decelerate during remaining 75%
+    FLOAT_TIER_INTERPOLATION_SPEED: 800, // How fast to transition between tiers
+    FLOAT_HORIZONTAL_INERTIA: 0.95, // Horizontal velocity decay after float ends
     
     // Movement detection threshold
     MOVEMENT_THRESHOLD: 0.001, // Minimum velocity to be considered "moving"

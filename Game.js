@@ -261,8 +261,8 @@ export class Game {
       }
     }
     
-    // Update moon (only visible in level 1)
-    if (this.moon && this.gameState.currentLevel === 1) {
+    // Update moon (visibility based on level config)
+    if (this.moon && levelConfig.showMoon) {
       this.moon.update(dt);
     }
     
@@ -588,16 +588,18 @@ export class Game {
    * Draw the game
    */
   draw() {
+    const levelConfig = this.gameState.getCurrentLevelConfig();
+    
     // Clear screen
     this.renderer.clear();
     
-    // Draw moon in background (only visible in level 1)
-    if (this.moon && this.gameState.currentLevel === 1) {
+    // Draw moon in background (visibility based on level config)
+    if (this.moon && levelConfig.showMoon) {
       this.moon.render(this.renderer.ctx);
     }
     
-    // Draw tree in background (visible on all levels)
-    if (this.tree) {
+    // Draw tree in background (visibility based on level config)
+    if (this.tree && levelConfig.showTree) {
       this.tree.render(this.renderer.ctx);
     }
     

@@ -182,28 +182,25 @@ export class Player {
   }
 
   startFloat(key, mode) {
-    // Set direction based on key
     const direction = key === 'ArrowLeft' ? -1 : 1;
-    
-    // Update facing direction
     this.facing = direction > 0 ? 'right' : 'left';
     
-    // Initialize float - always start with small float
+    // Initialize float state
     this.floatActive = true;
     this.floatTimer = 0;
-    this.floatMode = 'small'; // Track current float size
-    this.floatKey = key; // Track which key triggered this float
-    this.totalHoldDuration = undefined; // Reset hold duration tracking
+    this.floatMode = 'small';
+    this.floatKey = key;
+    this.totalHoldDuration = undefined;
     
-    // Set horizontal direction, vertical movement is handled separately via acceleration
+    // Set movement parameters
     this.floatDirection.x = direction;
-    this.floatDirection.y = 0; // Not used for movement anymore
+    this.floatDirection.y = 0;
     this.floatInitialSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
     this.floatCurrentSpeed = Constants.PLAYER.FLOAT_TIERS.small.force;
     
-    // Initialize vertical float effect - quick upward movement at start
+    // Initialize vertical effect
     this.floatVerticalOffset = 0;
-    this.floatVerticalVelocity = Constants.PLAYER.FLOAT_VERTICAL_INITIAL_VELOCITY;
+    this.floatVerticalVelocity = 0;
   }
 
   updateFloatEffects(dt, levelConfig) {
@@ -219,8 +216,7 @@ export class Player {
         const holdDuration = this.calculateHoldDuration(currentTime, keyStillHeld);
         
         // Determine current float mode based on how long key was/is held
-        const { targetMode, targetForce } = this.determineFloatTier(holdDuration);
-        const targetDuration = Constants.PLAYER.FLOAT_DURATION; // Same duration for all
+        const { targetMode, targetForce, targetDuration } = this.determineFloatTier(holdDuration);
         
         // Smoothly transition to new force if mode changed
         this.updateFloatMode(targetMode, targetForce, dt);
@@ -249,14 +245,16 @@ export class Player {
   determineFloatTier(holdDuration) {
     let targetMode = 'small';
     let targetForce = Constants.PLAYER.FLOAT_TIERS.small.force;
+    let targetDuration = Constants.PLAYER.FLOAT_TIERS.small.duration;
     
     // Check tiers in descending order to find the appropriate tier
     if (holdDuration > Constants.PLAYER.FLOAT_TIERS.large.threshold) {
       targetMode = 'large';
       targetForce = Constants.PLAYER.FLOAT_TIERS.large.force;
+      targetDuration = Constants.PLAYER.FLOAT_TIERS.large.duration;
     }
     
-    return { targetMode, targetForce };
+    return { targetMode, targetForce, targetDuration };
   }
   
   updateFloatMode(targetMode, targetForce, dt) {
@@ -297,21 +295,18 @@ export class Player {
   }
   
   updateVerticalFloatEffect(dt) {
-    // Apply gravity-like effect to bring player back down
-    this.floatVerticalVelocity += Constants.PLAYER.FLOAT_VERTICAL_GRAVITY * dt;
-    this.floatVerticalOffset += this.floatVerticalVelocity * dt;
+    const currentTier = Constants.PLAYER.FLOAT_TIERS[this.floatMode];
+    const progress = Math.min(this.floatTimer / currentTier.duration, 1.0);
     
-    // Apply damping to prevent oscillation
-    this.floatVerticalVelocity *= Constants.PLAYER.FLOAT_VERTICAL_DAMPING;
+    // Simple sine wave creates natural arc motion
+    this.floatVerticalOffset = -Math.sin(progress * Math.PI) * currentTier.hopHeight;
   }
   
   endFloat() {
     this.floatActive = false;
-    // Don't zero vx immediately - let inertia handle the deceleration
     this.vy = 0;
     this.floatVerticalOffset = 0;
     this.floatVerticalVelocity = 0;
-    // Clear any pending key presses to prevent immediate new float
     this.keyPressStart = {};
   }
 
