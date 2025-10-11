@@ -13,8 +13,7 @@ export class UIManager {
     this.arrowArea = document.getElementById('arrow-area');
     this.arrows = document.getElementById('arrows');
     this.comboUI = document.getElementById('combo-ui');
-    this.progressFill = document.getElementById('progress-fill');
-    this.progress = document.querySelector('.progress');
+    this.progressBar = document.getElementById('progress-bar');
     this.arrow1 = document.getElementById('arrow-1');
     this.arrow2 = document.getElementById('arrow-2');
   }
@@ -24,31 +23,9 @@ export class UIManager {
    */
   resizeElements() {
     // Canvas dimensions are now handled by the Game class
-    // This method only updates UI element sizes based on current canvas size
+    // Arrow images now use their natural size (200px) - no dynamic resizing needed
     
-    const bigSize = Math.max(
-      Constants.UI.MIN_ARROW_SIZE, 
-      Math.min(
-        Constants.UI.MAX_ARROW_SIZE, 
-        Math.floor(Math.min(
-          this.canvas.width * Constants.UI.ARROW_SIZE_FACTOR_WIDTH, 
-          this.canvas.height * Constants.UI.ARROW_SIZE_FACTOR_HEIGHT
-        ))
-      )
-    );
-    
-    // Resize arrows
-    const arrowStyle = `width:${bigSize}px; height:${bigSize}px; font-size:${Math.floor(bigSize * Constants.UI.ARROW_FONT_SCALE)}px`;
-    if (this.arrow1) this.arrow1.style.cssText += arrowStyle;
-    if (this.arrow2) this.arrow2.style.cssText += arrowStyle;
-
-    // Resize progress bar
-    if (this.progress) {
-      const desired = bigSize * 2 + Constants.UI.ARROW_GAP;
-      const maxAllowed = this.canvas.width - Constants.UI.PROGRESS_MARGIN;
-      const finalW = Math.max(Constants.UI.MIN_PROGRESS_WIDTH, Math.min(desired, maxAllowed));
-      this.progress.style.width = `${finalW}px`;
-    }
+    // Progress bar doesn't need resizing - it's a fixed-size image
   }
 
   /**
@@ -60,7 +37,7 @@ export class UIManager {
     if (this.comboUI) this.comboUI.style.display = display;
     if (this.arrows) this.arrows.style.display = display;
     if (this.arrowArea) this.arrowArea.style.display = display;
-    if (this.progress) this.progress.style.display = display;
+    if (this.progressBar) this.progressBar.style.display = display;
   }
 
   /**
@@ -141,21 +118,24 @@ export class UIManager {
   }
 
   /**
-   * Update progress bar
+   * Update progress bar with image frame
    * @param {number} percentage - Progress percentage (0-1)
    */
   updateProgress(percentage) {
-    if (this.progressFill) {
-      this.progressFill.style.transform = `scaleX(${Math.max(0, Math.min(1, percentage))})`;
+    if (this.progressBar) {
+      // Convert percentage to frame number (0-5)
+      const frame = Math.floor(percentage * 5);
+      const clampedFrame = Math.max(0, Math.min(5, frame));
+      this.progressBar.src = `images/ui/prog-bar-${clampedFrame}-200px.png`;
     }
   }
 
   /**
-   * Reset progress bar to full
+   * Reset progress bar to full (frame 5)
    */
   resetProgress() {
-    if (this.progressFill) {
-      this.progressFill.style.transform = 'scaleX(1)';
+    if (this.progressBar) {
+      this.progressBar.src = 'images/ui/prog-bar-5-200px.png';
     }
   }
 

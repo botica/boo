@@ -56,7 +56,15 @@ export class AssetManager {
       arrowUpSmall: 'images/ui/arrow-up-50px.png',
       arrowDownSmall: 'images/ui/arrow-down-50px.png',
       arrowLeftSmall: 'images/ui/arrow-left-50px.png',
-      arrowRightSmall: 'images/ui/arrow-right-50px.png'
+      arrowRightSmall: 'images/ui/arrow-right-50px.png',
+      
+      // Progress bar sprites
+      progressBar0: 'images/ui/prog-bar-0-200px.png',
+      progressBar1: 'images/ui/prog-bar-1-200px.png',
+      progressBar2: 'images/ui/prog-bar-2-200px.png',
+      progressBar3: 'images/ui/prog-bar-3-200px.png',
+      progressBar4: 'images/ui/prog-bar-4-200px.png',
+      progressBar5: 'images/ui/prog-bar-5-200px.png'
     };
 
     this.totalAssets = Object.keys(assetPaths).length;
