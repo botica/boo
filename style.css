@@ -113,6 +113,9 @@ canvas {
   box-sizing: border-box;
   user-select: none;
   border-radius: 0;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 #tile-up    { grid-column: 2; grid-row: 1; }
@@ -120,27 +123,63 @@ canvas {
 #tile-down  { grid-column: 2; grid-row: 2; }
 #tile-right { grid-column: 3; grid-row: 2; }
 
-.arrows {
+.arrows-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   gap: 20px;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 40px;
+  z-index: 50;
+  pointer-events: none;
 }
 
-.big-arrow {
-  width: 400px;
-  height: 400px;
-  background: rgba(0,0,0,0.55);
-  font-size: 180px;
-  line-height: 1;
-  border-radius: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.arrow-image {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  opacity: 0.9;
 }
+
+.arrow-image.pressed {
+  opacity: 0;
+}
+
+.tiles-overlay {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(2, 50px);
+  gap: 5px;
+  pointer-events: auto;
+}
+
+.tile-image {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.tile-image:hover {
+  opacity: 0.8;
+}
+
+.tile-image.pressed {
+  opacity: 0;
+}
+
+/* Grid positioning for tiles */
+#tile-up    { grid-column: 2; grid-row: 1; }
+#tile-left  { grid-column: 1; grid-row: 2; }
+#tile-down  { grid-column: 2; grid-row: 2; }
+#tile-right { grid-column: 3; grid-row: 2; }
 
 .combo-ui {
   display: flex;
@@ -170,19 +209,8 @@ canvas {
 }
 
 #tiles-arrows {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  z-index: 40;
-  pointer-events: auto;
-}
-
-#tiles-arrows .tile {
-  background: rgba(0,0,0,0.55);
-  border-color: rgba(255,255,255,0.6);
-  color: rgba(255,255,255,0.9);
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
-  opacity: 0.5;
+  /* Override to ensure tiles-overlay works */
+  display: grid !important;
 }
 
 @media (max-width: 599px) {

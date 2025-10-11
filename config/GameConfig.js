@@ -52,7 +52,23 @@ export const GameConfig = {
   // Key mappings
   arrowKeys: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
   
-  // Arrow key display symbols
+  // Arrow key display images
+  arrowImages: {
+    large: {
+      ArrowLeft: 'images/ui/arrow-left-200px.png',
+      ArrowRight: 'images/ui/arrow-right-200px.png',
+      ArrowUp: 'images/ui/arrow-up-200px.png',
+      ArrowDown: 'images/ui/arrow-down-200px.png'
+    },
+    small: {
+      ArrowLeft: 'images/ui/arrow-left-50px.png',
+      ArrowRight: 'images/ui/arrow-right-50px.png',
+      ArrowUp: 'images/ui/arrow-up-50px.png',
+      ArrowDown: 'images/ui/arrow-down-50px.png'
+    }
+  },
+  
+  // Arrow key display symbols (kept for backwards compatibility)
   arrowSymbols: {
     ArrowLeft: '<',
     ArrowRight: '>',

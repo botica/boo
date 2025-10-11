@@ -2,10 +2,12 @@
  * UIManager handles UI elements, progress bars, and visual feedback
  */
 import { Constants } from '../config/Constants.js';
+import { GameConfig } from '../config/GameConfig.js';
 
 export class UIManager {
-  constructor(canvas) {
+  constructor(canvas, assetManager = null) {
     this.canvas = canvas;
+    this.assetManager = assetManager;
     
     // Cache UI element references
     this.arrowArea = document.getElementById('arrow-area');
@@ -64,10 +66,10 @@ export class UIManager {
   /**
    * Update combo arrows display
    * @param {string[]} combo - Current combo keys
-   * @param {string[]} symbols - Display symbols for the combo
+   * @param {string[]} symbols - Display symbols for the combo (deprecated, kept for compatibility)
    */
   updateComboDisplay(combo, symbols) {
-    if (!combo || !symbols) {
+    if (!combo) {
       if (this.arrows) this.arrows.style.display = 'none';
       if (this.arrow1) this.arrow1.style.display = 'none';
       if (this.arrow2) this.arrow2.style.display = 'none';
@@ -77,18 +79,43 @@ export class UIManager {
     if (this.arrows) this.arrows.style.display = 'flex';
     
     // Update arrow 1
-    if (this.arrow1 && symbols[0]) {
-      this.arrow1.style.display = '';
-      this.arrow1.textContent = symbols[0];
+    if (this.arrow1 && combo[0]) {
+      this.arrow1.style.display = 'block';
+      this.setArrowImage(this.arrow1, combo[0], 'large');
       this.setArrowStyle(this.arrow1, false);
     }
     
     // Update arrow 2
-    if (this.arrow2 && symbols[1]) {
-      this.arrow2.style.display = '';
-      this.arrow2.textContent = symbols[1];
+    if (this.arrow2 && combo[1]) {
+      this.arrow2.style.display = 'block';
+      this.setArrowImage(this.arrow2, combo[1], 'large');
       this.setArrowStyle(this.arrow2, false);
     }
+  }
+
+  /**
+   * Set arrow image source
+   * @param {HTMLElement} el - Arrow image element
+   * @param {string} arrowKey - Arrow key (ArrowLeft, ArrowRight, etc.)
+   * @param {string} size - Size variant ('large' or 'small')
+   */
+  setArrowImage(el, arrowKey, size = 'large') {
+    if (!el || !arrowKey) return;
+    
+    const imagePath = GameConfig.arrowImages[size] && GameConfig.arrowImages[size][arrowKey];
+    if (imagePath) {
+      el.src = imagePath;
+      el.alt = `${arrowKey} arrow`;
+    }
+  }
+
+  /**
+   * Get sprite key for arrow from AssetManager
+   */
+  getArrowSpriteKey(arrowKey, size) {
+    const direction = arrowKey.replace('Arrow', '').toLowerCase();
+    const sizeKey = size === 'large' ? 'Large' : 'Small';
+    return `arrow${direction.charAt(0).toUpperCase() + direction.slice(1)}${sizeKey}`;
   }
 
   /**
@@ -99,13 +126,9 @@ export class UIManager {
   setArrowStyle(el, pressed) {
     if (!el) return;
     if (pressed) {
-      el.style.background = '#fff';
-      el.style.color = '#000';
-      el.style.border = '1px solid #000';
+      el.classList.add('pressed');
     } else {
-      el.style.background = '#000';
-      el.style.color = '#fff';
-      el.style.border = '1px solid #fff';
+      el.classList.remove('pressed');
     }
   }
 

@@ -24,8 +24,8 @@ export class Game {
     this.assetManager = new AssetManager();
     this.renderer = new Renderer(this.canvas);
     this.gameState = new GameState();
-    this.uiManager = new UIManager(this.canvas);
-    this.inputManager = new InputManager();
+    this.uiManager = new UIManager(this.canvas, this.assetManager);
+    this.inputManager = new InputManager(this.assetManager);
     
     // Game entities (will be initialized after assets load)
     this.player = null;

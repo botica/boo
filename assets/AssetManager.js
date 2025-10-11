@@ -46,7 +46,17 @@ export class AssetManager {
       
       // Tree sprites
       tree1: 'images/tree.png',
-      tree2: 'images/tree-1.png'
+      tree2: 'images/tree-1.png',
+      
+      // Arrow UI sprites
+      arrowUpLarge: 'images/ui/arrow-up-200px.png',
+      arrowDownLarge: 'images/ui/arrow-down-200px.png',
+      arrowLeftLarge: 'images/ui/arrow-left-200px.png',
+      arrowRightLarge: 'images/ui/arrow-right-200px.png',
+      arrowUpSmall: 'images/ui/arrow-up-50px.png',
+      arrowDownSmall: 'images/ui/arrow-down-50px.png',
+      arrowLeftSmall: 'images/ui/arrow-left-50px.png',
+      arrowRightSmall: 'images/ui/arrow-right-50px.png'
     };
 
     this.totalAssets = Object.keys(assetPaths).length;

@@ -20,20 +20,20 @@
     <div class="game-wrap" style="position:relative;">
       <canvas id="game"></canvas>
       <div id="arrow-area" style="pointer-events:none;">
-        <div id="arrows" class="arrows" aria-hidden="true" style="display:none;">
-          <div id="arrow-1" class="tile big-arrow" aria-hidden="true"></div>
-          <div id="arrow-2" class="tile big-arrow" aria-hidden="true"></div>
+        <div id="arrows" class="arrows-overlay" aria-hidden="true" style="display:none;">
+          <img id="arrow-1" class="arrow-image" aria-hidden="true" style="display:none;">
+          <img id="arrow-2" class="arrow-image" aria-hidden="true" style="display:none;">
         </div>
         <div id="combo-ui" class="combo-ui" style="display:none; align-items:center;">
           <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
         </div>
       </div>
 
-      <div id="tiles-arrows" class="tiles" aria-hidden="true">
-        <div id="tile-up" class="tile" data-key="ArrowUp">^</div>
-        <div id="tile-left" class="tile" data-key="ArrowLeft"><</div>
-        <div id="tile-down" class="tile" data-key="ArrowDown">v</div>
-        <div id="tile-right" class="tile" data-key="ArrowRight">></div>
+      <div id="tiles-arrows" class="tiles-overlay" aria-hidden="true">
+        <img id="tile-up" class="tile-image" data-key="ArrowUp" src="images/ui/arrow-up-50px.png">
+        <img id="tile-left" class="tile-image" data-key="ArrowLeft" src="images/ui/arrow-left-50px.png">
+        <img id="tile-down" class="tile-image" data-key="ArrowDown" src="images/ui/arrow-down-50px.png">
+        <img id="tile-right" class="tile-image" data-key="ArrowRight" src="images/ui/arrow-right-50px.png">
       </div>
     </div>
   </div>

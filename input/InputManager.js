@@ -7,9 +7,10 @@ import { TouchHandler } from './TouchHandler.js';
 import { ComboValidator } from './ComboValidator.js';
 
 export class InputManager {
-  constructor() {
+  constructor(assetManager = null) {
     // Arrow keys for movement and combos
     this.arrowKeys = GameConfig.arrowKeys;
+    this.assetManager = assetManager;
     
     // Initialize sub-systems
     this.keyboardHandler = new KeyboardHandler();
@@ -60,6 +61,50 @@ export class InputManager {
       0: document.getElementById('arrow-1'),
       1: document.getElementById('arrow-2'),
     };
+
+    // No need to initialize tile images - they're already set in HTML
+  }
+
+  /**
+   * Initialize small arrow tile images
+   */
+  initializeTileImages() {
+    for (const [key, element] of Object.entries(this.tileEls)) {
+      if (element) {
+        // Try to use preloaded images from AssetManager first
+        if (this.assetManager) {
+          const spriteKey = this.getArrowSpriteKey(key, 'small');
+          const sprite = this.assetManager.getSprite(spriteKey);
+          if (sprite) {
+            element.style.backgroundImage = `url('${sprite.src}')`;
+            element.style.backgroundSize = 'contain';
+            element.style.backgroundRepeat = 'no-repeat';
+            element.style.backgroundPosition = 'center';
+            element.textContent = ''; // Clear any text content
+            continue;
+          }
+        }
+        
+        // Fallback to direct path
+        if (GameConfig.arrowImages.small[key]) {
+          const imagePath = GameConfig.arrowImages.small[key];
+          element.style.backgroundImage = `url('${imagePath}')`;
+          element.style.backgroundSize = 'contain';
+          element.style.backgroundRepeat = 'no-repeat';
+          element.style.backgroundPosition = 'center';
+          element.textContent = ''; // Clear any text content
+        }
+      }
+    }
+  }
+
+  /**
+   * Get sprite key for arrow from AssetManager
+   */
+  getArrowSpriteKey(arrowKey, size) {
+    const direction = arrowKey.replace('Arrow', '').toLowerCase();
+    const sizeKey = size === 'large' ? 'Large' : 'Small';
+    return `arrow${direction.charAt(0).toUpperCase() + direction.slice(1)}${sizeKey}`;
   }
 
   /**
@@ -155,13 +200,9 @@ export class InputManager {
   setElementStyle(el, pressed) {
     if (!el) return;
     if (pressed) {
-      el.style.background = '#fff';
-      el.style.color = '#000';
-      el.style.border = '1px solid #000';
+      el.classList.add('pressed');
     } else {
-      el.style.background = '#000';
-      el.style.color = '#fff';
-      el.style.border = '1px solid #fff';
+      el.classList.remove('pressed');
     }
   }
 
