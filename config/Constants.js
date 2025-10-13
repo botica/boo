@@ -28,8 +28,8 @@ export const Constants = {
         hopHeight: 20 // Vertical hop height in pixels - ADJUST THIS FOR SMALL FLOAT HEIGHT
       },
       large: {
-        force: 850, // Horizontal speed (increased from 950 for faster movement)
-        threshold: 0.08, // Requires > 0.1s hold (changed back)
+        force: 850, // Horizontal speed
+        threshold: 0.08, // Requires > 0.1s hold
         holdDurationMax: Infinity,
         duration: 0.6, // Float duration in seconds
         hopHeight: 44 // Vertical hop height in pixels - ADJUST THIS FOR LARGE FLOAT HEIGHT
@@ -38,10 +38,10 @@ export const Constants = {
 
     FLOAT_DURATION: 0.4, // Default fallback
     FLOAT_SLOWDOWN_FACTOR: 0.45, // How much to slow down during deceleration
-    FLOAT_FULL_SPEED_RATIO: 0.25, // Maintain full speed for first 25% of duration (reduced from 35%)
-    FLOAT_DECELERATION_RATIO: 0.75, // Decelerate during remaining 75%
+    FLOAT_FULL_SPEED_RATIO: 0.25, // Maintain full speed for first part of float 
+    FLOAT_DECELERATION_RATIO: 0.75, // Decelerate during remaining part
     FLOAT_TIER_INTERPOLATION_SPEED: 800, // How fast to transition between tiers
-    FLOAT_HORIZONTAL_INERTIA: 0.95, // Horizontal velocity decay after float ends
+    FLOAT_HORIZONTAL_INERTIA: 0.90, // Horizontal velocity decay after float ends
     
     // Movement detection threshold
     MOVEMENT_THRESHOLD: 0.001, // Minimum velocity to be considered "moving"
@@ -65,8 +65,8 @@ export const Constants = {
   
   // =================== OTHER ENTITY CONSTANTS ===================
   PERSON: {
-    WIDTH: 225,  // 150% of original 150 (150 * 1.5)
-    HEIGHT: 225, // 150% of original 150 (150 * 1.5)
+    WIDTH: 225,
+    HEIGHT: 225,
     MOVE_SPEED: 80,
     ESCAPE_SPEED: 400,
     MOVE_WAIT_MIN: 1.0,
@@ -89,10 +89,10 @@ export const Constants = {
   },
   
   TREE: {
-    WIDTH: 200,   // Keep doubled width to maintain proper aspect ratio
-    HEIGHT: 400,  // 4x original height (100 * 4) to make it twice as tall as doubled
+    WIDTH: 200,
+    HEIGHT: 400,
     DEFAULT_X_OFFSET: 200,
-    DEFAULT_Y_OFFSET: 300  // Will need adjustment
+    DEFAULT_Y_OFFSET: 300
   },
   
   // =================== VISUAL & UI CONSTANTS ===================
