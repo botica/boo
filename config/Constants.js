@@ -65,8 +65,8 @@ export const Constants = {
   
   // =================== OTHER ENTITY CONSTANTS ===================
   PERSON: {
-    WIDTH: 150,
-    HEIGHT: 150,
+    WIDTH: 225,  // 150% of original 150 (150 * 1.5)
+    HEIGHT: 225, // 150% of original 150 (150 * 1.5)
     MOVE_SPEED: 80,
     ESCAPE_SPEED: 400,
     MOVE_WAIT_MIN: 1.0,
@@ -89,10 +89,10 @@ export const Constants = {
   },
   
   TREE: {
-    WIDTH: 100,
-    HEIGHT: 100,
+    WIDTH: 200,   // Keep doubled width to maintain proper aspect ratio
+    HEIGHT: 400,  // 4x original height (100 * 4) to make it twice as tall as doubled
     DEFAULT_X_OFFSET: 200,
-    DEFAULT_Y_OFFSET: 200
+    DEFAULT_Y_OFFSET: 300  // Will need adjustment
   },
   
   // =================== VISUAL & UI CONSTANTS ===================

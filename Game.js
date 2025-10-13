@@ -571,7 +571,7 @@ export class Game {
     // Reposition tree for current canvas size
     if (this.tree) {
       this.tree.x = this.canvas.width / 2 + 50;
-      this.tree.y = this.canvas.height - 100;
+      this.tree.y = this.canvas.height - 400;  // Updated for 4x tree height
     }
     
     // Reset UI

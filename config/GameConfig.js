@@ -11,7 +11,7 @@ export const GameConfig = {
       comboDuration: 10.0,
       hasWind: false,
       hasFloats: true,
-      showMoon: true,
+      showMoon: false,
       showTree: true
     },
     2: {
@@ -20,7 +20,7 @@ export const GameConfig = {
       hasWind: true,
       hasFloats: true,
       showMoon: true,
-      showTree: true
+      showTree: false
     },
     3: {
       level: 3,

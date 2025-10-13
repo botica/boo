@@ -34,6 +34,12 @@ export class AssetManager {
       personScared: 'images/person-scared.png',
       personScaredAlt: 'images/person-scared-1.png',
       
+      // Sleeping person sprites
+      guySleeping: 'images/guy-sleeping.png',
+      guySleeping1: 'images/guy-sleeping-1.png',
+      guyScared: 'images/guy-scared.png',
+      guyScared1: 'images/guy-scared-1.png',
+      
       // Business person sprites
       businessDefault: 'images/business.png',
       businessAlt: 'images/business-1.png',
@@ -151,6 +157,14 @@ export class AssetManager {
     return {
       default: [this.sprites.personDefault, this.sprites.personAlt],
       scared: [this.sprites.personScared, this.sprites.personScaredAlt]
+    };
+  }
+
+  getLevel1PersonSprites() {
+    return {
+      default: [this.sprites.personDefault, this.sprites.personAlt],
+      sleeping: [this.sprites.guySleeping, this.sprites.guySleeping1],
+      scared: [this.sprites.guyScared, this.sprites.guyScared1]
     };
   }
 

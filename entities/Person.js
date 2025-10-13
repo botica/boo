@@ -31,6 +31,9 @@ export class Person {
     // Collision state
     this.colliding = false;
     
+    // Level tracking for behavior changes
+    this.currentLevel = 1;
+    
     // Animation will be set up when level is configured
     this.animator = null;
   }
@@ -40,18 +43,25 @@ export class Person {
    * @param {Object} levelConfig - Current level configuration
    */
   updateForLevel(levelConfig) {
+    this.currentLevel = levelConfig.level;
     let sprites;
+    let defaultState = 'default';
+    
     switch (levelConfig.level) {
+      case 1:
+        sprites = this.assetManager.getLevel1PersonSprites();
+        defaultState = 'sleeping';
+        break;
       case 2:
         sprites = this.assetManager.getBusinessSprites();
         break;
-      default:
+      default: // Levels 3, 4, 5 use original person sprites
         sprites = this.assetManager.getPersonSprites();
         break;
     }
     
     const states = AnimationFactory.createPersonAnimations(sprites);
-    this.animator = new AnimatedEntity(states, 'default');
+    this.animator = new AnimatedEntity(states, defaultState);
   }
 
   /**
@@ -76,6 +86,13 @@ export class Person {
   }
 
   updateMovement(dt) {
+    // On level 1, the person stays stationary (sitting on bench)
+    if (this.currentLevel === 1) {
+      this.isMoving = false;
+      this.vx = 0;
+      return;
+    }
+    
     if (this.isMoving) {
       this.moveTimeLeft -= dt;
       this.x += this.vx * dt;
@@ -140,7 +157,9 @@ export class Person {
     this.isEscaping = false;
     
     if (this.animator) {
-      this.animator.setState('default');
+      // Set appropriate default state based on level
+      const defaultState = this.currentLevel === 1 ? 'sleeping' : 'default';
+      this.animator.setState(defaultState);
     }
   }
 

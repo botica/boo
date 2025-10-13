@@ -12,7 +12,7 @@ canvas {
   image-rendering: pixelated; 
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  border: 2px dashed white;
+  border: 2px solid white;
   max-width: 1200px;
 }
 

@@ -179,6 +179,7 @@ export class AnimationFactory {
     const interval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
     return [
       new AnimationState('default', sprites.default, interval, true),
+      new AnimationState('sleeping', sprites.sleeping, interval, true),
       new AnimationState('scared', sprites.scared, interval, true)
     ];
   }
