@@ -361,32 +361,8 @@ export class Renderer {
     });
     
     // Draw loading text
-    this.drawText('Loading...', this.canvas.width / 2, this.canvas.height / 2 - 40, {
-      font: '32px sans-serif',
-      fillStyle: '#ffffff'
-    });
-    
-    // Draw progress bar
-    const barWidth = 300;
-    const barHeight = 20;
-    const barX = (this.canvas.width - barWidth) / 2;
-    const barY = this.canvas.height / 2 + 20;
-    
-    // Progress bar background
-    this.drawRect(barX, barY, barWidth, barHeight, {
-      strokeStyle: '#ffffff',
-      lineWidth: 2
-    });
-    
-    // Progress bar fill
-    const fillWidth = (progress / 100) * (barWidth - 4);
-    this.drawRect(barX + 2, barY + 2, fillWidth, barHeight - 4, {
-      fillStyle: '#ffffff'
-    });
-    
-    // Progress percentage
-    this.drawText(`${progress.toFixed(1)}%`, this.canvas.width / 2, barY + barHeight + 30, {
-      font: '18px sans-serif',
+    this.drawText('welcome to boo game', this.canvas.width / 2, this.canvas.height / 2, {
+      font: '24px sans-serif',
       fillStyle: '#ffffff'
     });
   }

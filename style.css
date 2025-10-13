@@ -12,7 +12,7 @@ canvas {
   image-rendering: pixelated; 
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  border: 2px solid white;
+  border: 3px dashed white;
   max-width: 1200px;
 }
 
@@ -22,7 +22,7 @@ canvas {
   align-items: flex-start;
   min-height: 100vh;
   box-sizing: border-box;
-  padding-top: 20px;
+  padding-top: 10px;
 }
 
 .narrow-screen-warning {
@@ -36,7 +36,7 @@ canvas {
   color: white;
   text-align: center;
   z-index: 1000;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
 }
 
@@ -55,7 +55,7 @@ canvas {
   color: #fff;
 }
 
-@media (max-width: 599px) {
+@media (max-width: 719px) {
   .narrow-screen-warning {
     display: block;
   }

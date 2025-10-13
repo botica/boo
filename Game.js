@@ -138,8 +138,8 @@ export class Game {
     }
     
     // Calculate available space accounting for container padding
-    const containerWidth = container.clientWidth - 40; // Account for padding
-    const containerHeight = container.clientHeight - 40;
+    const containerWidth = container.clientWidth - 20; // Account for padding
+    const containerHeight = container.clientHeight - 20;
     
     // Determine canvas size based on container and constraints
     let canvasWidth = Math.max(Constants.CANVAS.MIN_WIDTH, 
