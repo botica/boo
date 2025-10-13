@@ -356,32 +356,35 @@ export class Game {
     
     console.log('Using standard level complete animation');
     
-    // Start success animation for other levels
-    this.player.setAnimationState('angry', {
-      frameCount: Constants.ANIMATION.ANGRY_FRAME_COUNT,
-      onComplete: () => {
-        this.gameState.endSuccessAnimation();
-        
-        this.player.setAnimationState('laughing', {
-          duration: Constants.ANIMATION.LAUGHING_DURATION,
-          onComplete: () => {
-            this.gameState.endSuccessAnimation();
-            
-            // Advance level after laughing animation completes
-            if (!gameComplete) {
-              this.gameState.advanceToNextLevel();
-            }
-            
-            this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
-            this.resetScene();
-          }
-        });
-      }
-    });
-    
-    // Make person scared immediately
-    this.person.setAnimationState('scared');
+    // Start BOO text immediately
     this.gameState.startSuccessAnimation();
+    
+    // Wait for 2 complete BOO text flashes (4 frame changes = 2.0 seconds)
+    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4; // 2 complete flashes
+    
+    setTimeout(() => {
+      // After BOO flashes, make person scared and ghost starts laughing immediately
+      this.person.setAnimationState('scared');
+      
+      this.player.setAnimationState('laughing', {
+        duration: Constants.ANIMATION.LAUGHING_DURATION,
+        onComplete: () => {
+          this.gameState.endSuccessAnimation();
+          
+          // Advance level after laughing animation completes
+          if (!gameComplete) {
+            this.gameState.advanceToNextLevel();
+          }
+          
+          this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
+          this.resetScene();
+        }
+      });
+      
+      // Start "he he" text when laughing begins
+      this.gameState.startLaughingAnimation();
+      
+    }, booFlashDelay * 1000); // Convert to milliseconds
   }
 
   /**
@@ -392,30 +395,33 @@ export class Game {
     // Reset escape tracking flag
     this.level5EscapeTriggered = false;
     
-    // Start player angry animation first
-    this.player.setAnimationState('angry', {
-      frameCount: Constants.ANIMATION.ANGRY_FRAME_COUNT,
-      onComplete: () => {
-        console.log('Player angry animation complete, starting escape');
-        // Stop BOO text from showing during escape
-        this.gameState.showBooText = false;
-        
-        // After player gets angry, person starts escaping
-        this.person.startEscape();
-        
-        // Start player laughing while person escapes
-        this.player.setAnimationState('laughing', {
-          duration: Constants.ANIMATION.LAUGHING_DURATION * 2, // Shorter duration
-          onComplete: () => {
-            console.log('Player laughing animation complete');
-            // Check if person escaped, if not complete anyway
-            this.completeLevel5Victory();
-          }
-        });
-      }
-    });
-    
+    // Start BOO text immediately
     this.gameState.startSuccessAnimation();
+    
+    // Wait for 2 complete BOO text flashes (4 frame changes = 2.0 seconds)
+    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4; // 2 complete flashes
+    
+    setTimeout(() => {
+      console.log('BOO flashes complete, starting escape sequence');
+      // Stop BOO text from showing during escape
+      this.gameState.showBooText = false;
+      
+      // After BOO flashes, person starts escaping and ghost starts laughing immediately
+      this.person.startEscape();
+      
+      this.player.setAnimationState('laughing', {
+        duration: Constants.ANIMATION.LAUGHING_DURATION * 2, // Longer duration for level 5
+        onComplete: () => {
+          console.log('Player laughing animation complete');
+          // Check if person escaped, if not complete anyway
+          this.completeLevel5Victory();
+        }
+      });
+      
+      // Start "he he" text when laughing begins
+      this.gameState.startLaughingAnimation();
+      
+    }, booFlashDelay * 1000); // Convert to milliseconds
   }
 
   /**
@@ -622,6 +628,23 @@ export class Game {
       }
       
       this.renderer.drawBooText(textX, textY, this.gameState.booTextTimer);
+    }
+
+    // Draw "he he" text if active (appears above BOO text when laughing)
+    if (this.gameState.showHeheText && this.player && this.person) {
+      let textX, textY;
+      
+      if (this.person.isEscaping) {
+        // Keep he he text at player position during escape
+        textX = this.player.x;
+        textY = this.player.y - Constants.HEHE_TEXT.OFFSET_Y;
+      } else {
+        // Normal positioning between player and person, above BOO text
+        textX = (this.player.x + this.person.x) / 2;
+        textY = Math.min(this.player.y, this.person.y) - Constants.HEHE_TEXT.OFFSET_Y;
+      }
+      
+      this.renderer.drawHeheText(textX, textY, this.gameState.heheTextTimer);
     }
   }
 

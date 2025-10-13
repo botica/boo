@@ -125,6 +125,13 @@ export const Constants = {
     FONT_SIZE: 48
   },
 
+  HEHE_TEXT: {
+    OFFSET_Y: 100, // Position above BOO text
+    FONT_SIZE: 32,
+    FLASH_INTERVAL: 0.3,
+    DURATION: 2200 // Shortened by two flash cycles (2 * 0.3 * 1000 = 600ms less)
+  },
+
   // Canvas configuration for responsive sizing
   CANVAS: {
     MIN_WIDTH: 500,

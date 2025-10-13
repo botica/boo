@@ -175,6 +175,25 @@ export class Renderer {
   }
 
   /**
+   * Draw the "he he" text effect
+   * @param {number} x - X position
+   * @param {number} y - Y position
+   * @param {number} timer - Animation timer
+   */
+  drawHeheText(x, y, timer) {
+    // Flash white and black at regular intervals
+    const flashPhase = Math.floor(timer / Constants.HEHE_TEXT.FLASH_INTERVAL) % 2;
+    const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
+
+    this.drawText('he he', x, y, {
+      font: `${Constants.HEHE_TEXT.FONT_SIZE}px sans-serif`,
+      fillStyle: fillStyle,
+      textAlign: 'center',
+      textBaseline: 'middle'
+    });
+  }
+
+  /**
    * Draw a rectangle with styling
    * @param {number} x - X position
    * @param {number} y - Y position

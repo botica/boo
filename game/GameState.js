@@ -26,6 +26,8 @@ export class GameState {
     // Visual effects
     this.showBooText = false;
     this.booTextTimer = 0;
+    this.showHeheText = false;
+    this.heheTextTimer = 0;
     
     // Cache config data
     this.arrowKeys = GameConfig.arrowKeys;
@@ -166,8 +168,14 @@ export class GameState {
     this.animationInProgress = true;
   }
 
+  startLaughingAnimation() {
+    this.showHeheText = true;
+    this.heheTextTimer = 0;
+  }
+
   endSuccessAnimation() {
     this.showBooText = false;
+    this.showHeheText = false;
     this.animationInProgress = false;
   }
 
@@ -197,6 +205,13 @@ export class GameState {
         this.showBooText = false;
       }
     }
+    
+    if (this.showHeheText) {
+      this.heheTextTimer += dt;
+      if (this.heheTextTimer >= Constants.HEHE_TEXT.DURATION / 1000) {
+        this.showHeheText = false;
+      }
+    }
   }
 
   updateComboTimer(dt, changes) {
@@ -218,6 +233,8 @@ export class GameState {
     this.resetComboState();
     this.showBooText = false;
     this.booTextTimer = 0;
+    this.showHeheText = false;
+    this.heheTextTimer = 0;
     this.combosCompleted = 0;
   }
 
