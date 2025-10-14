@@ -27,6 +27,9 @@ export class Person {
     // Escape animation state
     this.isEscaping = false;
     this.escapeSpeed = Constants.PERSON.ESCAPE_SPEED;
+    this.escapePhase = null; // 'initial', 'returning_for_cat', 'final_escape'
+    this.catRescueTarget = null;
+    this.carryingCat = false;
     
     // Collision state
     this.colliding = false;
@@ -131,13 +134,49 @@ export class Person {
    * @param {number} dt - Delta time in seconds
    */
   updateEscape(dt) {
-    // Move right at escape speed
-    this.vx = this.escapeSpeed;
-    this.x += this.vx * dt;
+    if (!this.escapePhase) {
+      this.escapePhase = 'initial';
+    }
+
+    switch (this.escapePhase) {
+      case 'initial':
+        // Move right at escape speed
+        this.vx = this.escapeSpeed;
+        this.x += this.vx * dt;
+        break;
+        
+      case 'returning_for_cat':
+        // Move left back toward the cat
+        if (this.catRescueTarget) {
+          const targetX = this.catRescueTarget.x;
+          if (this.x > targetX + 20) {
+            this.vx = -this.escapeSpeed * 0.8; // Slightly slower return
+            this.x += this.vx * dt;
+          } else {
+            // Reached the cat
+            this.vx = 0;
+            if (this.hasReachedCat()) {
+              this.startFinalEscapeWithCat();
+            }
+          }
+        }
+        break;
+        
+      case 'final_escape':
+        // Move right at escape speed with cat
+        this.vx = this.escapeSpeed;
+        this.x += this.vx * dt;
+        
+        // Update cat position if carrying it
+        if (this.carryingCat && this.catRescueTarget) {
+          this.catRescueTarget.startBeingCarried(this.x, this.y, this.vx, 0);
+        }
+        break;
+    }
     
     // Log position occasionally
     if (Math.floor(performance.now() / 1000) % 2 === 0 && Math.floor(this.x) % 200 === 0) {
-      console.log(`Person escaping: x=${Math.floor(this.x)}, canvas width=${this.canvas.width}, off screen=${this.isOffScreen()}`);
+      console.log(`Person escaping: phase=${this.escapePhase}, x=${Math.floor(this.x)}, canvas width=${this.canvas.width}, off screen=${this.isOffScreen()}`);
     }
     
     // No bounds checking during escape - allow movement off screen
@@ -155,6 +194,9 @@ export class Person {
     this.moveTimeLeft = 0;
     this.colliding = false;
     this.isEscaping = false;
+    this.escapePhase = null;
+    this.catRescueTarget = null;
+    this.carryingCat = false;
     
     if (this.animator) {
       // Set appropriate default state based on level
@@ -171,11 +213,46 @@ export class Person {
     this.isEscaping = true;
     this.isMoving = false;
     this.vx = 0;
+    this.escapePhase = 'initial'; // Track escape phase
+    this.catRescueTarget = null;
+    this.carryingCat = false;
     
     // Set scared animation
     if (this.animator) {
       this.animator.setState('scared');
       console.log('Person animation set to scared');
+    }
+  }
+
+  /**
+   * Start the cat rescue sequence for level 3
+   */
+  startCatRescue(cat) {
+    console.log('Person.startCatRescue called');
+    this.escapePhase = 'returning_for_cat';
+    this.catRescueTarget = cat;
+    this.isEscaping = true;
+    this.vx = 0; // Will be set in update loop
+  }
+
+  /**
+   * Check if person has reached the cat during rescue
+   */
+  hasReachedCat() {
+    if (!this.catRescueTarget) return false;
+    const distance = Math.abs(this.x - this.catRescueTarget.x);
+    return distance < 50; // Close enough to "grab" the cat
+  }
+
+  /**
+   * Start final escape with cat
+   */
+  startFinalEscapeWithCat() {
+    console.log('Person.startFinalEscapeWithCat called');
+    this.escapePhase = 'final_escape';
+    this.carryingCat = true;
+    if (this.catRescueTarget) {
+      this.catRescueTarget.startBeingCarried(this.x, this.y, this.escapeSpeed, 0);
     }
   }
 

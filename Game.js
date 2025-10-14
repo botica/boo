@@ -3,6 +3,7 @@ import { Player } from './entities/Player.js';
 import { Person } from './entities/Person.js';
 import { Moon } from './entities/Moon.js';
 import { Tree } from './entities/Tree.js';
+import { Cat } from './entities/Cat.js';
 import { InputManager } from './input/InputManager.js';
 import { GameState } from './game/GameState.js';
 import { UIManager } from './ui/UIManager.js';
@@ -32,6 +33,7 @@ export class Game {
     this.person = null;
     this.moon = null;
     this.tree = null;
+    this.cat = null;
     
     // Game loop tracking
     this.lastTime = performance.now();
@@ -89,6 +91,9 @@ export class Game {
     
     // Initialize tree (positioned just right of center at bottom)
     this.tree = new Tree(this.assetManager);
+    
+    // Initialize cat (only visible on level 3)
+    this.cat = new Cat(this.assetManager, this.canvas);
     
     // Set up initial game state
     this.resetScene();
@@ -242,6 +247,9 @@ export class Game {
     
     // During outro scene, allow entity updates but skip game logic
     if (this.gameState.currentScene === 'outro') {
+      // Update game state to keep timers running (especially heheTextTimer for flashing)
+      this.gameState.update(dt);
+      
       // Update entities for animation
       const levelConfig = this.gameState.getCurrentLevelConfig();
       
@@ -293,12 +301,26 @@ export class Game {
     if (this.person) {
       this.person.update(dt, this.gameState.interactionActive);
       
-      // Check if person has escaped off screen during level 3 victory
-      if (this.person.isEscaping && this.person.isOffScreen() && 
-          this.gameState.currentLevel === 3 && !this.level3EscapeTriggered) {
-        console.log('Person escaped off screen, completing level 3');
+      // Handle level 3 cat rescue sequence
+      if (this.gameState.currentLevel === 3 && this.person.isEscaping) {
+        if (this.person.escapePhase === 'initial' && this.person.isOffScreen() && !this.level3EscapeTriggered) {
+          console.log('Person escaped off screen initially, starting cat rescue');
+          this.level3EscapeTriggered = true;
+          // Start cat rescue sequence
+          setTimeout(() => {
+            console.log('Person returning for cat');
+            this.person.startCatRescue(this.cat);
+          }, 1000); // 1 second delay before returning
+        } else if (this.person.escapePhase === 'final_escape' && this.person.isOffScreen()) {
+          console.log('Person escaped with cat, completing level 3');
+          this.completeLevel3Victory();
+        }
+      }
+      // Handle non-level 3 escape completion
+      else if (this.person.isEscaping && this.person.isOffScreen() && 
+               this.gameState.currentLevel !== 3 && !this.level3EscapeTriggered) {
+        console.log('Person escaped off screen, completing level');
         this.level3EscapeTriggered = true;
-        // Complete immediately when person is off screen
         this.completeLevel3Victory();
       }
     }
@@ -311,6 +333,11 @@ export class Game {
     // Update tree (visible on all levels)
     if (this.tree) {
       this.tree.update(dt);
+    }
+    
+    // Update cat (only on level 3)
+    if (this.cat && this.gameState.currentLevel === 3) {
+      this.cat.update(dt);
     }
     
     // Handle combo input
@@ -347,8 +374,8 @@ export class Game {
       // Intro complete, start normal gameplay
       console.log('Intro scene complete, starting normal gameplay');
     } else if (completedScene === 'outro') {
-      // Outro complete, reset to level 1 for next round
-      console.log('Outro scene complete, resetting game');
+      // Outro complete, reset game for next round
+      console.log('Outro scene complete, resetting game for next round');
       this.gameState.resetToLevel1();
       this.resetScene();
     }
@@ -474,17 +501,13 @@ export class Game {
       // After BOO flashes, person starts escaping and ghost starts laughing immediately
       this.person.startEscape();
       
+      // Start continuous laughing animation (no duration limit)
       this.player.setAnimationState('laughing', {
-        duration: Constants.ANIMATION.LAUGHING_DURATION * 2, // Longer duration for level 3
-        onComplete: () => {
-          console.log('Player laughing animation complete');
-          // Check if person escaped, if not complete anyway
-          this.completeLevel3Victory();
-        }
+        loop: true // Make it loop indefinitely
       });
       
-      // Start "he he" text when laughing begins
-      this.gameState.startLaughingAnimation();
+      // Start continuous "he he" text when laughing begins
+      this.gameState.startContinuousLaughing();
       
     }, booFlashDelay * 1000); // Convert to milliseconds
   }
@@ -500,10 +523,11 @@ export class Game {
     }
     
     console.log('Completing level 3 victory, starting outro scene');
-    this.gameState.endSuccessAnimation();
+    // Don't end the success animation - keep laughing and "he he" text
+    // this.gameState.endSuccessAnimation(); // Commented out to keep laughing
     this.endInteraction('success: game complete - person escaped!');
     
-    // Start outro scene
+    // Start outro scene (laughing will continue until game resets)
     this.gameState.startOutroScene();
   }
 
@@ -599,7 +623,12 @@ export class Game {
    */
   endInteraction(reason) {
     this.gameState.endInteraction(reason);
-    this.player.setAnimationState('default');
+    
+    // Don't reset player animation during level 3 victory (keep laughing)
+    if (!(reason.includes('game complete') && this.gameState.currentLevel === 3)) {
+      this.player.setAnimationState('default');
+    }
+    
     this.uiManager.resetAll();
     this.inputManager.resetKeys();
   }
@@ -646,6 +675,11 @@ export class Game {
       this.tree.y = this.canvas.height - 400;  // Updated for 4x tree height
     }
     
+    // Reset cat position
+    if (this.cat) {
+      this.cat.reset();
+    }
+    
     // Reset UI
     this.uiManager.resetAll();
     this.inputManager.resetKeys();
@@ -676,6 +710,11 @@ export class Game {
         this.tree.render(this.renderer.ctx);
       }
       
+      // Draw cat during outro if it was on level 3
+      if (this.cat && this.gameState.currentLevel === 3) {
+        this.renderer.drawCat(this.cat);
+      }
+      
       // Draw entities during outro
       if (this.person) {
         this.renderer.drawPerson(this.person);
@@ -683,6 +722,13 @@ export class Game {
       
       if (this.player) {
         this.renderer.drawPlayer(this.player);
+      }
+      
+      // Draw "he he" text during outro if laughing
+      if (this.gameState.showHeheText && this.player) {
+        const textX = this.player.x;
+        const textY = this.player.y - Constants.HEHE_TEXT.OFFSET_Y;
+        this.renderer.drawHeheText(textX, textY, this.gameState.heheTextTimer);
       }
     } else {
       // Normal gameplay rendering
@@ -694,6 +740,11 @@ export class Game {
       // Draw tree in background (visibility based on level config)
       if (this.tree && levelConfig.showTree) {
         this.tree.render(this.renderer.ctx);
+      }
+      
+      // Draw cat (only on level 3)
+      if (this.cat && this.gameState.currentLevel === 3) {
+        this.renderer.drawCat(this.cat);
       }
       
       // Draw entities

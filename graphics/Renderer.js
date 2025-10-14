@@ -117,6 +117,22 @@ export class Renderer {
   }
 
   /**
+   * Draw cat entity
+   */
+  drawCat(cat) {
+    if (!cat.sprite) return;
+
+    this.drawSprite(
+      cat.sprite,
+      cat.x,
+      cat.y,
+      cat.width,
+      cat.height,
+      { debug: false }
+    );
+  }
+
+  /**
    * Draw text with styling
    * @param {string} text - Text to draw
    * @param {number} x - X position

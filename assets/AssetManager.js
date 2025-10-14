@@ -54,6 +54,9 @@ export class AssetManager {
       tree1: 'images/tree.png',
       tree2: 'images/tree-1.png',
       
+      // Cat sprite
+      cat: 'images/boo-mock.png',
+      
       // Arrow UI sprites
       arrowUpLarge: 'images/ui/arrow-up-200px.png',
       arrowDownLarge: 'images/ui/arrow-down-200px.png',
@@ -185,5 +188,9 @@ export class AssetManager {
     return {
       default: [this.sprites.tree1, this.sprites.tree2]
     };
+  }
+
+  getCatSprite() {
+    return this.sprites.cat;
   }
 }

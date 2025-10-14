@@ -93,6 +93,14 @@ export const Constants = {
     DEFAULT_Y_OFFSET: 300
   },
   
+  CAT: {
+    WIDTH: 150,
+    HEIGHT: 150,
+    MARGIN_FROM_EDGE: 20,
+    CARRY_OFFSET_X: -30, // Offset when being carried by person
+    CARRY_OFFSET_Y: -20
+  },
+  
   // =================== VISUAL & UI CONSTANTS ===================
   ANIMATION: {
     DEFAULT_FRAME_INTERVAL: 0.4,

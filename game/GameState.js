@@ -28,6 +28,7 @@ export class GameState {
     this.booTextTimer = 0;
     this.showHeheText = false;
     this.heheTextTimer = 0;
+    this.continuousLaughing = false; // Flag for level 3 continuous laughing
     
     // Scene management
     this.gameHasStarted = false; // Track if game has ever been started
@@ -180,6 +181,12 @@ export class GameState {
     this.heheTextTimer = 0;
   }
 
+  startContinuousLaughing() {
+    this.showHeheText = true;
+    this.heheTextTimer = 0;
+    this.continuousLaughing = true;
+  }
+
   endSuccessAnimation() {
     this.showBooText = false;
     this.showHeheText = false;
@@ -215,7 +222,8 @@ export class GameState {
     
     if (this.showHeheText) {
       this.heheTextTimer += dt;
-      if (this.heheTextTimer >= Constants.HEHE_TEXT.DURATION / 1000) {
+      // Don't timeout "he he" text during continuous laughing (level 3 victory)
+      if (!this.continuousLaughing && this.heheTextTimer >= Constants.HEHE_TEXT.DURATION / 1000) {
         this.showHeheText = false;
       }
     }
@@ -242,6 +250,7 @@ export class GameState {
     this.booTextTimer = 0;
     this.showHeheText = false;
     this.heheTextTimer = 0;
+    this.continuousLaughing = false;
     this.combosCompleted = 0;
   }
 
