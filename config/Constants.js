@@ -132,6 +132,17 @@ export const Constants = {
     DURATION: 2200 // Shortened by two flash cycles (2 * 0.3 * 1000 = 600ms less)
   },
 
+  SCENE_TEXT: {
+    INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
+    OUTRO_TEXT: "you won!",
+    FONT_SIZE: 24,
+    FADE_DURATION: 4.0, // Total scene duration in seconds (increased)
+    FADE_FRAME_INTERVAL: 0.5, // Frame interval for fade animation (matches sprite animations)
+    // Fade sequence: 0% 50% 100% 100% 100% 100% 50% 0% over 8 frames (4 seconds at 0.5s per frame)
+    FADE_OPACITY_SEQUENCE: [0, 0.5, 1, 1, 1, 1, 0.5, 0],
+    LINE_HEIGHT: 40 // Spacing between lines for multi-line text
+  },
+
   // Canvas configuration for responsive sizing
   CANVAS: {
     MIN_WIDTH: 700,

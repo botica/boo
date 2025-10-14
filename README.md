@@ -1,7 +1,7 @@
 # boo — js ghost mini-game
 
 float around and scare people by landing on their heads and inputting the correct key combo. 
-correct input advances the level (5 levels).
+correct input advances the level.
 dont run into the side of someone or you'll blow away! 
 
 ![screenshot](images/boo-screenshot.png)

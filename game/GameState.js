@@ -29,6 +29,13 @@ export class GameState {
     this.showHeheText = false;
     this.heheTextTimer = 0;
     
+    // Scene management
+    this.gameHasStarted = false; // Track if game has ever been started
+    this.currentScene = null; // 'intro', 'outro', or null for gameplay
+    this.sceneTimer = 0;
+    this.sceneFrameIndex = 0;
+    this.sceneStartTime = 0;
+    
     // Cache config data
     this.arrowKeys = GameConfig.arrowKeys;
     this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
@@ -252,5 +259,69 @@ export class GameState {
   hasFloatEffect() {
     const config = this.getCurrentLevelConfig();
     return config && config.hasFloats !== false && !this.interactionActive && !this.animationInProgress;
+  }
+
+  // =================== SCENE MANAGEMENT ===================
+
+  startIntroScene() {
+    this.currentScene = 'intro';
+    this.sceneTimer = 0;
+    this.sceneFrameIndex = 0;
+    this.sceneStartTime = performance.now();
+    console.log('Starting intro scene');
+  }
+
+  startOutroScene() {
+    this.currentScene = 'outro';
+    this.sceneTimer = 0;
+    this.sceneFrameIndex = 0;
+    this.sceneStartTime = performance.now();
+    console.log('Starting outro scene');
+  }
+
+  updateScene(dt) {
+    if (!this.currentScene) return { sceneComplete: false };
+
+    this.sceneTimer += dt;
+    
+    // Update frame index based on animation interval
+    const frameInterval = Constants.SCENE_TEXT.FADE_FRAME_INTERVAL;
+    const newFrameIndex = Math.floor(this.sceneTimer / frameInterval);
+    
+    if (newFrameIndex !== this.sceneFrameIndex) {
+      this.sceneFrameIndex = newFrameIndex;
+    }
+
+    // Check if scene is complete
+    const totalFrames = Constants.SCENE_TEXT.FADE_OPACITY_SEQUENCE.length;
+    if (this.sceneFrameIndex >= totalFrames) {
+      console.log(`${this.currentScene} scene complete`);
+      const completedScene = this.currentScene;
+      this.currentScene = null;
+      this.sceneTimer = 0;
+      this.sceneFrameIndex = 0;
+      
+      // Mark game as started if intro completed
+      if (completedScene === 'intro') {
+        this.gameHasStarted = true;
+      }
+      
+      return { sceneComplete: true, completedScene };
+    }
+
+    return { sceneComplete: false };
+  }
+
+  getCurrentSceneOpacity() {
+    if (!this.currentScene) return 0;
+    
+    const sequence = Constants.SCENE_TEXT.FADE_OPACITY_SEQUENCE;
+    if (this.sceneFrameIndex >= sequence.length) return 0;
+    
+    return sequence[this.sceneFrameIndex];
+  }
+
+  isInScene() {
+    return this.currentScene !== null;
   }
 }

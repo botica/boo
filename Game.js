@@ -94,6 +94,11 @@ export class Game {
     this.resetScene();
     this.gameState.updateLevelTitle();
     
+    // Start with intro scene if game hasn't started yet
+    if (!this.gameState.gameHasStarted) {
+      this.gameState.startIntroScene();
+    }
+    
     // Hide loading and start game loop
     this.start();
   }
@@ -224,6 +229,48 @@ export class Game {
    * @param {number} dt - Delta time in seconds
    */
   update(dt) {
+    // Handle scene updates first
+    const sceneUpdate = this.gameState.updateScene(dt);
+    if (sceneUpdate.sceneComplete) {
+      this.handleSceneComplete(sceneUpdate.completedScene);
+    }
+    
+    // Skip normal game updates during intro scene only
+    if (this.gameState.currentScene === 'intro') {
+      return;
+    }
+    
+    // During outro scene, allow entity updates but skip game logic
+    if (this.gameState.currentScene === 'outro') {
+      // Update entities for animation
+      const levelConfig = this.gameState.getCurrentLevelConfig();
+      
+      if (this.player) {
+        this.player.update(
+          dt,
+          this.inputManager,
+          levelConfig,
+          false, // no interaction
+          false  // no animation in progress
+        );
+      }
+      
+      if (this.person) {
+        this.person.update(dt, false); // no interaction
+      }
+      
+      // Update moon and tree
+      if (this.moon && levelConfig.showMoon) {
+        this.moon.update(dt);
+      }
+      
+      if (this.tree) {
+        this.tree.update(dt);
+      }
+      
+      return;
+    }
+    
     // Update game state
     const stateChanges = this.gameState.update(dt);
     
@@ -286,6 +333,24 @@ export class Game {
     // Handle timeout
     if (stateChanges.timeout) {
       this.handleTimeout();
+    }
+  }
+
+  /**
+   * Handle completion of intro/outro scenes
+   * @param {string} completedScene - The scene that just completed ('intro' or 'outro')
+   */
+  handleSceneComplete(completedScene) {
+    console.log(`Scene completed: ${completedScene}`);
+    
+    if (completedScene === 'intro') {
+      // Intro complete, start normal gameplay
+      console.log('Intro scene complete, starting normal gameplay');
+    } else if (completedScene === 'outro') {
+      // Outro complete, reset to level 1 for next round
+      console.log('Outro scene complete, resetting game');
+      this.gameState.resetToLevel1();
+      this.resetScene();
     }
   }
 
@@ -425,7 +490,7 @@ export class Game {
   }
 
   /**
-   * Complete level 5 victory sequence and reset to level 1
+   * Complete level 5 victory sequence and start outro scene
    */
   completeLevel5Victory() {
     // Prevent multiple calls - if we're not on level 5 anymore, we already completed
@@ -434,11 +499,12 @@ export class Game {
       return;
     }
     
-    console.log('Completing level 5 victory');
+    console.log('Completing level 5 victory, starting outro scene');
     this.gameState.endSuccessAnimation();
-    this.gameState.resetToLevel1(); // Reset to level 1 after escape
     this.endInteraction('success: game complete - person escaped!');
-    this.resetScene();
+    
+    // Start outro scene
+    this.gameState.startOutroScene();
   }
 
   /**
@@ -593,58 +659,101 @@ export class Game {
     
     // Clear screen
     this.renderer.clear();
-    
-    // Draw moon in background (visibility based on level config)
-    if (this.moon && levelConfig.showMoon) {
-      this.moon.render(this.renderer.ctx);
-    }
-    
-    // Draw tree in background (visibility based on level config)
-    if (this.tree && levelConfig.showTree) {
-      this.tree.render(this.renderer.ctx);
-    }
-    
-    // Draw entities
-    if (this.person) {
-      this.renderer.drawPerson(this.person);
-    }
-    
-    if (this.player) {
-      this.renderer.drawPlayer(this.player);
-    }
-    
-    // Draw "BOO!" text if active (fixed position during level 5 escape)
-    if (this.gameState.showBooText && this.player && this.person) {
-      let textX, textY;
-      
-      if (this.person.isEscaping) {
-        // Keep BOO text at player position during escape
-        textX = this.player.x;
-        textY = this.player.y - Constants.BOO_TEXT.OFFSET_Y;
-      } else {
-        // Normal positioning between player and person
-        textX = (this.player.x + this.person.x) / 2;
-        textY = Math.min(this.player.y, this.person.y) - Constants.BOO_TEXT.OFFSET_Y;
+
+    // During intro scene, show nothing but the text
+    if (this.gameState.currentScene === 'intro') {
+      // Don't draw anything - just the scene text will be rendered at the end
+    } 
+    // During outro scene, show game elements in background
+    else if (this.gameState.currentScene === 'outro') {
+      // Draw moon in background (visibility based on level config)
+      if (this.moon && levelConfig.showMoon) {
+        this.moon.render(this.renderer.ctx);
       }
       
-      this.renderer.drawBooText(textX, textY, this.gameState.booTextTimer);
+      // Draw tree in background (visibility based on level config)
+      if (this.tree && levelConfig.showTree) {
+        this.tree.render(this.renderer.ctx);
+      }
+      
+      // Draw entities during outro
+      if (this.person) {
+        this.renderer.drawPerson(this.person);
+      }
+      
+      if (this.player) {
+        this.renderer.drawPlayer(this.player);
+      }
+    } else {
+      // Normal gameplay rendering
+      // Draw moon in background (visibility based on level config)
+      if (this.moon && levelConfig.showMoon) {
+        this.moon.render(this.renderer.ctx);
+      }
+      
+      // Draw tree in background (visibility based on level config)
+      if (this.tree && levelConfig.showTree) {
+        this.tree.render(this.renderer.ctx);
+      }
+      
+      // Draw entities
+      if (this.person) {
+        this.renderer.drawPerson(this.person);
+      }
+      
+      if (this.player) {
+        this.renderer.drawPlayer(this.player);
+      }
+      
+      // Draw "BOO!" text if active (fixed position during level 5 escape)
+      if (this.gameState.showBooText && this.player && this.person) {
+        let textX, textY;
+        
+        if (this.person.isEscaping) {
+          // Keep BOO text at player position during escape
+          textX = this.player.x;
+          textY = this.player.y - Constants.BOO_TEXT.OFFSET_Y;
+        } else {
+          // Normal positioning between player and person
+          textX = (this.player.x + this.person.x) / 2;
+          textY = Math.min(this.player.y, this.person.y) - Constants.BOO_TEXT.OFFSET_Y;
+        }
+        
+        this.renderer.drawBooText(textX, textY, this.gameState.booTextTimer);
+      }
+
+      // Draw "he he" text if active (appears above BOO text when laughing)
+      if (this.gameState.showHeheText && this.player && this.person) {
+        let textX, textY;
+        
+        if (this.person.isEscaping) {
+          // Keep he he text at player position during escape
+          textX = this.player.x;
+          textY = this.player.y - Constants.HEHE_TEXT.OFFSET_Y;
+        } else {
+          // Normal positioning between player and person, above BOO text
+          textX = (this.player.x + this.person.x) / 2;
+          textY = Math.min(this.player.y, this.person.y) - Constants.HEHE_TEXT.OFFSET_Y;
+        }
+        
+        this.renderer.drawHeheText(textX, textY, this.gameState.heheTextTimer);
+      }
     }
 
-    // Draw "he he" text if active (appears above BOO text when laughing)
-    if (this.gameState.showHeheText && this.player && this.person) {
-      let textX, textY;
+    // Draw scene text (intro/outro) if active - this should always be on top
+    if (this.gameState.isInScene()) {
+      const opacity = this.gameState.getCurrentSceneOpacity();
+      let text = '';
       
-      if (this.person.isEscaping) {
-        // Keep he he text at player position during escape
-        textX = this.player.x;
-        textY = this.player.y - Constants.HEHE_TEXT.OFFSET_Y;
-      } else {
-        // Normal positioning between player and person, above BOO text
-        textX = (this.player.x + this.person.x) / 2;
-        textY = Math.min(this.player.y, this.person.y) - Constants.HEHE_TEXT.OFFSET_Y;
+      if (this.gameState.currentScene === 'intro') {
+        text = Constants.SCENE_TEXT.INTRO_TEXT;
+      } else if (this.gameState.currentScene === 'outro') {
+        text = Constants.SCENE_TEXT.OUTRO_TEXT;
       }
       
-      this.renderer.drawHeheText(textX, textY, this.gameState.heheTextTimer);
+      if (text && opacity > 0) {
+        this.renderer.drawSceneText(text, opacity);
+      }
     }
   }
 

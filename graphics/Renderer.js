@@ -194,6 +194,38 @@ export class Renderer {
   }
 
   /**
+   * Draw scene text (intro/outro) with fade opacity
+   * @param {string} text - Text to display
+   * @param {number} opacity - Current opacity (0-1)
+   */
+  drawSceneText(text, opacity) {
+    if (!text || opacity <= 0) return;
+
+    // Calculate center position
+    const centerX = this.canvas.width / 2;
+    const centerY = this.canvas.height / 2;
+
+    // Split text into lines if it contains line breaks
+    const lines = text.split('\n');
+    const lineHeight = Constants.SCENE_TEXT.LINE_HEIGHT;
+    
+    // Calculate starting Y position for centered text
+    const totalHeight = (lines.length - 1) * lineHeight;
+    let currentY = centerY - totalHeight / 2;
+
+    // Draw each line
+    lines.forEach(line => {
+      this.drawText(line, centerX, currentY, {
+        font: `${Constants.SCENE_TEXT.FONT_SIZE}px sans-serif`,
+        fillStyle: `rgba(255, 255, 255, ${opacity})`,
+        textAlign: 'center',
+        textBaseline: 'middle'
+      });
+      currentY += lineHeight;
+    });
+  }
+
+  /**
    * Draw a rectangle with styling
    * @param {number} x - X position
    * @param {number} y - Y position
