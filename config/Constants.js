@@ -58,8 +58,6 @@ export const Constants = {
     // Wind strength by level
     WIND_STRENGTH_NORMAL_MIN: 135,
     WIND_STRENGTH_NORMAL_MAX: 225,
-    WIND_STRENGTH_LEVEL4_MIN: 270,
-    WIND_STRENGTH_LEVEL4_MAX: 450,
     WIND_Y_FACTOR: 0.3
   },
   

@@ -55,7 +55,7 @@ export class Person {
       case 2:
         sprites = this.assetManager.getBusinessSprites();
         break;
-      default: // Levels 3, 4, 5 use original person sprites
+      default: // Level 3 uses original person sprites
         sprites = this.assetManager.getPersonSprites();
         break;
     }

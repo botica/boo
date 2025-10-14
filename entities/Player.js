@@ -274,19 +274,11 @@ export class Player {
       if (this.windTimer >= this.windChangeInterval) {
         this.windTimer = 0;
         
-        // Generate random wind force - level 4 has double strength
-        let windStrength;
-        if (levelConfig.level === 4) {
-          windStrength = MathUtils.random(
-            Constants.PLAYER.WIND_STRENGTH_LEVEL4_MIN, 
-            Constants.PLAYER.WIND_STRENGTH_LEVEL4_MAX
-          );
-        } else {
-          windStrength = MathUtils.random(
-            Constants.PLAYER.WIND_STRENGTH_NORMAL_MIN, 
-            Constants.PLAYER.WIND_STRENGTH_NORMAL_MAX
-          );
-        }
+        // Generate random wind force
+        const windStrength = MathUtils.random(
+          Constants.PLAYER.WIND_STRENGTH_NORMAL_MIN, 
+          Constants.PLAYER.WIND_STRENGTH_NORMAL_MAX
+        );
         
         const windAngle = Math.random() * Math.PI * 2;
         const windForceX = Math.cos(windAngle) * windStrength;

@@ -2,7 +2,7 @@
  * Game configuration including level settings and key mappings
  */
 export const GameConfig = {
-  MAX_LEVELS: 5,
+  MAX_LEVELS: 3,
   COMBOS_PER_LEVEL: 3,
   
   levelConfig: {
@@ -29,22 +29,6 @@ export const GameConfig = {
       hasFloats: true,
       showMoon: true,
       showTree: true
-    },
-    4: {
-      level: 4,
-      comboDuration: 4.0,
-      hasWind: true,
-      hasFloats: true,
-      showMoon: true,
-      showTree: true
-    },
-    5: {
-      level: 5,
-      comboDuration: 2.0,
-      hasWind: false,
-      hasFloats: true,
-      showMoon: false,
-      showTree: false
     }
   },
   
