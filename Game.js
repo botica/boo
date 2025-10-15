@@ -58,17 +58,9 @@ export class Game {
    */
   async init() {
     try {
-      console.log('Initializing game...');
-      
-      // Resize canvas initially
       this.resizeCanvas();
-      
-      // Show loading screen
       this.renderer.drawLoadingScreen(0);
-      
-      // Load all game assets
       await this.assetManager.loadAssets(this.onAssetsLoaded);
-      
     } catch (error) {
       console.error('Failed to initialize game:', error);
     }
@@ -78,33 +70,19 @@ export class Game {
    * Called when all assets are loaded
    */
   onAssetsLoaded() {
-    console.log('All assets loaded, starting game...');
-    
-    // Initialize game entities
     this.player = new Player(this.assetManager, this.canvas);
     this.person = new Person(this.assetManager, this.canvas);
-    
-    // Initialize moon (positioned in top left corner, size 50px)
-    const moonX = Constants.MOON.OFFSET_X;
-    const moonY = Constants.MOON.OFFSET_Y;
-    this.moon = new Moon(this.assetManager, moonX, moonY);
-    
-    // Initialize tree (positioned just right of center at bottom)
+    this.moon = new Moon(this.assetManager, Constants.MOON.OFFSET_X, Constants.MOON.OFFSET_Y);
     this.tree = new Tree(this.assetManager);
-    
-    // Initialize cat (only visible on level 3)
     this.cat = new Cat(this.assetManager, this.canvas);
     
-    // Set up initial game state
     this.resetScene();
     this.gameState.updateLevelTitle();
     
-    // Start with intro scene if game hasn't started yet
     if (!this.gameState.gameHasStarted) {
       this.gameState.startIntroScene();
     }
     
-    // Hide loading and start game loop
     this.start();
   }
 
@@ -112,20 +90,7 @@ export class Game {
    * Set up event listeners
    */
   setupEventListeners() {
-    // Window resize
     window.addEventListener('resize', this.onResize);
-    
-    // Input manager will handle keyboard and touch events
-    // Connect input manager to UI manager for visual feedback
-    this.setupInputUIConnection();
-  }
-
-  /**
-   * Connect input manager to UI manager for visual feedback
-   */
-  setupInputUIConnection() {
-    // Input manager handles its own visual feedback
-    // We just need to provide it with the current combo from game state
   }
 
   /**
@@ -142,21 +107,17 @@ export class Game {
   resizeCanvas() {
     const container = document.querySelector('.game-container');
     if (!container) {
-      console.warn('Game container not found, falling back to window dimensions');
       this.setCanvasDimensions();
       return;
     }
     
-    // Calculate available space accounting for container padding
-    const containerWidth = container.clientWidth - 20; // Account for padding
+    const containerWidth = container.clientWidth - 20;
     const containerHeight = container.clientHeight - 20;
     
-    // Determine canvas size based on container and constraints
     let canvasWidth = Math.max(Constants.CANVAS.MIN_WIDTH, 
                               Math.min(Constants.CANVAS.MAX_WIDTH, containerWidth));
     let canvasHeight = Math.round(canvasWidth / Constants.CANVAS.ASPECT_RATIO);
     
-    // Check if height fits, adjust if needed
     if (canvasHeight > containerHeight) {
       canvasHeight = containerHeight;
       canvasWidth = Math.round(canvasHeight * Constants.CANVAS.ASPECT_RATIO);
@@ -164,13 +125,10 @@ export class Game {
                             Math.min(Constants.CANVAS.MAX_WIDTH, canvasWidth));
     }
     
-    // Set canvas dimensions
     this.canvas.width = canvasWidth;
     this.canvas.height = canvasHeight;
     this.canvas.style.width = canvasWidth + 'px';
     this.canvas.style.height = canvasHeight + 'px';
-    
-    console.log(`Canvas resized: ${canvasWidth}x${canvasHeight}`);
   }
   
   /**
@@ -300,29 +258,7 @@ export class Game {
     
     if (this.person) {
       this.person.update(dt, this.gameState.interactionActive);
-      
-      // Handle level 3 cat rescue sequence
-      if (this.gameState.currentLevel === 3 && this.person.isEscaping) {
-        if (this.person.escapePhase === 'initial' && this.person.isOffScreen() && !this.level3EscapeTriggered) {
-          console.log('Person escaped off screen initially, starting cat rescue');
-          this.level3EscapeTriggered = true;
-          // Start cat rescue sequence
-          setTimeout(() => {
-            console.log('Person returning for cat');
-            this.person.startCatRescue(this.cat);
-          }, 1000); // 1 second delay before returning
-        } else if (this.person.escapePhase === 'final_escape' && this.person.isOffScreen()) {
-          console.log('Person escaped with cat, completing level 3');
-          this.completeLevel3Victory();
-        }
-      }
-      // Handle non-level 3 escape completion
-      else if (this.person.isEscaping && this.person.isOffScreen() && 
-               this.gameState.currentLevel !== 3 && !this.level3EscapeTriggered) {
-        console.log('Person escaped off screen, completing level');
-        this.level3EscapeTriggered = true;
-        this.completeLevel3Victory();
-      }
+      this.handlePersonEscape();
     }
     
     // Update moon (visibility based on level config)
@@ -348,6 +284,36 @@ export class Game {
   }
 
   /**
+   * Handle person escape sequences
+   */
+  handlePersonEscape() {
+    if (!this.person.isEscaping || !this.person.isOffScreen()) {
+      return;
+    }
+
+    if (this.gameState.currentLevel === 3) {
+      this.handleLevel3Escape();
+    } else if (!this.level3EscapeTriggered) {
+      this.level3EscapeTriggered = true;
+      this.completeLevel3Victory();
+    }
+  }
+
+  /**
+   * Handle level 3 specific escape with cat rescue
+   */
+  handleLevel3Escape() {
+    if (this.person.escapePhase === 'initial' && !this.level3EscapeTriggered) {
+      this.level3EscapeTriggered = true;
+      setTimeout(() => {
+        this.person.startCatRescue(this.cat);
+      }, 1000);
+    } else if (this.person.escapePhase === 'final_escape') {
+      this.completeLevel3Victory();
+    }
+  }
+
+  /**
    * Handle state changes from game state update
    * @param {Object} stateChanges - Changes that occurred in game state
    */
@@ -368,14 +334,7 @@ export class Game {
    * @param {string} completedScene - The scene that just completed ('intro' or 'outro')
    */
   handleSceneComplete(completedScene) {
-    console.log(`Scene completed: ${completedScene}`);
-    
-    if (completedScene === 'intro') {
-      // Intro complete, start normal gameplay
-      console.log('Intro scene complete, starting normal gameplay');
-    } else if (completedScene === 'outro') {
-      // Outro complete, reset game for next round
-      console.log('Outro scene complete, resetting game for next round');
+    if (completedScene === 'outro') {
       this.gameState.resetToLevel1();
       this.resetScene();
     }
@@ -398,10 +357,7 @@ export class Game {
    * Handle successful combo input
    */
   handleComboSuccess() {
-    // Highlight successful combo in UI
     this.uiManager.highlightSuccessfulCombo();
-    
-    // Process combo success
     const result = this.gameState.processComboSuccess();
     
     switch (result) {
@@ -409,11 +365,9 @@ export class Game {
         this.startNextCombo();
         break;
       case 'level_complete':
-        console.log('Level complete detected');
         this.handleLevelComplete(false);
         break;
       case 'game_complete':
-        console.log('Game complete detected');
         this.handleLevelComplete(true);
         break;
     }
@@ -425,7 +379,6 @@ export class Game {
   startNextCombo() {
     this.gameState.startNextCombo();
     this.updateComboUI();
-    // Set the current combo in input manager BEFORE starting tracking
     this.inputManager.setCurrentCombo(this.gameState.currentCombo);
     this.inputManager.startComboTracking();
   }
@@ -437,97 +390,72 @@ export class Game {
   handleLevelComplete(gameComplete) {
     this.uiManager.showComboUI(false);
     
-    console.log(`handleLevelComplete called: gameComplete=${gameComplete}, currentLevel=${this.gameState.currentLevel}`);
-    
-    // Special handling for level 3 (game complete) - person escapes
     if (gameComplete && this.gameState.currentLevel === 3) {
-      console.log('Triggering level 3 victory');
       this.handleLevel3Victory();
       return;
     }
     
-    console.log('Using standard level complete animation');
-    
-    // Start BOO text immediately
-    this.gameState.startSuccessAnimation();
-    
-    // Wait for 2 complete BOO text flashes (4 frame changes = 2.0 seconds)
-    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4; // 2 complete flashes
-    
-    setTimeout(() => {
-      // After BOO flashes, make person scared and ghost starts laughing immediately
+    this.startBooAnimation(() => {
       this.person.setAnimationState('scared');
-      
-      this.player.setAnimationState('laughing', {
-        duration: Constants.ANIMATION.LAUGHING_DURATION,
-        onComplete: () => {
-          this.gameState.endSuccessAnimation();
-          
-          // Advance level after laughing animation completes
-          if (!gameComplete) {
-            this.gameState.advanceToNextLevel();
-          }
-          
-          this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
-          this.resetScene();
+      this.startLaughingAnimation(() => {
+        this.gameState.endSuccessAnimation();
+        
+        if (!gameComplete) {
+          this.gameState.advanceToNextLevel();
         }
+        
+        this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
+        this.resetScene();
       });
-      
-      // Start "he he" text when laughing begins
-      this.gameState.startLaughingAnimation();
-      
-    }, booFlashDelay * 1000); // Convert to milliseconds
+    });
+  }
+
+  /**
+   * Start BOO text animation
+   * @param {Function} onComplete - Callback when animation completes
+   */
+  startBooAnimation(onComplete) {
+    this.gameState.startSuccessAnimation();
+    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4;
+    setTimeout(onComplete, booFlashDelay * 1000);
+  }
+
+  /**
+   * Start laughing animation with "he he" text
+   * @param {Function} onComplete - Callback when animation completes
+   */
+  startLaughingAnimation(onComplete) {
+    this.player.setAnimationState('laughing', {
+      duration: Constants.ANIMATION.LAUGHING_DURATION,
+      onComplete
+    });
+    this.gameState.startLaughingAnimation();
   }
 
   /**
    * Handle special level 3 victory with person escape animation
    */
   handleLevel3Victory() {
-    console.log('handleLevel3Victory started');
-    // Reset escape tracking flag
     this.level3EscapeTriggered = false;
     
-    // Start BOO text immediately
-    this.gameState.startSuccessAnimation();
-    
-    // Wait for 2 complete BOO text flashes (4 frame changes = 2.0 seconds)
-    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4; // 2 complete flashes
-    
-    setTimeout(() => {
-      console.log('BOO flashes complete, starting escape sequence');
-      // Stop BOO text from showing during escape
+    this.startBooAnimation(() => {
       this.gameState.showBooText = false;
-      
-      // After BOO flashes, person starts escaping and ghost starts laughing immediately
       this.person.startEscape();
       
-      // Start continuous laughing animation (no duration limit)
-      this.player.setAnimationState('laughing', {
-        loop: true // Make it loop indefinitely
-      });
-      
-      // Start continuous "he he" text when laughing begins
+      this.player.setAnimationState('laughing', { loop: true });
       this.gameState.startContinuousLaughing();
-      
-    }, booFlashDelay * 1000); // Convert to milliseconds
+    });
   }
 
   /**
    * Complete level 3 victory sequence and start outro scene
    */
   completeLevel3Victory() {
-    // Prevent multiple calls - if we're not on level 3 anymore, we already completed
     if (this.gameState.currentLevel !== 3) {
-      console.log('Level 3 victory already completed, skipping');
       return;
     }
     
-    console.log('Completing level 3 victory, starting outro scene');
-    // Don't end the success animation - keep laughing and "he he" text
-    // this.gameState.endSuccessAnimation(); // Commented out to keep laughing
     this.endInteraction('success: game complete - person escaped!');
-    
-    // Start outro scene (laughing will continue until game resets)
     this.gameState.startOutroScene();
   }
 
@@ -536,22 +464,7 @@ export class Game {
    */
   handleTimeout() {
     this.uiManager.showComboUI(false);
-    
-    // Start failure animation
-    this.gameState.startFailureAnimation();
-    this.player.setAnimationState('swirling', {
-      frameCount: Constants.ANIMATION.SWIRL_FRAME_COUNT,
-      onComplete: () => {
-        this.player.setAnimationState('dead', {
-          duration: Constants.ANIMATION.DEAD_DURATION,
-          onComplete: () => {
-            this.gameState.endFailureAnimation();
-            this.endInteraction('timeout');
-            this.resetScene();
-          }
-        });
-      }
-    });
+    this.startFailureAnimation();
   }
 
   /**
@@ -566,18 +479,23 @@ export class Game {
       const collisionInfo = this.person.getCollisionInfo(this.player);
       
       if (collisionInfo.isTopCollision) {
-        // Top collision starts interaction
-        this.player.y = this.person.y - (this.person.height + this.player.height) / 2;
-        this.player.vx = 0;
-        this.player.vy = 0;
-        this.startInteraction();
+        this.handleTopCollision();
       } else {
-        // Side collision causes failure
         this.handleSideCollision();
       }
     }
     
     this.person.colliding = nowColliding;
+  }
+
+  /**
+   * Handle top collision (successful landing)
+   */
+  handleTopCollision() {
+    this.player.y = this.person.y - (this.person.height + this.player.height) / 2;
+    this.player.vx = 0;
+    this.player.vy = 0;
+    this.startInteraction();
   }
 
   /**
@@ -587,7 +505,14 @@ export class Game {
     this.player.vx = 0;
     this.player.vy = 0;
     this.uiManager.showComboUI(false);
-    
+    this.startFailureAnimation('failed: side collision');
+  }
+
+  /**
+   * Start failure animation sequence
+   * @param {string} reason - Reason for failure (default: 'timeout')
+   */
+  startFailureAnimation(reason = 'timeout') {
     this.gameState.startFailureAnimation();
     this.player.setAnimationState('swirling', {
       frameCount: Constants.ANIMATION.SWIRL_FRAME_COUNT,
@@ -596,7 +521,7 @@ export class Game {
           duration: Constants.ANIMATION.DEAD_DURATION,
           onComplete: () => {
             this.gameState.endFailureAnimation();
-            this.endInteraction('failed: side collision');
+            this.endInteraction(reason);
             this.resetScene();
           }
         });
@@ -612,7 +537,6 @@ export class Game {
     this.player.setAnimationState('scaring');
     this.uiManager.showComboUI(true);
     this.updateComboUI();
-    // Set the current combo in input manager BEFORE starting tracking
     this.inputManager.setCurrentCombo(this.gameState.currentCombo);
     this.inputManager.startComboTracking();
   }
@@ -624,7 +548,6 @@ export class Game {
   endInteraction(reason) {
     this.gameState.endInteraction(reason);
     
-    // Don't reset player animation during level 3 victory (keep laughing)
     if (!(reason.includes('game complete') && this.gameState.currentLevel === 3)) {
       this.player.setAnimationState('default');
     }
@@ -648,10 +571,8 @@ export class Game {
    * Reset the game scene
    */
   resetScene() {
-    // Reset game state
     this.gameState.reset();
     
-    // Reset entities
     if (this.player) {
       this.player.reset();
     }
@@ -661,26 +582,20 @@ export class Game {
       this.person.reset();
     }
     
-    // Reposition moon for current canvas size
     if (this.moon) {
-      const moonX = Constants.MOON.OFFSET_X;
-      const moonY = Constants.MOON.OFFSET_Y;
-      this.moon.x = moonX;
-      this.moon.y = moonY;
+      this.moon.x = Constants.MOON.OFFSET_X;
+      this.moon.y = Constants.MOON.OFFSET_Y;
     }
     
-    // Reposition tree for current canvas size
     if (this.tree) {
       this.tree.x = this.canvas.width / 2 + 50;
-      this.tree.y = this.canvas.height - 400;  // Updated for 4x tree height
+      this.tree.y = this.canvas.height - 400;
     }
     
-    // Reset cat position
     if (this.cat) {
       this.cat.reset();
     }
     
-    // Reset UI
     this.uiManager.resetAll();
     this.inputManager.resetKeys();
   }
@@ -690,121 +605,98 @@ export class Game {
    */
   draw() {
     const levelConfig = this.gameState.getCurrentLevelConfig();
-    
-    // Clear screen
     this.renderer.clear();
 
-    // During intro scene, show nothing but the text
     if (this.gameState.currentScene === 'intro') {
-      // Don't draw anything - just the scene text will be rendered at the end
-    } 
-    // During outro scene, show game elements in background
-    else if (this.gameState.currentScene === 'outro') {
-      // Draw moon in background (visibility based on level config)
-      if (this.moon && levelConfig.showMoon) {
-        this.moon.render(this.renderer.ctx);
-      }
-      
-      // Draw tree in background (visibility based on level config)
-      if (this.tree && levelConfig.showTree) {
-        this.tree.render(this.renderer.ctx);
-      }
-      
-      // Draw cat during outro if it was on level 3
-      if (this.cat && this.gameState.currentLevel === 3) {
-        this.renderer.drawCat(this.cat);
-      }
-      
-      // Draw entities during outro
-      if (this.person) {
-        this.renderer.drawPerson(this.person);
-      }
-      
-      if (this.player) {
-        this.renderer.drawPlayer(this.player);
-      }
-      
-      // Draw "he he" text during outro if laughing
-      if (this.gameState.showHeheText && this.player) {
-        const textX = this.player.x;
-        const textY = this.player.y - Constants.HEHE_TEXT.OFFSET_Y;
-        this.renderer.drawHeheText(textX, textY, this.gameState.heheTextTimer);
-      }
-    } else {
-      // Normal gameplay rendering
-      // Draw moon in background (visibility based on level config)
-      if (this.moon && levelConfig.showMoon) {
-        this.moon.render(this.renderer.ctx);
-      }
-      
-      // Draw tree in background (visibility based on level config)
-      if (this.tree && levelConfig.showTree) {
-        this.tree.render(this.renderer.ctx);
-      }
-      
-      // Draw cat (only on level 3)
-      if (this.cat && this.gameState.currentLevel === 3) {
-        this.renderer.drawCat(this.cat);
-      }
-      
-      // Draw entities
-      if (this.person) {
-        this.renderer.drawPerson(this.person);
-      }
-      
-      if (this.player) {
-        this.renderer.drawPlayer(this.player);
-      }
-      
-      // Draw "BOO!" text if active (fixed position during level 3 escape)
-      if (this.gameState.showBooText && this.player && this.person) {
-        let textX, textY;
-        
-        if (this.person.isEscaping) {
-          // Keep BOO text at player position during escape
-          textX = this.player.x;
-          textY = this.player.y - Constants.BOO_TEXT.OFFSET_Y;
-        } else {
-          // Normal positioning between player and person
-          textX = (this.player.x + this.person.x) / 2;
-          textY = Math.min(this.player.y, this.person.y) - Constants.BOO_TEXT.OFFSET_Y;
-        }
-        
-        this.renderer.drawBooText(textX, textY, this.gameState.booTextTimer);
-      }
-
-      // Draw "he he" text if active (appears above BOO text when laughing)
-      if (this.gameState.showHeheText && this.player && this.person) {
-        let textX, textY;
-        
-        if (this.person.isEscaping) {
-          // Keep he he text at player position during escape
-          textX = this.player.x;
-          textY = this.player.y - Constants.HEHE_TEXT.OFFSET_Y;
-        } else {
-          // Normal positioning between player and person, above BOO text
-          textX = (this.player.x + this.person.x) / 2;
-          textY = Math.min(this.player.y, this.person.y) - Constants.HEHE_TEXT.OFFSET_Y;
-        }
-        
-        this.renderer.drawHeheText(textX, textY, this.gameState.heheTextTimer);
-      }
+      this.drawSceneText();
+      return;
     }
 
-    // Draw scene text (intro/outro) if active - this should always be on top
-    if (this.gameState.isInScene()) {
-      const opacity = this.gameState.getCurrentSceneOpacity();
-      let text = '';
-      
-      if (this.gameState.currentScene === 'intro') {
-        text = Constants.SCENE_TEXT.INTRO_TEXT;
-      } else if (this.gameState.currentScene === 'outro') {
-        text = Constants.SCENE_TEXT.OUTRO_TEXT;
-      }
-      
-      if (text && opacity > 0) {
-        this.renderer.drawSceneText(text, opacity);
-      }
+    this.drawBackground(levelConfig);
+    this.drawEntities(levelConfig);
+    this.drawTextEffects();
+    this.drawSceneText();
+  }
+
+  /**
+   * Draw background elements (moon and tree)
+   * @param {Object} levelConfig - Current level configuration
+   */
+  drawBackground(levelConfig) {
+    if (this.moon && levelConfig.showMoon) {
+      this.moon.render(this.renderer.ctx);
+    }
+    
+    if (this.tree && levelConfig.showTree) {
+      this.tree.render(this.renderer.ctx);
+    }
+  }
+
+  /**
+   * Draw game entities
+   * @param {Object} levelConfig - Current level configuration
+   */
+  drawEntities(levelConfig) {
+    if (this.cat && this.gameState.currentLevel === 3) {
+      this.renderer.drawCat(this.cat);
+    }
+    
+    if (this.person) {
+      this.renderer.drawPerson(this.person);
+    }
+    
+    if (this.player) {
+      this.renderer.drawPlayer(this.player);
+    }
+  }
+
+  /**
+   * Draw text effects (BOO and "he he")
+   */
+  drawTextEffects() {
+    if (this.gameState.showBooText && this.player && this.person) {
+      const { x, y } = this.getTextPosition(Constants.BOO_TEXT.OFFSET_Y);
+      this.renderer.drawBooText(x, y, this.gameState.booTextTimer);
+    }
+
+    if (this.gameState.showHeheText && this.player) {
+      const { x, y } = this.getTextPosition(Constants.HEHE_TEXT.OFFSET_Y);
+      this.renderer.drawHeheText(x, y, this.gameState.heheTextTimer);
+    }
+  }
+
+  /**
+   * Get text position based on player and person positions
+   * @param {number} offsetY - Y offset from entity position
+   * @returns {Object} Object with x and y coordinates
+   */
+  getTextPosition(offsetY) {
+    if (this.person.isEscaping) {
+      return {
+        x: this.player.x,
+        y: this.player.y - offsetY
+      };
+    }
+    
+    return {
+      x: (this.player.x + this.person.x) / 2,
+      y: Math.min(this.player.y, this.person.y) - offsetY
+    };
+  }
+
+  /**
+   * Draw intro/outro scene text if active
+   */
+  drawSceneText() {
+    if (!this.gameState.isInScene()) return;
+    
+    const opacity = this.gameState.getCurrentSceneOpacity();
+    const text = this.gameState.currentScene === 'intro' 
+      ? Constants.SCENE_TEXT.INTRO_TEXT 
+      : Constants.SCENE_TEXT.OUTRO_TEXT;
+    
+    if (text && opacity > 0) {
+      this.renderer.drawSceneText(text, opacity);
     }
   }
 
@@ -829,6 +721,5 @@ export class Game {
   destroy() {
     this.stop();
     window.removeEventListener('resize', this.onResize);
-    // Additional cleanup could be added here
   }
 }
