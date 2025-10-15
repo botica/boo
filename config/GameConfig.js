@@ -28,7 +28,7 @@ export const GameConfig = {
       hasWind: false,
       hasFloats: true,
       showMoon: true,
-      showTree: true
+      showTree: false
     }
   },
   

@@ -183,4 +183,16 @@ export class AnimationFactory {
       new AnimationState('scared', sprites.scared, interval, true)
     ];
   }
+
+  /**
+   * Create cat animation states
+   * @param {Object} sprites - Sprite collections for cat
+   * @returns {AnimationState[]} Array of animation states
+   */
+  static createCatAnimations(sprites) {
+    const interval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+    return [
+      new AnimationState('default', sprites.default, interval, true)
+    ];
+  }
 }
