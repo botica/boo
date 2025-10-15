@@ -12,32 +12,26 @@ export class GameState {
   // =================== INITIALIZATION ===================
 
   initializeState() {
-    // Level state
     this.currentLevel = 1;
     this.combosCompleted = 0;
     
-    // Interaction state
     this.interactionActive = false;
     this.animationInProgress = false;
     
-    // Combo state
     this.resetComboState();
     
-    // Visual effects
     this.showBooText = false;
     this.booTextTimer = 0;
     this.showHeheText = false;
     this.heheTextTimer = 0;
-    this.continuousLaughing = false; // Flag for level 3 continuous laughing
+    this.continuousLaughing = false;
     
-    // Scene management
-    this.gameHasStarted = false; // Track if game has ever been started
-    this.currentScene = null; // 'intro', 'outro', or null for gameplay
+    this.gameHasStarted = false;
+    this.currentScene = null;
     this.sceneTimer = 0;
     this.sceneFrameIndex = 0;
     this.sceneStartTime = 0;
     
-    // Cache config data
     this.arrowKeys = GameConfig.arrowKeys;
     this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
   }
@@ -63,7 +57,6 @@ export class GameState {
       this.resetComboState();
       this.comboDuration = GameConfig.levelConfig[this.currentLevel].comboDuration;
       this.updateLevelTitle();
-      console.log(`Level advanced to ${this.currentLevel}`);
     }
   }
 
@@ -92,7 +85,6 @@ export class GameState {
     this.interactionActive = false;
     this.currentCombo = null;
     this.comboTimeLeft = 0;
-    console.log('Interaction ended:', reason || 'finished');
   }
 
   // =================== COMBO GENERATION ===================
@@ -117,16 +109,11 @@ export class GameState {
     this.comboDuration = config ? config.comboDuration : 5.0;
     
     const allCombos = this.generateAllCombos();
-    
-    // Filter out only the last combo to prevent consecutive duplicates
     const availableCombos = this.lastCombo 
       ? allCombos.filter(combo => combo !== this.lastCombo)
       : allCombos;
     
     const chosen = this.selectRandomCombo(availableCombos);
-    
-    // Debug logging
-    console.log(`Previous combo: ${this.lastCombo}, Generated combo: ${chosen}`);
     
     this.lastCombo = chosen;
     this.levelCombos.push(chosen);
@@ -154,10 +141,8 @@ export class GameState {
     this.animationInProgress = true;
     
     if (this.currentLevel < GameConfig.MAX_LEVELS) {
-      console.log(`boo! you scared them! advancing to level ${this.currentLevel + 1}!`);
       return 'level_complete';
     } else {
-      console.log('boo! you scared them! you beat the game!');
       return 'game_complete';
     }
   }
@@ -165,7 +150,6 @@ export class GameState {
   processComboTimeout() {
     this.comboAccepted = true;
     this.animationInProgress = true;
-    console.log('Try again?');
   }
 
   // =================== ANIMATION MANAGEMENT ===================
@@ -222,7 +206,6 @@ export class GameState {
     
     if (this.showHeheText) {
       this.heheTextTimer += dt;
-      // Don't timeout "he he" text during continuous laughing (level 3 victory)
       if (!this.continuousLaughing && this.heheTextTimer >= Constants.HEHE_TEXT.DURATION / 1000) {
         this.showHeheText = false;
       }
@@ -277,7 +260,6 @@ export class GameState {
     this.sceneTimer = 0;
     this.sceneFrameIndex = 0;
     this.sceneStartTime = performance.now();
-    console.log('Starting intro scene');
   }
 
   startOutroScene() {
@@ -285,7 +267,6 @@ export class GameState {
     this.sceneTimer = 0;
     this.sceneFrameIndex = 0;
     this.sceneStartTime = performance.now();
-    console.log('Starting outro scene');
   }
 
   updateScene(dt) {
@@ -293,7 +274,6 @@ export class GameState {
 
     this.sceneTimer += dt;
     
-    // Update frame index based on animation interval
     const frameInterval = Constants.SCENE_TEXT.FADE_FRAME_INTERVAL;
     const newFrameIndex = Math.floor(this.sceneTimer / frameInterval);
     
@@ -301,16 +281,13 @@ export class GameState {
       this.sceneFrameIndex = newFrameIndex;
     }
 
-    // Check if scene is complete
     const totalFrames = Constants.SCENE_TEXT.FADE_OPACITY_SEQUENCE.length;
     if (this.sceneFrameIndex >= totalFrames) {
-      console.log(`${this.currentScene} scene complete`);
       const completedScene = this.currentScene;
       this.currentScene = null;
       this.sceneTimer = 0;
       this.sceneFrameIndex = 0;
       
-      // Mark game as started if intro completed
       if (completedScene === 'intro') {
         this.gameHasStarted = true;
       }

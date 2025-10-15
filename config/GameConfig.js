@@ -34,7 +34,6 @@ export const GameConfig = {
   
   arrowKeys: ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'],
   
-  // Arrow key display images
   arrowImages: {
     large: {
       ArrowLeft: 'images/ui/arrow-left-200px.png',
