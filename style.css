@@ -12,7 +12,7 @@ canvas {
   image-rendering: pixelated; 
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  border: 3px dashed white;
+  border: 2px dashed white;
   max-width: 1200px;
 }
 
@@ -76,7 +76,7 @@ canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 30px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -182,13 +182,17 @@ canvas {
 #tile-right { grid-column: 3; grid-row: 2; }
 
 .combo-ui {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 140px));
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  margin-left: 6px;
   font: 12px sans-serif;
   color: #fff;
+  z-index: 49;
 }
 .progress-bar-image {
   width: 100px;
