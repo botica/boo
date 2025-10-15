@@ -94,9 +94,10 @@ export const Constants = {
   },
   
   CAT: {
-    WIDTH: 150,
-    HEIGHT: 150,
+    WIDTH: 200,
+    HEIGHT: 200,
     MARGIN_FROM_EDGE: 20,
+    SPAWN_OFFSET_X: 150, // Additional offset from right edge
     CARRY_OFFSET_X: -30, // Offset when being carried by person
     CARRY_OFFSET_Y: -20
   },

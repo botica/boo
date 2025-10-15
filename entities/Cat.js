@@ -13,8 +13,8 @@ export class Cat {
     this.width = Constants.CAT.WIDTH;
     this.height = Constants.CAT.HEIGHT;
     
-    // Position cat in bottom right corner, moved left 150px total, bottom-aligned
-    this.x = canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - 150;
+    // Position cat in bottom right corner, moved left by SPAWN_OFFSET_X, bottom-aligned
+    this.x = canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - Constants.CAT.SPAWN_OFFSET_X;
     this.y = canvas.height - this.height/2; // Center Y at bottom edge to align sprite bottom with canvas bottom
     
     // Movement properties for escape sequence
