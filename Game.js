@@ -1,28 +1,5 @@
 /**
- * Game.js - Main game orchestrator
- * 
- * This class manages the entire game lifecycle including:
- * - Asset loading and initialization
- * - Game loop (update/draw cycle)
- * - Entity management (player, person, moon, tree, cat)
- * - Collision detection and interaction handling
- * - Level progression and scene transitions
- * - Input handling and combo validation
- * - Animation sequences for success/failure states
- * 
- * Key Game Flow:
- * 1. Initialize assets and entities
- * 2. Show intro scene
- * 3. Player floats around and lands on person's head
- * 4. Player must input correct arrow key combos to scare the person
- * 5. Complete all combos to advance level (3 levels total)
- * 6. Level 3 ends with person escaping (with cat rescue sequence)
- * 7. Show outro scene and reset game
- * 
- * Collision Rules:
- * - Landing on person's head starts interaction (combo input)
- * - Hitting person's side causes failure (ghost blows away)
- * - Timeout on combo also causes failure
+ * Game.js - game orchestrator
  */
 
 import { AssetManager } from './assets/AssetManager.js';
