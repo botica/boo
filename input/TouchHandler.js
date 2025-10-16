@@ -51,7 +51,7 @@ export class TouchHandler {
     // Click support
     tileEl.addEventListener('click', e => {
       pressKey();
-      setTimeout(() => releaseKey(), Constants.TOUCH.CLICK_DURATION);
+      setTimeout(() => releaseKey(), Constants.TOUCH.CLICK_DURATION * 1000);
     });
 
     // Keyboard accessibility
@@ -112,7 +112,7 @@ export class TouchHandler {
     
     el.addEventListener('click', e => {
       pressKey();
-      setTimeout(releaseKey, Constants.TOUCH.CLICK_DURATION);
+      setTimeout(releaseKey, Constants.TOUCH.CLICK_DURATION * 1000);
     });
     
     el.addEventListener('keydown', e => {

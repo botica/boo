@@ -24,15 +24,15 @@ export const Constants = {
         force: 350, // Horizontal speed
         threshold: 0, // Always available
         holdDurationMax: 0.075,
-        duration: 0.35, // Float duration in seconds
+        duration: 0.3, // Float duration in seconds
         hopHeight: 20 // Vertical hop height in pixels - ADJUST THIS FOR SMALL FLOAT HEIGHT
       },
       large: {
         force: 850, // Horizontal speed
-        threshold: 0.08, // Requires > 0.1s hold
+        threshold: 0.1, // Requires > 0.1s hold
         holdDurationMax: Infinity,
         duration: 0.6, // Float duration in seconds
-        hopHeight: 44 // Vertical hop height in pixels - ADJUST THIS FOR LARGE FLOAT HEIGHT
+        hopHeight: 40 // Vertical hop height in pixels - ADJUST THIS FOR LARGE FLOAT HEIGHT
       }
     },
 
@@ -40,8 +40,8 @@ export const Constants = {
     FLOAT_SLOWDOWN_FACTOR: 0.45, // How much to slow down during deceleration
     FLOAT_FULL_SPEED_RATIO: 0.25, // Maintain full speed for first part of float 
     FLOAT_DECELERATION_RATIO: 0.75, // Decelerate during remaining part
-    FLOAT_TIER_INTERPOLATION_SPEED: 800, // How fast to transition between tiers
-    FLOAT_HORIZONTAL_INERTIA: 0.90, // Horizontal velocity decay after float ends
+    FLOAT_TIER_INTERPOLATION_SPEED: 750, // How fast to transition between tiers
+    FLOAT_HORIZONTAL_INERTIA: 0.92, // Horizontal velocity decay after float ends
     
     // Movement detection threshold
     MOVEMENT_THRESHOLD: 0.001, // Minimum velocity to be considered "moving"
@@ -97,19 +97,25 @@ export const Constants = {
     WIDTH: 150,
     HEIGHT: 150,
     MARGIN_FROM_EDGE: 20,
-    CARRY_OFFSET_X: -30, // Offset when being carried by person
-    CARRY_OFFSET_Y: -20
+    CARRY_OFFSET_X: 0, // Offset when being carried by person
+    CARRY_OFFSET_Y: 0
   },
   
-  // =================== VISUAL & UI CONSTANTS ===================
+  // =================== ANIMATION CONSTANTS ===================
+  // All animation durations are in SECONDS for consistency
   ANIMATION: {
-    DEFAULT_FRAME_INTERVAL: 0.4,
-    ANGRY_FRAME_COUNT: 4,
-    SWIRL_FRAME_COUNT: 2,
-    LAUGHING_DURATION: 2800,
-    DEAD_DURATION: 1000,
+    // Frame timing - interval between animation frames (in seconds)
+    DEFAULT_FRAME_INTERVAL: 0.5,
+    
+    // Ghost animation durations (in seconds)
+    ANGRY_DURATION: 1.6,      // 4 frames * 0.4s per frame
+    SWIRL_DURATION: 0.8,      // 2 frames * 0.4s per frame
+    LAUGHING_DURATION: 2.8,   // 2800ms converted to seconds
+    DEAD_DURATION: 1.0,       // 1000ms converted to seconds
+    
+    // Text animation timings (in seconds)
     BOO_TEXT_FLASH_INTERVAL: 0.5,
-    BOO_TEXT_DURATION: 1500 // Maximum time BOO text shows (ms)
+    BOO_TEXT_DURATION: 1.5,   // 1500ms converted to seconds
   },
   
   UI: {
@@ -135,7 +141,7 @@ export const Constants = {
     OFFSET_Y: 100, // Position above BOO text
     FONT_SIZE: 32,
     FLASH_INTERVAL: 0.3,
-    DURATION: 2200 // Shortened by two flash cycles (2 * 0.3 * 1000 = 600ms less)
+    DURATION: 2.2 // 2200ms converted to seconds
   },
 
   SCENE_TEXT: {
@@ -160,6 +166,6 @@ export const Constants = {
   
   // =================== INPUT CONSTANTS ===================
   TOUCH: {
-    CLICK_DURATION: 120 // ms
+    CLICK_DURATION: 0.12 // Duration in seconds (120ms)
   }
 };

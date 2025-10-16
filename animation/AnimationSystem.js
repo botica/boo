@@ -10,7 +10,7 @@ export class AnimationState {
   constructor(name, frames, interval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL, loop = true) {
     this.name = name;
     this.frames = frames;
-    this.interval = interval; // seconds between frames
+    this.interval = interval; // Interval between frames in SECONDS
     this.loop = loop;
   }
 }
@@ -40,6 +40,10 @@ export class AnimatedEntity {
    * Set the current animation state
    * @param {string} stateName - Name of the state to switch to
    * @param {Object} options - Animation options
+   * @param {number} options.duration - Duration in SECONDS (mutually exclusive with frameCount)
+   * @param {number} options.frameCount - Number of frames to play before ending (mutually exclusive with duration)
+   * @param {Function} options.onComplete - Callback when animation completes
+   * @param {boolean} options.immediate - If true, start at interval offset instead of 0
    */
   setState(stateName, options = {}) {
     const { duration, frameCount, onComplete, immediate = false } = options;
@@ -57,8 +61,9 @@ export class AnimatedEntity {
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
     
+    // Use duration (in seconds) for time-based animation ending
     if (duration && duration > 0) {
-      this.tempEndTime = performance.now() + duration;
+      this.tempEndTime = performance.now() + duration * 1000; // Convert seconds to milliseconds
     } else if (frameCount && frameCount > 0) {
       this.tempStateFrameCount = frameCount;
       this.tempStateFramesPlayed = 0;
@@ -85,7 +90,7 @@ export class AnimatedEntity {
   
   /**
    * Update animation timing and frame progression
-   * @param {number} dt - Delta time in seconds
+   * @param {number} dt - Delta time in SECONDS
    */
   update(dt) {
     const state = this.getCurrentState();
@@ -111,7 +116,7 @@ export class AnimatedEntity {
       }
     }
     
-    // Check time-based limits
+    // Check time-based limits (tempEndTime is in milliseconds)
     if (this.tempEndTime > 0 && performance.now() >= this.tempEndTime) {
       this._endTempState();
     }

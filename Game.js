@@ -519,7 +519,7 @@ export class Game {
   startFailureAnimation(reason = 'timeout') {
     this.gameState.startFailureAnimation();
     this.player.setAnimationState('swirling', {
-      frameCount: Constants.ANIMATION.SWIRL_FRAME_COUNT,
+      duration: Constants.ANIMATION.SWIRL_DURATION,
       onComplete: () => {
         this.player.setAnimationState('dead', {
           duration: Constants.ANIMATION.DEAD_DURATION,

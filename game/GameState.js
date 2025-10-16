@@ -199,14 +199,14 @@ export class GameState {
   updateBooText(dt) {
     if (this.showBooText) {
       this.booTextTimer += dt;
-      if (this.booTextTimer >= Constants.ANIMATION.BOO_TEXT_DURATION / 1000) {
+      if (this.booTextTimer >= Constants.ANIMATION.BOO_TEXT_DURATION) {
         this.showBooText = false;
       }
     }
     
     if (this.showHeheText) {
       this.heheTextTimer += dt;
-      if (!this.continuousLaughing && this.heheTextTimer >= Constants.HEHE_TEXT.DURATION / 1000) {
+      if (!this.continuousLaughing && this.heheTextTimer >= Constants.HEHE_TEXT.DURATION) {
         this.showHeheText = false;
       }
     }
