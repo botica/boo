@@ -221,7 +221,7 @@ export class Game {
           this.inputManager,
           levelConfig,
           false, // no interaction
-          false  // no animation in progress
+          true   // animation in progress - prevents player control during outro
         );
       }
       
