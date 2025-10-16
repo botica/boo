@@ -12,7 +12,7 @@ canvas {
   image-rendering: pixelated; 
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  border: 2px dashed white;
+  border: 2px solid white;
   max-width: 1200px;
 }
 
@@ -109,7 +109,6 @@ canvas {
   background: #000;
   color: #fff;
   font: 20px sans-serif;
-  border: 1px solid #fff;
   box-sizing: border-box;
   user-select: none;
   border-radius: 0;

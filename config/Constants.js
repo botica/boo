@@ -13,7 +13,7 @@ export const Constants = {
     SPAWN_OFFSET_Y: 10,
     
     // Movement speeds
-    VERTICAL_SPEED: 200, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
+    VERTICAL_SPEED: 250, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
     ACCEL: 1500,
     VERTICAL_INERTIA: 0.97, // How much vertical velocity is retained when key is released
 
