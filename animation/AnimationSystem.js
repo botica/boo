@@ -25,7 +25,6 @@ export class AnimatedEntity {
     this.currentState = defaultState;
     this.frameIndex = 0;
     this.frameTimer = 0;
-    this.tempEndTime = 0;
     this.tempEndCallback = null;
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
@@ -56,7 +55,6 @@ export class AnimatedEntity {
     this.currentState = stateName;
     this.frameTimer = immediate ? this.getCurrentState().interval : 0;
     this.frameIndex = 0;
-    this.tempEndTime = 0;
     this.tempEndCallback = onComplete || null;
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
@@ -126,7 +124,6 @@ export class AnimatedEntity {
    */
   _endTempState() {
     const callback = this.tempEndCallback;
-    this.tempEndTime = 0;
     this.tempEndCallback = null;
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;

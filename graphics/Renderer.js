@@ -8,6 +8,9 @@ export class Renderer {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     
+    // Cache frame interval for flash animations
+    this.flashFrameInterval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+    
     // Disable image smoothing for crisp pixel art
     this.ctx.imageSmoothingEnabled = false;
     this.ctx.mozImageSmoothingEnabled = false;
@@ -179,8 +182,7 @@ export class Renderer {
    */
   drawBooText(x, y, timer) {
     // Flash white and black at frame intervals (0.5s per frame = 2 colors per second)
-    const frameInterval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-    const flashPhase = Math.floor(timer / frameInterval) % 2;
+    const flashPhase = Math.floor(timer / this.flashFrameInterval) % 2;
     const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
 
     this.drawText('boo', x, y, {
@@ -199,8 +201,7 @@ export class Renderer {
    */
   drawHeheText(x, y, timer) {
     // Flash white and black at frame intervals (0.5s per frame = 2 colors per second)
-    const frameInterval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-    const flashPhase = Math.floor(timer / frameInterval) % 2;
+    const flashPhase = Math.floor(timer / this.flashFrameInterval) % 2;
     const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
 
     this.drawText('he he', x, y, {
