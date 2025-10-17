@@ -102,20 +102,20 @@ export const Constants = {
   },
   
   // =================== ANIMATION CONSTANTS ===================
-  // All animation durations are in SECONDS for consistency
+  // All animation timing is based on frame counts and frame intervals
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
     DEFAULT_FRAME_INTERVAL: 0.5,
     
-    // Ghost animation durations (in seconds)
-    ANGRY_DURATION: 1.6,      // 4 frames * 0.4s per frame
-    SWIRL_DURATION: 0.8,      // 2 frames * 0.4s per frame
-    LAUGHING_DURATION: 2.8,   // 2800ms converted to seconds
-    DEAD_DURATION: 1.0,       // 1000ms converted to seconds
+    // Ghost animation frame counts
+    ANGRY_FRAME_COUNT: 4,      // 4 frames at 0.5s = 2.0s total
+    SWIRL_FRAME_COUNT: 2,      // 2 frames at 0.5s = 1.0s total
+    LAUGHING_FRAME_COUNT: 6,   // 6 frames at 0.5s = 3.0s total (rounded from 2.8s)
+    DEAD_FRAME_COUNT: 2,       // 2 frames at 0.5s = 1.0s total
     
-    // Text animation timings (in seconds)
-    BOO_TEXT_FLASH_INTERVAL: 0.5,
-    BOO_TEXT_DURATION: 1.5,   // 1500ms converted to seconds
+    // Text animation frame counts
+    BOO_TEXT_FLASH_FRAME_COUNT: 8,  // 8 frames at 0.5s = 4.0s total (4 full flashes)
+    BOO_TEXT_DURATION: 4.0,         // Total duration in seconds (8 frames * 0.5s)
   },
   
   UI: {
@@ -140,8 +140,8 @@ export const Constants = {
   HEHE_TEXT: {
     OFFSET_Y: 100, // Position above BOO text
     FONT_SIZE: 32,
-    FLASH_INTERVAL: 0.3,
-    DURATION: 2.2 // 2200ms converted to seconds
+    FLASH_FRAME_COUNT: 4,  // 4 frames at 0.5s = 2.0s total (rounded from 2.2s)
+    DURATION: 2.0          // Total duration in seconds (4 frames * 0.5s)
   },
 
   SCENE_TEXT: {

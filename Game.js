@@ -420,8 +420,8 @@ export class Game {
    */
   startBooAnimation(onComplete) {
     this.gameState.startSuccessAnimation();
-    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4;
-    setTimeout(onComplete, booFlashDelay * 1000);
+    const booFlashDuration = Constants.ANIMATION.BOO_TEXT_DURATION;
+    setTimeout(onComplete, booFlashDuration * 1000);
   }
 
   /**
@@ -430,7 +430,7 @@ export class Game {
    */
   startLaughingAnimation(onComplete) {
     this.player.setAnimationState('laughing', {
-      duration: Constants.ANIMATION.LAUGHING_DURATION,
+      frameCount: Constants.ANIMATION.LAUGHING_FRAME_COUNT,
       onComplete
     });
     this.gameState.startLaughingAnimation();
@@ -519,10 +519,10 @@ export class Game {
   startFailureAnimation(reason = 'timeout') {
     this.gameState.startFailureAnimation();
     this.player.setAnimationState('swirling', {
-      duration: Constants.ANIMATION.SWIRL_DURATION,
+      frameCount: Constants.ANIMATION.SWIRL_FRAME_COUNT,
       onComplete: () => {
         this.player.setAnimationState('dead', {
-          duration: Constants.ANIMATION.DEAD_DURATION,
+          frameCount: Constants.ANIMATION.DEAD_FRAME_COUNT,
           onComplete: () => {
             this.gameState.endFailureAnimation();
             this.endInteraction(reason);

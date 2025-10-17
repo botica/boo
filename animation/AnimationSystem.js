@@ -40,8 +40,8 @@ export class AnimatedEntity {
    * Set the current animation state
    * @param {string} stateName - Name of the state to switch to
    * @param {Object} options - Animation options
-   * @param {number} options.duration - Duration in SECONDS (mutually exclusive with frameCount)
-   * @param {number} options.frameCount - Number of frames to play before ending (mutually exclusive with duration)
+   * @param {number} options.frameCount - Number of frames to play before ending (preferred)
+   * @param {number} options.duration - Duration in SECONDS (deprecated, converted to frameCount)
    * @param {Function} options.onComplete - Callback when animation completes
    * @param {boolean} options.immediate - If true, start at interval offset instead of 0
    */
@@ -61,11 +61,14 @@ export class AnimatedEntity {
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
     
-    // Use duration (in seconds) for time-based animation ending
-    if (duration && duration > 0) {
-      this.tempEndTime = performance.now() + duration * 1000; // Convert seconds to milliseconds
-    } else if (frameCount && frameCount > 0) {
+    // Prefer frameCount, but support duration for backward compatibility
+    if (frameCount && frameCount > 0) {
       this.tempStateFrameCount = frameCount;
+      this.tempStateFramesPlayed = 0;
+    } else if (duration && duration > 0) {
+      // Convert duration to frame count (round to nearest frame)
+      const state = this.getCurrentState();
+      this.tempStateFrameCount = Math.round(duration / state.interval);
       this.tempStateFramesPlayed = 0;
     }
   }
@@ -114,11 +117,6 @@ export class AnimatedEntity {
           }
         }
       }
-    }
-    
-    // Check time-based limits (tempEndTime is in milliseconds)
-    if (this.tempEndTime > 0 && performance.now() >= this.tempEndTime) {
-      this._endTempState();
     }
   }
   
