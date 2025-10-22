@@ -147,13 +147,6 @@ const Constants = {
     FONT_SIZE: 48
   },
 
-  HEHE_TEXT: {
-    OFFSET_Y: 100, // Position above BOO text
-    FONT_SIZE: 32,
-    FLASH_FRAMES: 1, // Frames per flash (flash interval)
-    FRAMES: 4 // Total duration in frames
-  },
-
   SCENE_TEXT: {
     INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
     OUTRO_TEXT: "you won!",

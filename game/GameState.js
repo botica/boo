@@ -22,9 +22,7 @@ export class GameState {
     
     this.showBooText = false;
     this.booTextTimer = 0;
-    this.showHeheText = false;
-    this.heheTextTimer = 0;
-    this.continuousLaughing = false;
+  this.continuousLaughing = false;
     
     this.gameHasStarted = false;
     this.currentScene = null;
@@ -161,20 +159,16 @@ export class GameState {
   }
 
   startLaughingAnimation() {
-    this.showHeheText = true;
-    this.heheTextTimer = 0;
+  // Laughing animation only
   }
 
   startContinuousLaughing() {
-    this.showHeheText = true;
-    this.heheTextTimer = 0;
-    this.continuousLaughing = true;
+  this.continuousLaughing = true;
   }
 
   endSuccessAnimation() {
-    this.showBooText = false;
-    this.showHeheText = false;
-    this.animationInProgress = false;
+  this.showBooText = false;
+  this.animationInProgress = false;
   }
 
   startFailureAnimation() {
@@ -206,14 +200,6 @@ export class GameState {
         this.showBooText = false;
       }
     }
-    
-    if (this.showHeheText) {
-      this.heheTextTimer += dt;
-      const heheTextDuration = Constants.HEHE_TEXT.FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-      if (!this.continuousLaughing && this.heheTextTimer >= heheTextDuration) {
-        this.showHeheText = false;
-      }
-    }
   }
 
   updateComboTimer(dt, changes) {
@@ -235,8 +221,7 @@ export class GameState {
     this.resetComboState();
     this.showBooText = false;
     this.booTextTimer = 0;
-    this.showHeheText = false;
-    this.heheTextTimer = 0;
+  // 'he he' text logic removed
     this.continuousLaughing = false;
     this.combosCompleted = 0;
   }

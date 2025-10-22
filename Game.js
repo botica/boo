@@ -705,11 +705,6 @@ export class Game {
       const { x, y } = this.getTextPosition(Constants.BOO_TEXT.OFFSET_Y);
       this.renderer.drawBooText(x, y, this.gameState.booTextTimer);
     }
-
-    if (this.gameState.showHeheText && this.player) {
-      const { x, y } = this.getTextPosition(Constants.HEHE_TEXT.OFFSET_Y);
-      this.renderer.drawHeheText(x, y, this.gameState.heheTextTimer);
-    }
   }
 
   /**
