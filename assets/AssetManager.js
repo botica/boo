@@ -1,6 +1,8 @@
 /**
  * AssetManager handles loading and managing all game sprites and images
  */
+import { GameConfig } from '../config/GameConfig.js';
+
 export class AssetManager {
   constructor() {
     this.sprites = {};
@@ -58,23 +60,23 @@ export class AssetManager {
       cat: 'images/cat.png',
       cat1: 'images/cat-1.png',
       
-      // Arrow UI sprites
-      arrowUpLarge: 'images/ui/arrow-up-200px.png',
-      arrowDownLarge: 'images/ui/arrow-down-200px.png',
-      arrowLeftLarge: 'images/ui/arrow-left-200px.png',
-      arrowRightLarge: 'images/ui/arrow-right-200px.png',
-      arrowUpSmall: 'images/ui/arrow-up-50px.png',
-      arrowDownSmall: 'images/ui/arrow-down-50px.png',
-      arrowLeftSmall: 'images/ui/arrow-left-50px.png',
-      arrowRightSmall: 'images/ui/arrow-right-50px.png',
+      // Arrow UI sprites (from GameConfig)
+      arrowUpLarge: GameConfig.arrowImages.large.ArrowUp,
+      arrowDownLarge: GameConfig.arrowImages.large.ArrowDown,
+      arrowLeftLarge: GameConfig.arrowImages.large.ArrowLeft,
+      arrowRightLarge: GameConfig.arrowImages.large.ArrowRight,
+      arrowUpSmall: GameConfig.arrowImages.small.ArrowUp,
+      arrowDownSmall: GameConfig.arrowImages.small.ArrowDown,
+      arrowLeftSmall: GameConfig.arrowImages.small.ArrowLeft,
+      arrowRightSmall: GameConfig.arrowImages.small.ArrowRight,
       
-      // Progress bar sprites
-      progressBar0: 'images/ui/prog-bar-0-200px.png',
-      progressBar1: 'images/ui/prog-bar-1-200px.png',
-      progressBar2: 'images/ui/prog-bar-2-200px.png',
-      progressBar3: 'images/ui/prog-bar-3-200px.png',
-      progressBar4: 'images/ui/prog-bar-4-200px.png',
-      progressBar5: 'images/ui/prog-bar-5-200px.png'
+      // Progress bar sprites (from GameConfig)
+      progressBar0: GameConfig.progressBarImages[0],
+      progressBar1: GameConfig.progressBarImages[1],
+      progressBar2: GameConfig.progressBarImages[2],
+      progressBar3: GameConfig.progressBarImages[3],
+      progressBar4: GameConfig.progressBarImages[4],
+      progressBar5: GameConfig.progressBarImages[5]
     };
 
     this.totalAssets = Object.keys(assetPaths).length;

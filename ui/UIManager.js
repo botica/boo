@@ -13,6 +13,39 @@ export class UIManager {
     this.progressBar = document.getElementById('progress-bar');
     this.arrow1 = document.getElementById('arrow-1');
     this.arrow2 = document.getElementById('arrow-2');
+    
+    // Initialize tile images from GameConfig
+    this.initializeTileImages();
+    // Initialize progress bar from GameConfig
+    this.initializeProgressBar();
+  }
+
+  /**
+   * Initialize tile images with paths from GameConfig
+   */
+  initializeTileImages() {
+    const tiles = {
+      'tile-up': 'ArrowUp',
+      'tile-left': 'ArrowLeft',
+      'tile-down': 'ArrowDown',
+      'tile-right': 'ArrowRight'
+    };
+    
+    for (const [tileId, arrowKey] of Object.entries(tiles)) {
+      const tileEl = document.getElementById(tileId);
+      if (tileEl && GameConfig.arrowImages.small[arrowKey]) {
+        tileEl.src = GameConfig.arrowImages.small[arrowKey];
+      }
+    }
+  }
+
+  /**
+   * Initialize progress bar with initial image from GameConfig
+   */
+  initializeProgressBar() {
+    if (this.progressBar && GameConfig.progressBarImages[0]) {
+      this.progressBar.src = GameConfig.progressBarImages[0];
+    }
   }
 
   showComboUI(show) {
@@ -74,13 +107,15 @@ export class UIManager {
     if (this.progressBar) {
       const frame = Math.floor(percentage * 5);
       const clampedFrame = Math.max(0, Math.min(5, frame));
-      this.progressBar.src = `images/ui/prog-bar-${clampedFrame}-200px.png`;
+      if (GameConfig.progressBarImages[clampedFrame]) {
+        this.progressBar.src = GameConfig.progressBarImages[clampedFrame];
+      }
     }
   }
 
   resetProgress() {
-    if (this.progressBar) {
-      this.progressBar.src = 'images/ui/prog-bar-5-200px.png';
+    if (this.progressBar && GameConfig.progressBarImages[5]) {
+      this.progressBar.src = GameConfig.progressBarImages[5];
     }
   }
 

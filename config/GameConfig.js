@@ -36,16 +36,16 @@ export const GameConfig = {
   
   arrowImages: {
     large: {
-      ArrowLeft: 'images/ui/arrow-left-200px.png',
-      ArrowRight: 'images/ui/arrow-right-200px.png',
-      ArrowUp: 'images/ui/arrow-up-200px.png',
-      ArrowDown: 'images/ui/arrow-down-200px.png'
+      ArrowLeft: 'images/ui/arrow-90-l.png',
+      ArrowRight: 'images/ui/arrow-90-r.png',
+      ArrowUp: 'images/ui/arrow-90-u.png',
+      ArrowDown: 'images/ui/arrow-90-d.png'
     },
     small: {
-      ArrowLeft: 'images/ui/arrow-left-50px.png',
-      ArrowRight: 'images/ui/arrow-right-50px.png',
-      ArrowUp: 'images/ui/arrow-up-50px.png',
-      ArrowDown: 'images/ui/arrow-down-50px.png'
+      ArrowLeft: 'images/ui/arrow-30-l.png',
+      ArrowRight: 'images/ui/arrow-30-r.png',
+      ArrowUp: 'images/ui/arrow-30-u.png',
+      ArrowDown: 'images/ui/arrow-30-d.png'
     }
   },
   
@@ -54,5 +54,14 @@ export const GameConfig = {
     ArrowRight: '>',
     ArrowUp: '^',
     ArrowDown: 'v'
+  },
+  
+  progressBarImages: {
+    0: 'images/ui/prog-bar-0-200px.png',
+    1: 'images/ui/prog-bar-1-200px.png',
+    2: 'images/ui/prog-bar-2-200px.png',
+    3: 'images/ui/prog-bar-3-200px.png',
+    4: 'images/ui/prog-bar-4-200px.png',
+    5: 'images/ui/prog-bar-5-200px.png'
   }
 };
