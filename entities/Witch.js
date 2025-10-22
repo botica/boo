@@ -23,6 +23,8 @@ export class Witch {
     this.nextMoveIn = MathUtils.random(Constants.PERSON.MOVE_WAIT_MIN, Constants.PERSON.MOVE_WAIT_MAX);
     this.moveTimeLeft = 0;
     this.moveSpeed = Constants.PERSON.MOVE_SPEED;
+    // Facing direction: 'right' or 'left'
+    this.facing = 'right'; // Start facing right
     
     // Escape animation state
     this.isEscaping = false;
@@ -79,6 +81,12 @@ export class Witch {
     if (this.isMoving) {
       this.moveTimeLeft -= dt;
       this.x += this.vx * dt;
+      // Change facing based on movement direction
+      if (this.vx > 0) {
+        this.facing = 'right';
+      } else if (this.vx < 0) {
+        this.facing = 'left';
+      }
       
       if (this.moveTimeLeft <= 0) {
         this.isMoving = false;
@@ -100,6 +108,8 @@ export class Witch {
           Constants.PERSON.MOVE_SPEED_VARIANCE_MAX + 0.3
         );
         this.vx = dir * speed;
+        // Set facing immediately on movement start
+        this.facing = dir > 0 ? 'right' : 'left';
       }
     }
     
@@ -177,6 +187,7 @@ export class Witch {
     this.escapePhase = null;
     this.catRescueTarget = null;
     this.carryingCat = false;
+    this.facing = 'right'; // Reset facing to right
     
     if (this.animator) {
       this.animator.setState('default');

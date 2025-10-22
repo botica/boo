@@ -112,7 +112,10 @@ export class Renderer {
       person.y,
       person.width,
       person.height,
-      { debug: false } // Disable debug bounds
+      {
+        debug: false,
+        flipX: person.facing === 'right' // Flip sprite if facing right
+      }
     );
   }
 
