@@ -79,6 +79,20 @@ export class Cat {
     this.vx = 0;
     this.vy = 0;
     this.isBeingCarried = false;
+    
+    // Reset animation to default state
+    if (this.animation) {
+      this.animation.setState('default');
+    }
+  }
+
+  /**
+   * Set cat to scared state (called when person is scared on level 3)
+   */
+  setScared() {
+    if (this.animation) {
+      this.animation.setState('scared');
+    }
   }
 
   /**

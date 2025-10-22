@@ -449,6 +449,11 @@ export class Game {
       this.gameState.showBooText = false;
       this.person.startEscape();
       
+      // Make the cat scared when person is scared
+      if (this.cat) {
+        this.cat.setScared();
+      }
+      
       this.player.setAnimationState('laughing', { loop: true });
       this.gameState.startContinuousLaughing();
     });

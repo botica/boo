@@ -59,6 +59,8 @@ export class AssetManager {
       // Cat sprites
       cat: 'images/cat.png',
       cat1: 'images/cat-1.png',
+      catScared: 'images/cat-scared.png',
+      catScared1: 'images/cat-scared-1.png',
       
       // Arrow UI sprites (from GameConfig)
       arrowUpLarge: GameConfig.arrowImages.large.ArrowUp,
@@ -195,7 +197,8 @@ export class AssetManager {
 
   getCatSprite() {
     return {
-      default: [this.sprites.cat, this.sprites.cat1]
+      default: [this.sprites.cat, this.sprites.cat1],
+      scared: [this.sprites.catScared, this.sprites.catScared1]
     };
   }
 }
