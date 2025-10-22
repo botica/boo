@@ -138,16 +138,19 @@ export class Witch {
       case 'returning_for_cat':
         // Move left back toward the cat
         if (this.catRescueTarget) {
-          const targetX = this.catRescueTarget.x;
-          if (this.x > targetX + 20) {
-            this.vx = -this.escapeSpeed * 0.8; // Slightly slower return
-            this.x += this.vx * dt;
-          } else {
-            // Reached the cat
-            this.vx = 0;
-            if (this.hasReachedCat()) {
-              this.startFinalEscapeWithCat();
-            }
+          this.vx = -this.escapeSpeed * 0.8;
+          this.x += this.vx * dt;
+          // Check for left side of witch colliding with right side of cat
+          const witchLeft = this.x - this.width / 2;
+          const catRight = this.catRescueTarget.x + this.catRescueTarget.width / 2;
+          if (witchLeft <= catRight) {
+            // Pick up the cat and change directions
+            this.x = catRight + this.width / 2; // Snap witch to cat
+            this.vx = this.escapeSpeed;
+            this.facing = 'right';
+            // Only update cat's velocity, do not snap its x position
+            this.catRescueTarget.vx = this.escapeSpeed;
+            this.startFinalEscapeWithCat();
           }
         }
         break;
@@ -157,9 +160,9 @@ export class Witch {
         this.vx = this.escapeSpeed;
         this.x += this.vx * dt;
         
-        // Update cat position if carrying it
+        // Update cat position if carrying it (keep original y)
         if (this.carryingCat && this.catRescueTarget) {
-          this.catRescueTarget.startBeingCarried(this.x, this.y, this.vx, 0);
+          this.catRescueTarget.startBeingCarried(this.x, this.catRescueTarget.y, this.vx, 0);
         }
         break;
     }
@@ -228,9 +231,8 @@ export class Witch {
    * Check if witch has reached the cat during rescue
    */
   hasReachedCat() {
-    if (!this.catRescueTarget) return false;
-    const distance = Math.abs(this.x - this.catRescueTarget.x);
-    return distance < 50; // Close enough to "grab" the cat
+  // No longer used for pickup logic
+  return false;
   }
 
   /**
@@ -241,7 +243,7 @@ export class Witch {
     this.escapePhase = 'final_escape';
     this.carryingCat = true;
     if (this.catRescueTarget) {
-      this.catRescueTarget.startBeingCarried(this.x, this.y, this.escapeSpeed, 0);
+      this.catRescueTarget.startBeingCarried(this.x, this.catRescueTarget.y, this.escapeSpeed, 0);
     }
   }
 

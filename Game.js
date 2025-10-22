@@ -331,7 +331,10 @@ export class Game {
         this.person.startCatRescue(this.cat);
       }, catRescueDelay * 1000);
     } else if (this.person.escapePhase === 'final_escape') {
-      this.completeLevel3Victory();
+      // Only complete victory when cat is fully off screen
+      if (this.cat && this.cat.isOffScreen()) {
+        this.completeLevel3Victory();
+      }
     }
   }
 
