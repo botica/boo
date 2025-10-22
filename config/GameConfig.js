@@ -20,7 +20,8 @@ export const GameConfig = {
       hasWind: true,
       hasFloats: true,
       showMoon: true,
-      showTree: false
+      showTree: false,
+      showCity: true
     },
     3: {
       level: 3,

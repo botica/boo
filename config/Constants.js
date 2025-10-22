@@ -93,6 +93,13 @@ const Constants = {
     DEFAULT_Y_OFFSET: 300
   },
   
+  CITY: {
+    WIDTH: 800,
+    HEIGHT: 800,
+    DEFAULT_X_OFFSET: 0,
+    DEFAULT_Y_OFFSET: 0
+  },
+  
   CAT: {
     WIDTH: 150,
     HEIGHT: 150,

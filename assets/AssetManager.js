@@ -56,6 +56,10 @@ export class AssetManager {
       tree1: 'images/tree.png',
       tree2: 'images/tree-1.png',
       
+      // City sprites
+      city1: 'images/city.png',
+      city2: 'images/city-1.png',
+      
       // Cat sprites
       cat: 'images/cat.png',
       cat1: 'images/cat-1.png',
@@ -192,6 +196,12 @@ export class AssetManager {
   getTreeSprites() {
     return {
       default: [this.sprites.tree1, this.sprites.tree2]
+    };
+  }
+
+  getCitySprites() {
+    return {
+      default: [this.sprites.city1, this.sprites.city2]
     };
   }
 

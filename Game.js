@@ -7,6 +7,7 @@ import { Player } from './entities/Player.js';
 import { Person } from './entities/Person.js';
 import { Moon } from './entities/Moon.js';
 import { Tree } from './entities/Tree.js';
+import { City } from './entities/City.js';
 import { Cat } from './entities/Cat.js';
 import { InputManager } from './input/InputManager.js';
 import { GameState } from './game/GameState.js';
@@ -37,6 +38,7 @@ export class Game {
     this.person = null;
     this.moon = null;
     this.tree = null;
+    this.city = null;
     this.cat = null;
     
     // Game loop tracking
@@ -78,6 +80,7 @@ export class Game {
     this.person = new Person(this.assetManager, this.canvas);
     this.moon = new Moon(this.assetManager, Constants.MOON.OFFSET_X, Constants.MOON.OFFSET_Y);
     this.tree = new Tree(this.assetManager);
+    this.city = new City(this.assetManager);
     this.cat = new Cat(this.assetManager, this.canvas);
     
     this.resetScene();
@@ -229,13 +232,17 @@ export class Game {
         this.person.update(dt, false); // no interaction
       }
       
-      // Update moon and tree
+      // Update moon, tree, and city
       if (this.moon && levelConfig.showMoon) {
         this.moon.update(dt);
       }
       
       if (this.tree) {
         this.tree.update(dt);
+      }
+      
+      if (this.city && levelConfig.showCity) {
+        this.city.update(dt);
       }
       
       return;
@@ -273,6 +280,11 @@ export class Game {
     // Update tree (visible on all levels)
     if (this.tree) {
       this.tree.update(dt);
+    }
+    
+    // Update city (only on level 2)
+    if (this.city && levelConfig.showCity) {
+      this.city.update(dt);
     }
     
     // Update cat (only on level 3)
@@ -604,6 +616,11 @@ export class Game {
       this.tree.y = this.canvas.height - 400;
     }
     
+    if (this.city) {
+      this.city.x = Constants.CITY.DEFAULT_X_OFFSET;
+      this.city.y = Constants.CITY.DEFAULT_Y_OFFSET;
+    }
+    
     if (this.cat) {
       this.cat.reset();
     }
@@ -631,10 +648,15 @@ export class Game {
   }
 
   /**
-   * Draw background elements (moon and tree)
+   * Draw background elements (city, moon and tree)
    * @param {Object} levelConfig - Current level configuration
    */
   drawBackground(levelConfig) {
+    // Draw city first (furthest back)
+    if (this.city && levelConfig.showCity) {
+      this.city.render(this.renderer.ctx);
+    }
+    
     if (this.moon && levelConfig.showMoon) {
       this.moon.render(this.renderer.ctx);
     }
