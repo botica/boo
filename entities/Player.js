@@ -333,6 +333,11 @@ export class Player {
     this.windVy = 0;
     this.windTimer = 0;
     
+    // Force reset animation state - clear all callbacks and temp state first
+    this.animator.tempEndCallback = null;
+    this.animator.tempStateFrameCount = 0;
+    this.animator.tempStateFramesPlayed = 0;
+    // Then use setState to properly initialize default state
     this.animator.setState('default');
   }
 

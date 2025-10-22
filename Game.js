@@ -5,6 +5,7 @@
 import { AssetManager } from './assets/AssetManager.js';
 import { Player } from './entities/Player.js';
 import { Person } from './entities/Person.js';
+import { Witch } from './entities/Witch.js';
 import { Moon } from './entities/Moon.js';
 import { Tree } from './entities/Tree.js';
 import { City } from './entities/City.js';
@@ -36,6 +37,8 @@ export class Game {
     // Game entities (will be initialized after assets load)
     this.player = null;
     this.person = null;
+    this.personEntity = null; // Level 1 & 2 person
+    this.witchEntity = null;  // Level 3 witch
     this.moon = null;
     this.tree = null;
     this.city = null;
@@ -77,7 +80,9 @@ export class Game {
    */
   onAssetsLoaded() {
     this.player = new Player(this.assetManager, this.canvas);
-    this.person = new Person(this.assetManager, this.canvas);
+    this.personEntity = new Person(this.assetManager, this.canvas);
+    this.witchEntity = new Witch(this.assetManager, this.canvas);
+    this.person = this.personEntity; // Start with person for level 1
     this.moon = new Moon(this.assetManager, Constants.MOON.OFFSET_X, Constants.MOON.OFFSET_Y);
     this.tree = new Tree(this.assetManager);
     this.city = new City(this.assetManager);
@@ -599,6 +604,14 @@ export class Game {
     
     if (this.player) {
       this.player.reset();
+    }
+    
+    // Swap between person and witch based on level
+    const currentLevel = this.gameState.currentLevel;
+    if (currentLevel === 3) {
+      this.person = this.witchEntity;
+    } else {
+      this.person = this.personEntity;
     }
     
     if (this.person) {

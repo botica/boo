@@ -93,14 +93,13 @@ export class AnimatedEntity {
       
       if (state.frames && state.frames.length > 0) {
         this.frameIndex = (this.frameIndex + 1) % state.frames.length;
-        
-        // Handle frame count limits
-        if (this.tempStateFrameCount > 0) {
-          this.tempStateFramesPlayed++;
-          if (this.tempStateFramesPlayed >= this.tempStateFrameCount) {
-            this._endTempState();
-            return;
-          }
+      }
+      
+      // Handle frame count limits (even if there are no frames to display)
+      if (this.tempStateFrameCount > 0) {
+        this.tempStateFramesPlayed++;
+        if (this.tempStateFramesPlayed >= this.tempStateFrameCount) {
+          this._endTempState();
         }
       }
     }
@@ -116,14 +115,11 @@ export class AnimatedEntity {
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
     
-    // Only reset to default state if we're not in a permanent state like 'dead'
-    if (this.currentState !== 'dead') {
-      this.currentState = this.defaultState;
-      this.frameIndex = 0;
-      this.frameTimer = 0;
-    }
-    
+    // Execute callback - it may set a new animation state or reset
     if (callback) callback();
+    
+    // Don't reset to default - let the callback handle state management
+    // This allows chaining animations (e.g., swirling -> dead)
   }
   
   /**

@@ -48,6 +48,12 @@ export class AssetManager {
       businessScared: 'images/business-scared.png',
       businessScaredAlt: 'images/business-scared-1.png',
       
+      // Witch sprites
+      witchDefault: 'images/witch.png',
+      witchAlt: 'images/witch-1.png',
+      witchScared: 'images/witch-scared.png',
+      witchScaredAlt: 'images/witch-scared-1.png',
+      
       // Moon sprites
       moon1: 'images/moon.png',
       moon2: 'images/moon-1.png',
@@ -184,6 +190,13 @@ export class AssetManager {
     return {
       default: [this.sprites.businessDefault, this.sprites.businessAlt],
       scared: [this.sprites.businessScared, this.sprites.businessScaredAlt]
+    };
+  }
+
+  getWitchSprites() {
+    return {
+      default: [this.sprites.witchDefault, this.sprites.witchAlt],
+      scared: [this.sprites.witchScared, this.sprites.witchScaredAlt]
     };
   }
 
