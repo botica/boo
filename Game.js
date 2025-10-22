@@ -309,9 +309,10 @@ export class Game {
   handleLevel3Escape() {
     if (this.person.escapePhase === 'initial' && !this.level3EscapeTriggered) {
       this.level3EscapeTriggered = true;
+      const catRescueDelay = Constants.ANIMATION.CAT_RESCUE_DELAY_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
       setTimeout(() => {
         this.person.startCatRescue(this.cat);
-      }, 1000);
+      }, catRescueDelay * 1000);
     } else if (this.person.escapePhase === 'final_escape') {
       this.completeLevel3Victory();
     }
@@ -420,7 +421,9 @@ export class Game {
    */
   startBooAnimation(onComplete) {
     this.gameState.startSuccessAnimation();
-    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL * 4;
+    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_FRAMES * 
+                         Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 
+                         Constants.ANIMATION.BOO_TEXT_FLASH_CYCLES;
     setTimeout(onComplete, booFlashDelay * 1000);
   }
 
@@ -430,7 +433,7 @@ export class Game {
    */
   startLaughingAnimation(onComplete) {
     this.player.setAnimationState('laughing', {
-      duration: Constants.ANIMATION.LAUGHING_DURATION,
+      frames: Constants.ANIMATION.LAUGHING_FRAMES,
       onComplete
     });
     this.gameState.startLaughingAnimation();
@@ -519,10 +522,10 @@ export class Game {
   startFailureAnimation(reason = 'timeout') {
     this.gameState.startFailureAnimation();
     this.player.setAnimationState('swirling', {
-      duration: Constants.ANIMATION.SWIRL_DURATION,
+      frames: Constants.ANIMATION.SWIRL_FRAMES,
       onComplete: () => {
         this.player.setAnimationState('dead', {
-          duration: Constants.ANIMATION.DEAD_DURATION,
+          frames: Constants.ANIMATION.DEAD_FRAMES,
           onComplete: () => {
             this.gameState.endFailureAnimation();
             this.endInteraction(reason);

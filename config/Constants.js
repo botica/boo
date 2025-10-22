@@ -102,20 +102,23 @@ export const Constants = {
   },
   
   // =================== ANIMATION CONSTANTS ===================
-  // All animation durations are in SECONDS for consistency
+  // All animation durations are in FRAMES for consistency
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
     DEFAULT_FRAME_INTERVAL: 0.5,
     
-    // Ghost animation durations (in seconds)
-    ANGRY_DURATION: 1.6,      // 4 frames * 0.4s per frame
-    SWIRL_DURATION: 0.8,      // 2 frames * 0.4s per frame
-    LAUGHING_DURATION: 2.8,   // 2800ms converted to seconds
-    DEAD_DURATION: 1.0,       // 1000ms converted to seconds
+    // Ghost animation durations (in frames)
+    ANGRY_FRAMES: 4,
+    SWIRL_FRAMES: 2,
+    LAUGHING_FRAMES: 6,
+    DEAD_FRAMES: 2,
     
-    // Text animation timings (in seconds)
-    BOO_TEXT_FLASH_INTERVAL: 0.5,
-    BOO_TEXT_DURATION: 1.5,   // 1500ms converted to seconds
+    // Text animation timings (in frames)
+    BOO_TEXT_FLASH_FRAMES: 1,  // How many frames per flash
+    BOO_TEXT_FLASH_CYCLES: 4,  // Number of flash cycles (controls both display duration and callback timing)
+    
+    // Level 3 cat rescue timing
+    CAT_RESCUE_DELAY_FRAMES: 2, // Delay before person starts cat rescue (in frames)
   },
   
   UI: {
@@ -140,15 +143,15 @@ export const Constants = {
   HEHE_TEXT: {
     OFFSET_Y: 100, // Position above BOO text
     FONT_SIZE: 32,
-    FLASH_INTERVAL: 0.3,
-    DURATION: 2.2 // 2200ms converted to seconds
+    FLASH_FRAMES: 1, // Frames per flash (flash interval)
+    FRAMES: 4 // Total duration in frames
   },
 
   SCENE_TEXT: {
     INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
     OUTRO_TEXT: "you won!",
     FONT_SIZE: 24,
-    FADE_DURATION: 4.0, // Total scene duration in seconds (increased)
+    FADE_FRAMES: 8, // Total scene duration in frames
     FADE_FRAME_INTERVAL: 0.5, // Frame interval for fade animation (matches sprite animations)
     // Fade sequence: 0% 50% 100% 100% 100% 100% 50% 0% over 8 frames (4 seconds at 0.5s per frame)
     FADE_OPACITY_SEQUENCE: [0, 0.5, 1, 1, 1, 1, 0.5, 0],

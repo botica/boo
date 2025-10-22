@@ -179,7 +179,8 @@ export class Renderer {
    */
   drawBooText(x, y, timer) {
     // Flash white and black at regular intervals
-    const flashPhase = Math.floor(timer / Constants.ANIMATION.BOO_TEXT_FLASH_INTERVAL) % 2;
+    const flashInterval = Constants.ANIMATION.BOO_TEXT_FLASH_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+    const flashPhase = Math.floor(timer / flashInterval) % 2;
     const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
 
     this.drawText('boo', x, y, {
@@ -198,7 +199,8 @@ export class Renderer {
    */
   drawHeheText(x, y, timer) {
     // Flash white and black at regular intervals
-    const flashPhase = Math.floor(timer / Constants.HEHE_TEXT.FLASH_INTERVAL) % 2;
+    const flashInterval = Constants.HEHE_TEXT.FLASH_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+    const flashPhase = Math.floor(timer / flashInterval) % 2;
     const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
 
     this.drawText('he he', x, y, {

@@ -25,7 +25,6 @@ export class AnimatedEntity {
     this.currentState = defaultState;
     this.frameIndex = 0;
     this.frameTimer = 0;
-    this.tempEndTime = 0;
     this.tempEndCallback = null;
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;
@@ -40,13 +39,12 @@ export class AnimatedEntity {
    * Set the current animation state
    * @param {string} stateName - Name of the state to switch to
    * @param {Object} options - Animation options
-   * @param {number} options.duration - Duration in SECONDS (mutually exclusive with frameCount)
-   * @param {number} options.frameCount - Number of frames to play before ending (mutually exclusive with duration)
+   * @param {number} options.frames - Number of frames to play before ending
    * @param {Function} options.onComplete - Callback when animation completes
    * @param {boolean} options.immediate - If true, start at interval offset instead of 0
    */
   setState(stateName, options = {}) {
-    const { duration, frameCount, onComplete, immediate = false } = options;
+    const { frames, onComplete, immediate = false } = options;
     
     if (!this.states.has(stateName)) {
       console.warn(`Animation state "${stateName}" not found`);
@@ -56,18 +54,9 @@ export class AnimatedEntity {
     this.currentState = stateName;
     this.frameTimer = immediate ? this.getCurrentState().interval : 0;
     this.frameIndex = 0;
-    this.tempEndTime = 0;
     this.tempEndCallback = onComplete || null;
-    this.tempStateFrameCount = 0;
+    this.tempStateFrameCount = frames || 0;
     this.tempStateFramesPlayed = 0;
-    
-    // Use duration (in seconds) for time-based animation ending
-    if (duration && duration > 0) {
-      this.tempEndTime = performance.now() + duration * 1000; // Convert seconds to milliseconds
-    } else if (frameCount && frameCount > 0) {
-      this.tempStateFrameCount = frameCount;
-      this.tempStateFramesPlayed = 0;
-    }
   }
   
   /**
@@ -115,11 +104,6 @@ export class AnimatedEntity {
         }
       }
     }
-    
-    // Check time-based limits (tempEndTime is in milliseconds)
-    if (this.tempEndTime > 0 && performance.now() >= this.tempEndTime) {
-      this._endTempState();
-    }
   }
   
   /**
@@ -128,7 +112,6 @@ export class AnimatedEntity {
    */
   _endTempState() {
     const callback = this.tempEndCallback;
-    this.tempEndTime = 0;
     this.tempEndCallback = null;
     this.tempStateFrameCount = 0;
     this.tempStateFramesPlayed = 0;

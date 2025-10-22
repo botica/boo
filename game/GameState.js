@@ -199,14 +199,18 @@ export class GameState {
   updateBooText(dt) {
     if (this.showBooText) {
       this.booTextTimer += dt;
-      if (this.booTextTimer >= Constants.ANIMATION.BOO_TEXT_DURATION) {
+      const booTextDuration = Constants.ANIMATION.BOO_TEXT_FLASH_CYCLES * 
+                              Constants.ANIMATION.BOO_TEXT_FLASH_FRAMES * 
+                              Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+      if (this.booTextTimer >= booTextDuration) {
         this.showBooText = false;
       }
     }
     
     if (this.showHeheText) {
       this.heheTextTimer += dt;
-      if (!this.continuousLaughing && this.heheTextTimer >= Constants.HEHE_TEXT.DURATION) {
+      const heheTextDuration = Constants.HEHE_TEXT.FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+      if (!this.continuousLaughing && this.heheTextTimer >= heheTextDuration) {
         this.showHeheText = false;
       }
     }
