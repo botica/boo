@@ -285,7 +285,7 @@ export class GameState {
       this.sceneFrameIndex = newFrameIndex;
     }
 
-    const totalFrames = Constants.SCENE_TEXT.FADE_OPACITY_SEQUENCE.length;
+    const totalFrames = 3; // Full opacity (1 frame) + 50% opacity (1 frame) + 0% opacity (1 frame)
     if (this.sceneFrameIndex >= totalFrames) {
       const completedScene = this.currentScene;
       this.currentScene = null;
@@ -304,11 +304,16 @@ export class GameState {
 
   getCurrentSceneOpacity() {
     if (!this.currentScene) return 0;
-    
-    const sequence = Constants.SCENE_TEXT.FADE_OPACITY_SEQUENCE;
-    if (this.sceneFrameIndex >= sequence.length) return 0;
-    
-    return sequence[this.sceneFrameIndex];
+    return this.getFadeOutOpacity(this.sceneFrameIndex);
+  }
+
+  getFadeOutOpacity(frameIndex) {
+    // Frame 0: full opacity (1.0)
+    // Frame 1: fade to 50% opacity (0.5)
+    // Frame 2+: fade to dark (0.0)
+    if (frameIndex === 0) return 1.0;
+    if (frameIndex === 1) return 0.5;
+    return 0;
   }
 
   isInScene() {

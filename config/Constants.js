@@ -1,7 +1,7 @@
 /**
  * Game constants for physics, timing, and visual properties
  */
-export const Constants = {
+const Constants = {
   // =================== PLAYER CONSTANTS ===================
   PLAYER: {
     // Basic properties
@@ -151,10 +151,7 @@ export const Constants = {
     INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
     OUTRO_TEXT: "you won!",
     FONT_SIZE: 24,
-    FADE_FRAMES: 8, // Total scene duration in frames
-    FADE_FRAME_INTERVAL: 0.5, // Frame interval for fade animation (matches sprite animations)
-    // Fade sequence: 0% 50% 100% 100% 100% 100% 50% 0% over 8 frames (4 seconds at 0.5s per frame)
-    FADE_OPACITY_SEQUENCE: [0, 0.5, 1, 1, 1, 1, 0.5, 0],
+    // Full opacity for 1 frame, then 50% opacity for 1 frame, then 0% opacity
     LINE_HEIGHT: 40 // Spacing between lines for multi-line text
   },
 
@@ -172,3 +169,9 @@ export const Constants = {
     CLICK_DURATION: 0.12 // Duration in seconds (120ms)
   }
 };
+
+Object.defineProperty(Constants.SCENE_TEXT, 'FADE_FRAME_INTERVAL', {
+  get() { return Constants.ANIMATION.DEFAULT_FRAME_INTERVAL; }
+});
+
+export { Constants };
