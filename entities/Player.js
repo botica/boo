@@ -311,16 +311,22 @@ export class Player {
   reset() {
     // Default spawn: top right
     // For level 2, spawn top left
+    // For level 3, spawn facing left
     if (this.gameState && this.gameState.currentLevel === 2) {
       this.x = this.width/2 + Constants.PLAYER.SPAWN_OFFSET_X;
       this.y = this.height/2 + Constants.PLAYER.SPAWN_OFFSET_Y;
+      this.facing = 'right';
+    } else if (this.gameState && this.gameState.currentLevel === 3) {
+      this.x = this.canvas.width - this.width/2 - Constants.PLAYER.SPAWN_OFFSET_X;
+      this.y = this.height/2 + Constants.PLAYER.SPAWN_OFFSET_Y;
+      this.facing = 'left';
     } else {
       this.x = this.canvas.width - this.width/2 - Constants.PLAYER.SPAWN_OFFSET_X;
       this.y = this.height/2 + Constants.PLAYER.SPAWN_OFFSET_Y;
+      this.facing = 'right';
     }
     this.vx = 0;
     this.vy = 0;
-    this.facing = 'right';
     
     this.floatTimer = 0;
     this.floatActive = false;
