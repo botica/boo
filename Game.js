@@ -84,7 +84,10 @@ export class Game {
     this.personEntity = new Person(this.assetManager, this.canvas);
     this.witchEntity = new Witch(this.assetManager, this.canvas);
     this.person = this.personEntity; // Start with person for level 1
-  this.moon = new Moon(this.assetManager, Constants.MOON.OFFSET_X, Constants.MOON.OFFSET_Y);
+  // Spawn moon at horizontal center, top of canvas
+  const moonX = this.canvas.width / 2;
+  const moonY = Constants.MOON.OFFSET_Y;
+  this.moon = new Moon(this.assetManager, moonX, moonY);
     this.tree = new Tree(this.assetManager);
     this.city = new City(this.assetManager);
     this.cat = new Cat(this.assetManager, this.canvas);
@@ -628,7 +631,7 @@ export class Game {
     if (this.moon) {
       // Only reset moon if not level 2
       if (this.gameState.currentLevel !== 2) {
-        this.moon.x = Constants.MOON.OFFSET_X;
+        this.moon.x = this.canvas.width / 2;
         this.moon.y = Constants.MOON.OFFSET_Y;
       }
     }
