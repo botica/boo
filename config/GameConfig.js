@@ -19,7 +19,7 @@ export const GameConfig = {
       comboDuration: 8.0,
       hasWind: true,
       hasFloats: true,
-      showMoon: true,
+      showMoon: false,
       showTree: false,
       showCity: true
     },

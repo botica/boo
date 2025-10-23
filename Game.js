@@ -84,7 +84,7 @@ export class Game {
     this.personEntity = new Person(this.assetManager, this.canvas);
     this.witchEntity = new Witch(this.assetManager, this.canvas);
     this.person = this.personEntity; // Start with person for level 1
-    this.moon = new Moon(this.assetManager, Constants.MOON.OFFSET_X, Constants.MOON.OFFSET_Y);
+  this.moon = new Moon(this.assetManager, Constants.MOON.OFFSET_X, Constants.MOON.OFFSET_Y);
     this.tree = new Tree(this.assetManager);
     this.city = new City(this.assetManager);
     this.cat = new Cat(this.assetManager, this.canvas);
@@ -239,7 +239,8 @@ export class Game {
       }
       
       // Update moon, tree, and city
-      if (this.moon && levelConfig.showMoon) {
+      // Only update moon if not level 2
+      if (this.moon && levelConfig.showMoon && this.gameState.currentLevel !== 2) {
         this.moon.update(dt);
       }
       
@@ -279,7 +280,8 @@ export class Game {
     }
     
     // Update moon (visibility based on level config)
-    if (this.moon && levelConfig.showMoon) {
+    // Only update moon if not level 2
+    if (this.moon && levelConfig.showMoon && this.gameState.currentLevel !== 2) {
       this.moon.update(dt);
     }
     
@@ -624,8 +626,11 @@ export class Game {
     }
     
     if (this.moon) {
-      this.moon.x = Constants.MOON.OFFSET_X;
-      this.moon.y = Constants.MOON.OFFSET_Y;
+      // Only reset moon if not level 2
+      if (this.gameState.currentLevel !== 2) {
+        this.moon.x = Constants.MOON.OFFSET_X;
+        this.moon.y = Constants.MOON.OFFSET_Y;
+      }
     }
     
     if (this.tree) {
@@ -674,7 +679,8 @@ export class Game {
       this.city.render(this.renderer.ctx);
     }
     
-    if (this.moon && levelConfig.showMoon) {
+    // Only render moon if not level 2
+    if (this.moon && levelConfig.showMoon && this.gameState.currentLevel !== 2) {
       this.moon.render(this.renderer.ctx);
     }
     
