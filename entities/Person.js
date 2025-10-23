@@ -186,8 +186,15 @@ export class Person {
    * Reset person to initial state
    */
   reset() {
-    this.x = this.width/2 + Constants.PERSON.SPAWN_OFFSET_X;
-    this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
+    // Default spawn: bottom left
+    // For level 2, spawn bottom right
+    if (this.currentLevel === 2) {
+      this.x = this.canvas.width - this.width/2 - Constants.PERSON.SPAWN_OFFSET_X;
+      this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
+    } else {
+      this.x = this.width/2 + Constants.PERSON.SPAWN_OFFSET_X;
+      this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
+    }
     this.vx = 0;
     this.isMoving = false;
     this.nextMoveIn = MathUtils.random(Constants.PERSON.MOVE_WAIT_MIN, Constants.PERSON.MOVE_WAIT_MAX);

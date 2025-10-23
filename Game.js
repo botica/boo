@@ -79,7 +79,8 @@ export class Game {
    * Called when all assets are loaded
    */
   onAssetsLoaded() {
-    this.player = new Player(this.assetManager, this.canvas);
+  this.player = new Player(this.assetManager, this.canvas);
+  this.player.gameState = this.gameState;
     this.personEntity = new Person(this.assetManager, this.canvas);
     this.witchEntity = new Witch(this.assetManager, this.canvas);
     this.person = this.personEntity; // Start with person for level 1
