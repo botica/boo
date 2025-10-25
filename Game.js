@@ -400,6 +400,7 @@ export class Game {
    */
   startNextCombo() {
     this.gameState.startNextCombo();
+    this.uiManager.updateProgress(1.0); // Ensure progress bar starts at full (frame 5)
     this.updateComboUI();
     this.inputManager.setCurrentCombo(this.gameState.currentCombo);
     this.inputManager.startComboTracking();
@@ -566,6 +567,7 @@ export class Game {
     this.gameState.startInteraction();
     this.player.setAnimationState('scaring');
     this.uiManager.showComboUI(true);
+    this.uiManager.updateProgress(1.0); // Ensure progress bar starts at full (frame 5)
     this.updateComboUI();
     this.inputManager.setCurrentCombo(this.gameState.currentCombo);
     this.inputManager.startComboTracking();

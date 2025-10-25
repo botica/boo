@@ -41,6 +41,7 @@ export class GameState {
     this.comboAccepted = false;
     this.lastCombo = null;
     this.levelCombos = [];
+    this.comboStartDelay = 0; // Delay timer before countdown starts
   }
 
   // =================== LEVEL MANAGEMENT ===================
@@ -119,6 +120,10 @@ export class GameState {
     this.currentCombo = chosen.split('|');
     this.comboTimeLeft = this.comboDuration;
     this.comboAccepted = false;
+    // Calculate delay proportional to progress bar frame duration
+    // Each progress bar frame represents (comboDuration / PROGRESS_BAR_FRAMES) seconds
+    const frameTime = this.comboDuration / Constants.UI.PROGRESS_BAR_FRAMES;
+    this.comboStartDelay = frameTime * Constants.UI.PROGRESS_BAR_START_DELAY_FACTOR;
   }
 
   // =================== COMBO PROCESSING ===================
@@ -212,6 +217,14 @@ export class GameState {
 
   updateComboTimer(dt, changes) {
     if (this.interactionActive && this.currentCombo) {
+      // Wait for delay period before starting countdown
+      if (this.comboStartDelay > 0) {
+        this.comboStartDelay -= dt;
+        // Keep progress at 100% during delay
+        changes.progressPercentage = 1.0;
+        return;
+      }
+      
       this.comboTimeLeft -= dt;
       const pct = Math.max(0, Math.min(1, this.comboTimeLeft / this.comboDuration));
       changes.progressPercentage = pct;

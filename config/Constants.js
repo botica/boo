@@ -139,7 +139,9 @@ const Constants = {
     ARROW_FONT_SCALE: 0.45,
     ARROW_GAP: 20,
     MIN_PROGRESS_WIDTH: 64,
-    PROGRESS_MARGIN: 40
+    PROGRESS_MARGIN: 40,
+    PROGRESS_BAR_FRAMES: 5, // Number of progress bar animation frames (0-5 = 6 frames total, 5 transitions)
+    PROGRESS_BAR_START_DELAY_FACTOR: 0.5 // Delay as a fraction of one progress bar frame duration
   },
   
   // Text display settings
