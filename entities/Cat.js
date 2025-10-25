@@ -69,6 +69,21 @@ export class Cat {
   }
 
   /**
+   * Update cat position based on canvas size (called on resize)
+   */
+  updatePosition() {
+    // Recalculate position based on current canvas size
+    this.x = this.canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - 150;
+    this.y = this.canvas.height - this.height/2;
+    
+    // Update original position if not being carried
+    if (!this.isBeingCarried) {
+      this.originalX = this.x;
+      this.originalY = this.y;
+    }
+  }
+
+  /**
    * Reset cat to original position
    */
   reset() {

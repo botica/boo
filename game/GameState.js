@@ -22,6 +22,7 @@ export class GameState {
     
     this.showBooText = false;
     this.booTextTimer = 0;
+    this.booTextFrameIndex = 0;
   this.continuousLaughing = false;
     
     this.gameHasStarted = false;
@@ -136,6 +137,7 @@ export class GameState {
   handleLevelCompletion() {
     this.showBooText = true;
     this.booTextTimer = 0;
+    this.booTextFrameIndex = 0;
     this.animationInProgress = true;
     
     if (this.currentLevel < GameConfig.MAX_LEVELS) {
@@ -155,6 +157,7 @@ export class GameState {
   startSuccessAnimation() {
     this.showBooText = true;
     this.booTextTimer = 0;
+    this.booTextFrameIndex = 0;
     this.animationInProgress = true;
   }
 
@@ -193,9 +196,14 @@ export class GameState {
   updateBooText(dt) {
     if (this.showBooText) {
       this.booTextTimer += dt;
-      const booTextDuration = Constants.ANIMATION.BOO_TEXT_FLASH_CYCLES * 
-                              Constants.ANIMATION.BOO_TEXT_FLASH_FRAMES * 
-                              Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+      
+      // Calculate frame index based on timer (similar to scene text)
+      const frameInterval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+      this.booTextFrameIndex = Math.floor(this.booTextTimer / frameInterval);
+      
+      // Total duration: 3 frames (flash white, fade, gone)
+      const booTextDuration = 3 * frameInterval;
+      
       if (this.booTextTimer >= booTextDuration) {
         this.showBooText = false;
       }
@@ -221,7 +229,7 @@ export class GameState {
     this.resetComboState();
     this.showBooText = false;
     this.booTextTimer = 0;
-  // 'he he' text logic removed
+    this.booTextFrameIndex = 0;
     this.continuousLaughing = false;
     this.combosCompleted = 0;
   }

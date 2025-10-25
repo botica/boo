@@ -142,16 +142,19 @@ const Constants = {
     PROGRESS_MARGIN: 40
   },
   
+  // Text display settings
+  TEXT: {
+    FONT_SIZE: 28  // Universal font size for all text (boo, intro, outro)
+  },
+  
   BOO_TEXT: {
-    OFFSET_Y: 60,
-    FONT_SIZE: 48
+    // Uses TEXT.FONT_SIZE
   },
 
   SCENE_TEXT: {
     INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
     OUTRO_TEXT: "you won!",
-    FONT_SIZE: 24,
-    // Full opacity for 1 frame, then 50% opacity for 1 frame, then 0% opacity
+    // Uses TEXT.FONT_SIZE
     LINE_HEIGHT: 40 // Spacing between lines for multi-line text
   },
 

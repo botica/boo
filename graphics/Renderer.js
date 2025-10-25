@@ -186,43 +186,31 @@ export class Renderer {
   }
 
   /**
-   * Draw the "BOO!" text effect
-   * @param {number} x - X position
-   * @param {number} y - Y position
-   * @param {number} timer - Animation timer
+   * Draw the "BOO!" text effect (same style as intro/outro)
+   * @param {number} frameIndex - Current frame index for animation (0 = full opacity, 1 = 50%, 2+ = gone)
    */
-  drawBooText(x, y, timer) {
-    // Flash white and black at regular intervals
-    const flashInterval = Constants.ANIMATION.BOO_TEXT_FLASH_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-    const flashPhase = Math.floor(timer / flashInterval) % 2;
-    const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
+  drawBooText(frameIndex) {
+    // Calculate center position
+    const centerX = this.canvas.width / 2;
+    const centerY = this.canvas.height / 2;
 
-    this.drawText('boo', x, y, {
-      font: `${Constants.BOO_TEXT.FONT_SIZE}px sans-serif`,
-      fillStyle: fillStyle,
-      textAlign: 'center',
-      textBaseline: 'middle'
-    });
-  }
-
-  /**
-   * Draw the "he he" text effect
-   * @param {number} x - X position
-   * @param {number} y - Y position
-   * @param {number} timer - Animation timer
-   */
-  drawHeheText(x, y, timer) {
-    // Flash white and black at regular intervals
-    const flashInterval = Constants.HEHE_TEXT.FLASH_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-    const flashPhase = Math.floor(timer / flashInterval) % 2;
-    const fillStyle = flashPhase === 0 ? '#ffffff' : '#000000';
-
-    this.drawText('he he', x, y, {
-      font: `${Constants.HEHE_TEXT.FONT_SIZE}px sans-serif`,
-      fillStyle: fillStyle,
-      textAlign: 'center',
-      textBaseline: 'middle'
-    });
+    // Calculate opacity based on frame index (same as intro/outro text)
+    let opacity = 0;
+    if (frameIndex === 0) {
+      opacity = 1.0;  // Full opacity
+    } else if (frameIndex === 1) {
+      opacity = 0.5;  // 50% opacity
+    }
+    // Frame 2+: opacity = 0 (text fades out)
+    
+    if (opacity > 0) {
+      this.drawText('BOO!', centerX, centerY, {// change this to change scarey message
+        font: `${Constants.TEXT.FONT_SIZE}px sans-serif`,
+        fillStyle: `rgba(255, 255, 255, ${opacity})`,
+        textAlign: 'center',
+        textBaseline: 'middle'
+      });
+    }
   }
 
   /**
@@ -248,7 +236,7 @@ export class Renderer {
     // Draw each line
     lines.forEach(line => {
       this.drawText(line, centerX, currentY, {
-        font: `${Constants.SCENE_TEXT.FONT_SIZE}px sans-serif`,
+        font: `${Constants.TEXT.FONT_SIZE}px sans-serif`,
         fillStyle: `rgba(255, 255, 255, ${opacity})`,
         textAlign: 'center',
         textBaseline: 'middle'

@@ -145,6 +145,11 @@ export class Game {
     this.canvas.height = canvasHeight;
     this.canvas.style.width = canvasWidth + 'px';
     this.canvas.style.height = canvasHeight + 'px';
+    
+    // Update cat position on level 3
+    if (this.cat && this.gameState.currentLevel === 3) {
+      this.cat.updatePosition();
+    }
   }
   
   /**
@@ -167,6 +172,11 @@ export class Game {
     this.canvas.height = canvasHeight;
     this.canvas.style.width = canvasWidth + 'px';
     this.canvas.style.height = canvasHeight + 'px';
+    
+    // Update cat position on level 3
+    if (this.cat && this.gameState.currentLevel === 3) {
+      this.cat.updatePosition();
+    }
   }
 
   /**
@@ -221,7 +231,6 @@ export class Game {
     
     // During outro scene, allow entity updates but skip game logic
     if (this.gameState.currentScene === 'outro') {
-      // Update game state to keep timers running (especially heheTextTimer for flashing)
       this.gameState.update(dt);
       
       // Update entities for animation
@@ -447,10 +456,9 @@ export class Game {
    */
   startBooAnimation(onComplete) {
     this.gameState.startSuccessAnimation();
-    const booFlashDelay = Constants.ANIMATION.BOO_TEXT_FLASH_FRAMES * 
-                         Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 
-                         Constants.ANIMATION.BOO_TEXT_FLASH_CYCLES;
-    setTimeout(onComplete, booFlashDelay * 1000);
+    // New timing: 3 frames total (flash white, fade, gone)
+    const booTextDuration = 3 * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+    setTimeout(onComplete, booTextDuration * 1000);
   }
 
   /**
@@ -647,6 +655,7 @@ export class Game {
     }
     
     if (this.cat) {
+      this.cat.updatePosition();
       this.cat.reset();
     }
     
@@ -714,13 +723,12 @@ export class Game {
     }
   }
 
-  /**
-   * Draw text effects (BOO and "he he")
+  /**h
+   * Draw text effects 
    */
   drawTextEffects() {
-    if (this.gameState.showBooText && this.player && this.person) {
-      const { x, y } = this.getTextPosition(Constants.BOO_TEXT.OFFSET_Y);
-      this.renderer.drawBooText(x, y, this.gameState.booTextTimer);
+    if (this.gameState.showBooText) {
+      this.renderer.drawBooText(this.gameState.booTextFrameIndex);
     }
   }
 
