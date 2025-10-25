@@ -48,9 +48,6 @@ export class Game {
     this.lastTime = performance.now();
     this.isRunning = false;
     
-    // Level 3 escape tracking
-    this.level3EscapeTriggered = false;
-    
     // Bind methods to preserve context
     this.update = this.update.bind(this);
     this.draw = this.draw.bind(this);
@@ -91,6 +88,9 @@ export class Game {
     this.tree = new Tree(this.assetManager);
     this.city = new City(this.assetManager);
     this.cat = new Cat(this.assetManager, this.canvas);
+    
+    // Set up witch-cat relationship for level 3
+    this.witchEntity.setCat(this.cat);
     
     this.resetScene();
     this.gameState.updateLevelTitle();
@@ -329,9 +329,6 @@ export class Game {
 
     if (this.gameState.currentLevel === 3) {
       this.handleLevel3Escape();
-    } else if (!this.level3EscapeTriggered) {
-      this.level3EscapeTriggered = true;
-      this.completeLevel3Victory();
     }
   }
 
@@ -339,17 +336,11 @@ export class Game {
    * Handle level 3 specific escape with cat rescue
    */
   handleLevel3Escape() {
-    if (this.person.escapePhase === 'initial' && !this.level3EscapeTriggered) {
-      this.level3EscapeTriggered = true;
-      const catRescueDelay = Constants.ANIMATION.CAT_RESCUE_DELAY_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-      setTimeout(() => {
-        this.person.startCatRescue(this.cat);
-      }, catRescueDelay * 1000);
-    } else if (this.person.escapePhase === 'final_escape') {
-      // Only complete victory when cat is fully off screen
-      if (this.cat && this.cat.isOffScreen()) {
-        this.completeLevel3Victory();
-      }
+    // Delegate to witch to handle the victory sequence
+    const victoryComplete = this.person.updateVictorySequence();
+    
+    if (victoryComplete) {
+      this.completeLevel3Victory();
     }
   }
 
@@ -485,17 +476,10 @@ export class Game {
    * Handle special level 3 victory with person escape animation
    */
   handleLevel3Victory() {
-    this.level3EscapeTriggered = false;
-    
     // Start BOO animation and immediately trigger scared/laughing when BOO appears
     this.startBooAnimation(() => {
-      // BOO! just appeared - set witch to scared (via startEscape), cat to scared, and player to laughing NOW
-      this.person.startEscape(); // This sets the witch to scared automatically
-      
-      // Make the cat scared when witch is scared
-      if (this.cat) {
-        this.cat.setScared();
-      }
+      // BOO! just appeared - delegate to witch to handle victory sequence
+      this.person.startVictorySequence();
       
       this.player.setAnimationState('laughing', { loop: true });
       this.gameState.startContinuousLaughing();

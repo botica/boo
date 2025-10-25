@@ -5,7 +5,7 @@ import { MathUtils } from '../utils/MathUtils.js';
 
 /**
  * Base class for interactive NPC entities (Guy, Businessman, Witch)
- * Handles common movement, escape sequences, collision detection, and cat rescue logic
+ * Handles common movement and collision detection
  */
 export class NPCEntity {
   constructor(assetManager, canvas, config = {}) {
@@ -25,13 +25,6 @@ export class NPCEntity {
     this.moveTimeLeft = 0;
     this.moveSpeed = Constants.PERSON.MOVE_SPEED;
     this.facing = config.defaultFacing || 'right';
-    
-    // Escape animation state
-    this.isEscaping = false;
-    this.escapeSpeed = Constants.PERSON.ESCAPE_SPEED;
-    this.escapePhase = null; // 'initial', 'returning_for_cat', 'final_escape'
-    this.catRescueTarget = null;
-    this.carryingCat = false;
     
     // Collision state
     this.colliding = false;
@@ -54,12 +47,8 @@ export class NPCEntity {
       this.animator.update(dt);
     }
 
-    // Handle escape animation first (takes priority)
-    if (this.isEscaping) {
-      this.updateEscape(dt);
-    }
-    // Handle movement when not in interaction and not escaping
-    else if (!interactionActive) {
+    // Handle movement when not in interaction
+    if (!interactionActive) {
       this.updateMovement(dt);
     }
   }
@@ -91,10 +80,8 @@ export class NPCEntity {
       }
     }
     
-    // Keep NPC within bounds (only when not escaping)
-    if (!this.isEscaping) {
-      CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
-    }
+    // Keep NPC within bounds
+    CollisionDetector.clampToBounds(this, this.canvas.width, this.canvas.height);
   }
 
   /**
@@ -133,122 +120,6 @@ export class NPCEntity {
     );
     this.vx = dir * speed;
     this.facing = dir > 0 ? 'right' : 'left';
-  }
-
-  /**
-   * Update escape animation - NPC runs off screen to the right
-   * @param {number} dt - Delta time in seconds
-   */
-  updateEscape(dt) {
-    if (!this.escapePhase) {
-      this.escapePhase = 'initial';
-    }
-
-    switch (this.escapePhase) {
-      case 'initial':
-        this.handleInitialEscape(dt);
-        break;
-        
-      case 'returning_for_cat':
-        this.handleCatReturn(dt);
-        break;
-        
-      case 'final_escape':
-        this.handleFinalEscape(dt);
-        break;
-    }
-    
-    // Log position occasionally (for debugging)
-    if (Math.floor(performance.now() / 1000) % 2 === 0 && Math.floor(this.x) % 200 === 0) {
-      console.log(`${this.constructor.name} escaping: phase=${this.escapePhase}, x=${Math.floor(this.x)}, canvas width=${this.canvas.width}, off screen=${this.isOffScreen()}`);
-    }
-  }
-
-  /**
-   * Handle initial escape phase - move right
-   */
-  handleInitialEscape(dt) {
-    this.vx = this.escapeSpeed;
-    this.x += this.vx * dt;
-  }
-
-  /**
-   * Handle returning for cat phase - move left toward cat
-   */
-  handleCatReturn(dt) {
-    if (this.catRescueTarget) {
-      this.vx = -this.escapeSpeed * 0.8;
-      this.x += this.vx * dt;
-      
-      // Check for collision with cat
-      const npcLeft = this.x - this.width / 2;
-      const catRight = this.catRescueTarget.x + this.catRescueTarget.width / 2;
-      
-      if (npcLeft <= catRight) {
-        // Pick up the cat and reverse direction
-        this.x = catRight + this.width / 2;
-        this.vx = this.escapeSpeed;
-        this.facing = 'right';
-        this.catRescueTarget.vx = this.escapeSpeed;
-        this.startFinalEscapeWithCat();
-      }
-    }
-  }
-
-  /**
-   * Handle final escape phase - move right with cat
-   */
-  handleFinalEscape(dt) {
-    this.vx = this.escapeSpeed;
-    this.x += this.vx * dt;
-    
-    // Update cat position if carrying it
-    if (this.carryingCat && this.catRescueTarget) {
-      // Preserve cat's original y position (witch's behavior)
-      this.catRescueTarget.startBeingCarried(this.vx, 0);
-    }
-  }
-
-  /**
-   * Start escape animation - NPC runs off screen in fear
-   */
-  startEscape() {
-    console.log(`${this.constructor.name}.startEscape called`);
-    this.isEscaping = true;
-    this.isMoving = false;
-    this.vx = 0;
-    this.escapePhase = 'initial';
-    this.catRescueTarget = null;
-    this.carryingCat = false;
-    
-    // Set scared animation
-    if (this.animator) {
-      this.animator.setState('scared');
-      console.log(`${this.constructor.name} animation set to scared`);
-    }
-  }
-
-  /**
-   * Start the cat rescue sequence (for level 3)
-   */
-  startCatRescue(cat) {
-    console.log(`${this.constructor.name}.startCatRescue called`);
-    this.escapePhase = 'returning_for_cat';
-    this.catRescueTarget = cat;
-    this.isEscaping = true;
-    this.vx = 0;
-  }
-
-  /**
-   * Start final escape with cat
-   */
-  startFinalEscapeWithCat() {
-    console.log(`${this.constructor.name}.startFinalEscapeWithCat called`);
-    this.escapePhase = 'final_escape';
-    this.carryingCat = true;
-    if (this.catRescueTarget) {
-      this.catRescueTarget.startBeingCarried(this.escapeSpeed, 0);
-    }
   }
 
   /**
@@ -323,9 +194,5 @@ export class NPCEntity {
     this.nextMoveIn = MathUtils.random(Constants.PERSON.MOVE_WAIT_MIN, Constants.PERSON.MOVE_WAIT_MAX);
     this.moveTimeLeft = 0;
     this.colliding = false;
-    this.isEscaping = false;
-    this.escapePhase = null;
-    this.catRescueTarget = null;
-    this.carryingCat = false;
   }
 }
