@@ -36,9 +36,6 @@ export class Person extends NPCEntity {
       case 2:
         sprites = this.assetManager.getBusinessSprites();
         break;
-      default: // Level 3 uses original person sprites
-        sprites = this.assetManager.getPersonSprites();
-        break;
     }
     
     const states = AnimationFactory.createPersonAnimations(sprites);
