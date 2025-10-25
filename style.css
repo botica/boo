@@ -157,7 +157,7 @@ canvas {
   width: 200px;
   height: 200px;
   object-fit: contain;
-  opacity: 0.9;
+  opacity: 1.0;
 }
 
 .arrow-image.pressed {
