@@ -37,16 +37,16 @@ export const GameConfig = {
   
   arrowImages: {
     large: {
-      ArrowLeft: 'images/ui/arrow-90-l.png',
-      ArrowRight: 'images/ui/arrow-90-r.png',
-      ArrowUp: 'images/ui/arrow-90-u.png',
-      ArrowDown: 'images/ui/arrow-90-d.png'
+      ArrowLeft: 'images/ui/left-100.png',
+      ArrowRight: 'images/ui/right-100.png',
+      ArrowUp: 'images/ui/up-100.png',
+      ArrowDown: 'images/ui/down-100.png'
     },
     small: {
-      ArrowLeft: 'images/ui/arrow-30-l.png',
-      ArrowRight: 'images/ui/arrow-30-r.png',
-      ArrowUp: 'images/ui/arrow-30-u.png',
-      ArrowDown: 'images/ui/arrow-30-d.png'
+      ArrowLeft: 'images/ui/left-50.png',
+      ArrowRight: 'images/ui/right-50.png',
+      ArrowUp: 'images/ui/up-50.png',
+      ArrowDown: 'images/ui/down-50.png'
     }
   },
   
