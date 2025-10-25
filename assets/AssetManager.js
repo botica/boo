@@ -30,12 +30,6 @@ export class AssetManager {
       ghostSwirl1: 'images/boo-swirl-v2-0.png',
       ghostSwirl2: 'images/boo-swirl-v2-1.png',
       
-      // Person sprites
-      personDefault: 'images/person-mock.png',
-      personAlt: 'images/person-mock-1.png',
-      personScared: 'images/person-scared.png',
-      personScaredAlt: 'images/person-scared-1.png',
-      
       // Sleeping person sprites
       guySleeping: 'images/guy-sleeping.png',
       guySleeping1: 'images/guy-sleeping-1.png',

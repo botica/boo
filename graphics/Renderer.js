@@ -124,7 +124,7 @@ export class Renderer {
       person.height,
       {
         debug: false,
-        flipX: person.facing === 'right',
+        flipX: person.facing === 'left',
         debugOutline: (person.isScared || person.debugOutline) ? { color: 'yellow', width: 2 } : null
       }
     );

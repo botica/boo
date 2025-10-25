@@ -13,16 +13,15 @@ export class Cat {
     this.width = Constants.CAT.WIDTH;
     this.height = Constants.CAT.HEIGHT;
     
-    // Position cat in bottom right corner, moved left 150px total, bottom-aligned
-    this.x = canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - 150;
-    this.y = canvas.height - this.height/2; // Center Y at bottom edge to align sprite bottom with canvas bottom
-    
     // Movement properties for escape sequence
     this.vx = 0;
     this.vy = 0;
     this.isBeingCarried = false;
-    this.originalX = this.x;
-    this.originalY = this.y;
+    this.originalX = 0;
+    this.originalY = 0;
+    
+    // Set initial position
+    this.setInitialPosition();
     
     // Sprite and animation
     this.sprites = null;
@@ -39,17 +38,25 @@ export class Cat {
   }
 
   /**
+   * Set initial position based on canvas size
+   */
+  setInitialPosition() {
+    this.x = this.canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - 150;
+    this.y = this.canvas.height - this.height / 2;
+    this.originalX = this.x;
+    this.originalY = this.y;
+  }
+
+  /**
    * Get the current sprite frame for rendering
    */
   get sprite() {
-    return this.animation ? this.animation.getCurrentFrame() : null;
+    return this.animation?.getCurrentFrame() ?? null;
   }
 
   update(dt) {
     // Update animation
-    if (this.animation) {
-      this.animation.update(dt);
-    }
+    this.animation?.update(dt);
     
     // For now, cat doesn't move unless it's being carried
     if (this.isBeingCarried) {
@@ -61,25 +68,23 @@ export class Cat {
   /**
    * Start being carried during escape sequence
    */
-  startBeingCarried(carrierX, carrierY, carrierVx, carrierVy) {
-  this.isBeingCarried = true;
-  // Do NOT snap cat to witch's position, just update velocity
-  this.vx = carrierVx;
-  this.vy = carrierVy;
+  startBeingCarried(carrierVx, carrierVy) {
+    this.isBeingCarried = true;
+    this.vx = carrierVx;
+    this.vy = carrierVy;
   }
 
   /**
    * Update cat position based on canvas size (called on resize)
    */
   updatePosition() {
-    // Recalculate position based on current canvas size
-    this.x = this.canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - 150;
-    this.y = this.canvas.height - this.height/2;
-    
-    // Update original position if not being carried
+    // Just use the same initial position calculation
     if (!this.isBeingCarried) {
-      this.originalX = this.x;
-      this.originalY = this.y;
+      this.setInitialPosition();
+    } else {
+      // Update original position for when cat is released
+      this.originalX = this.canvas.width - this.width - Constants.CAT.MARGIN_FROM_EDGE - 150;
+      this.originalY = this.canvas.height - this.height / 2;
     }
   }
 
@@ -103,17 +108,15 @@ export class Cat {
    * Set cat to scared state (called when person is scared on level 3)
    */
   setScared() {
-    if (this.animation) {
-      this.animation.setState('scared');
-    }
+    this.animation?.setState('scared');
   }
 
   /**
    * Check if cat is off screen
    */
   isOffScreen() {
-  // Only off screen if the entire image is past the right edge
-  return (this.x - this.width / 2) > this.canvas.width;
+    // Only off screen if the entire image is past the right edge
+    return (this.x - this.width / 2) > this.canvas.width;
   }
 
   /**

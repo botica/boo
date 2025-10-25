@@ -1,60 +1,12 @@
-import { AnimatedEntity, AnimationState } from '../animation/AnimationSystem.js';
+import { DecorativeEntity } from './DecorativeEntity.js';
 import { Constants } from '../config/Constants.js';
 
 /**
  * Tree entity class - decorative animated background element
  */
-export class Tree {
+export class Tree extends DecorativeEntity {
   constructor(assetManager, x = window.innerWidth / 2 + Constants.TREE.DEFAULT_X_OFFSET, y = window.innerHeight - Constants.TREE.DEFAULT_Y_OFFSET) {
-    this.assetManager = assetManager;
-    
-    // Position and size
-    this.x = x;
-    this.y = y;
-    this.width = Constants.TREE.WIDTH;
-    this.height = Constants.TREE.HEIGHT;
-    
-    // Initialize animation
-    this.setupAnimation();
-  }
-
-  setupAnimation() {
-    const treeSprites = this.assetManager.getTreeSprites();
-    const states = [
-      new AnimationState('default', treeSprites.default, Constants.ANIMATION.DEFAULT_FRAME_INTERVAL, true)
-    ];
-    this.animator = new AnimatedEntity(states, 'default');
-  }
-
-  /**
-   * Update the tree animation
-   * @param {number} dt - Delta time in seconds
-   */
-  update(dt) {
-    this.animator.update(dt);
-  }
-
-  /**
-   * Render the tree
-   * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
-   */
-  render(ctx) {
-    const currentFrame = this.animator.getCurrentFrame();
-    if (currentFrame) {
-      ctx.drawImage(currentFrame, this.x, this.y, this.width, this.height);
-    }
-  }
-
-  /**
-   * Get the current bounds of the tree (for collision detection if needed)
-   * @returns {Object} Bounding box with x, y, width, height
-   */
-  getBounds() {
-    return {
-      x: this.x,
-      y: this.y,
-      width: this.width,
-      height: this.height
-    };
+    super(assetManager, x, y, Constants.TREE.WIDTH, Constants.TREE.HEIGHT);
+    this.setupAnimation(assetManager.getTreeSprites());
   }
 }
