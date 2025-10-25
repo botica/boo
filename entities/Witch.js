@@ -233,7 +233,7 @@ export class Witch extends NPCEntity {
       
       if (!this.catRescueScheduled) {
         this.catRescueScheduled = true;
-        const catRescueDelay = Constants.ANIMATION.CAT_RESCUE_DELAY_FRAMES * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
+        const catRescueDelay = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
         setTimeout(() => {
           this.startCatRescue(this.cat);
         }, catRescueDelay * 1000);
