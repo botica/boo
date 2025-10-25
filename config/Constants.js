@@ -112,7 +112,7 @@ const Constants = {
   // All animation durations are in FRAMES for consistency
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
-    DEFAULT_FRAME_INTERVAL: 0.4,
+    DEFAULT_FRAME_INTERVAL: 0.6,
     
     // Ghost animation durations (in frames)
     ANGRY_FRAMES: 4,
@@ -147,10 +147,6 @@ const Constants = {
     FONT_SIZE: 28  // Universal font size for all text (boo, intro, outro)
   },
   
-  BOO_TEXT: {
-    // Uses TEXT.FONT_SIZE
-  },
-
   SCENE_TEXT: {
     INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
     OUTRO_TEXT: "you won!",

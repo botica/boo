@@ -66,7 +66,7 @@ export class GameState {
   }
 
   updateLevelTitle() {
-    document.title = `game - Level ${this.currentLevel}`;
+    document.title = `boo! - level ${this.currentLevel}`;
   }
 
   // =================== INTERACTION MANAGEMENT ===================
