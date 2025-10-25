@@ -112,7 +112,7 @@ const Constants = {
   // All animation durations are in FRAMES for consistency
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
-    DEFAULT_FRAME_INTERVAL: 0.6,
+    DEFAULT_FRAME_INTERVAL: 0.7,
     
     // Ghost animation durations (in frames)
     ANGRY_FRAMES: 4,

@@ -435,30 +435,38 @@ export class Game {
       return;
     }
     
+    // Start BOO text animation and immediately set scared/laughing when BOO appears
     this.startBooAnimation(() => {
+      // BOO! just appeared - set person to scared and player to laughing NOW
       this.person.setAnimationState('scared');
-      this.startLaughingAnimation(() => {
-        this.gameState.endSuccessAnimation();
-        
-        if (!gameComplete) {
-          this.gameState.advanceToNextLevel();
+      this.player.setAnimationState('laughing', {
+        frames: Constants.ANIMATION.LAUGHING_FRAMES,
+        onComplete: () => {
+          // After laughing animation completes
+          this.gameState.endSuccessAnimation();
+          
+          if (!gameComplete) {
+            this.gameState.advanceToNextLevel();
+          }
+          
+          this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
+          this.resetScene();
         }
-        
-        this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
-        this.resetScene();
       });
+      this.gameState.startLaughingAnimation();
     });
   }
 
   /**
    * Start BOO text animation
-   * @param {Function} onComplete - Callback when animation completes
+   * @param {Function} onBooAppears - Callback when BOO text appears (immediately)
    */
-  startBooAnimation(onComplete) {
+  startBooAnimation(onBooAppears) {
     this.gameState.startSuccessAnimation();
-    // New timing: 3 frames total (flash white, fade, gone)
-    const booTextDuration = 3 * Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
-    setTimeout(onComplete, booTextDuration * 1000);
+    // Trigger callback immediately when BOO appears
+    if (onBooAppears) {
+      onBooAppears();
+    }
   }
 
   /**
@@ -479,11 +487,13 @@ export class Game {
   handleLevel3Victory() {
     this.level3EscapeTriggered = false;
     
+    // Start BOO animation and immediately trigger scared/laughing when BOO appears
     this.startBooAnimation(() => {
+      // BOO! just appeared - set witch to scared (via startEscape), cat to scared, and player to laughing NOW
       this.gameState.showBooText = false;
-      this.person.startEscape();
+      this.person.startEscape(); // This sets the witch to scared automatically
       
-      // Make the cat scared when person is scared
+      // Make the cat scared when witch is scared
       if (this.cat) {
         this.cat.setScared();
       }
