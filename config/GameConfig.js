@@ -8,7 +8,7 @@ export const GameConfig = {
   levelConfig: {
     1: {
       level: 1,
-      comboDuration: 10.0,
+      comboDuration: 4.0,
       hasWind: false,
       hasFloats: true,
       showMoon: false,
@@ -16,7 +16,7 @@ export const GameConfig = {
     },
     2: {
       level: 2,
-      comboDuration: 8.0,
+      comboDuration: 2.0,
       hasWind: true,
       hasFloats: true,
       showMoon: false,
@@ -25,7 +25,7 @@ export const GameConfig = {
     },
     3: {
       level: 3,
-      comboDuration: 6.0,
+      comboDuration: 1.0,
       hasWind: false,
       hasFloats: true,
       showMoon: true,
