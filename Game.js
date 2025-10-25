@@ -490,7 +490,6 @@ export class Game {
     // Start BOO animation and immediately trigger scared/laughing when BOO appears
     this.startBooAnimation(() => {
       // BOO! just appeared - set witch to scared (via startEscape), cat to scared, and player to laughing NOW
-      this.gameState.showBooText = false;
       this.person.startEscape(); // This sets the witch to scared automatically
       
       // Make the cat scared when witch is scared

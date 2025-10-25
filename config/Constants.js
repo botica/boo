@@ -158,7 +158,7 @@ const Constants = {
     ],
     OUTRO_TEXT: "you won!",
     // Uses TEXT.FONT_SIZE
-    LINE_HEIGHT: 60 // Spacing between lines for multi-line text
+    LINE_HEIGHT: 72 // Spacing between lines for multi-line text
   },
 
   // Canvas configuration for responsive sizing
