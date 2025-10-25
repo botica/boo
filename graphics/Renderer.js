@@ -39,7 +39,8 @@ export class Renderer {
       flipY = false,
       rotation = 0,
       alpha = 1,
-      debug = false
+      debug = false,
+      debugOutline = null
     } = options;
 
     this.ctx.save();
@@ -71,6 +72,15 @@ export class Renderer {
       this.ctx.lineWidth = 1;
       this.ctx.strokeRect(-width/2, -height/2, width, height);
     }
+    // Draw custom debug outline if requested
+    if (debugOutline) {
+      this.ctx.save();
+      this.ctx.strokeStyle = debugOutline.color || 'yellow';
+      this.ctx.lineWidth = debugOutline.width || 2;
+      this.ctx.setLineDash(debugOutline.dash || []);
+      this.ctx.strokeRect(-width/2, -height/2, width, height);
+      this.ctx.restore();
+    }
 
     this.ctx.restore();
   }
@@ -85,9 +95,9 @@ export class Renderer {
 
     const options = {
       flipX: player.facing === 'left',
-      debug: false // Disable debug bounds
+      debug: false,
+      debugOutline: player.debugOutline || { color: 'yellow', width: 2 }
     };
-
     this.drawSprite(
       currentSprite,
       player.x,
@@ -114,7 +124,8 @@ export class Renderer {
       person.height,
       {
         debug: false,
-        flipX: person.facing === 'right' // Flip sprite if facing right
+        flipX: person.facing === 'right',
+        debugOutline: (person.isScared || person.debugOutline) ? { color: 'yellow', width: 2 } : null
       }
     );
   }
@@ -131,7 +142,7 @@ export class Renderer {
       cat.y,
       cat.width,
       cat.height,
-      { debug: false }
+      { debug: false, debugOutline: cat.debugOutline || { color: 'yellow', width: 2 } }
     );
   }
 

@@ -698,14 +698,18 @@ export class Game {
    */
   drawEntities(levelConfig) {
     if (this.cat && this.gameState.currentLevel === 3) {
+      this.cat.debugOutline = { color: 'yellow', width: 2 };
       this.renderer.drawCat(this.cat);
     }
-    
+
     if (this.person) {
+      // Always show yellow outline for debug
+      this.person.debugOutline = { color: 'yellow', width: 2 };
       this.renderer.drawPerson(this.person);
     }
-    
+
     if (this.player) {
+      this.player.debugOutline = { color: 'yellow', width: 2 };
       this.renderer.drawPlayer(this.player);
     }
   }
