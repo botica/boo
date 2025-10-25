@@ -225,8 +225,32 @@ export class Renderer {
     const centerX = this.canvas.width / 2;
     const centerY = this.canvas.height / 2;
 
-    // Split text into lines if it contains line breaks
-    const lines = text.split('\n');
+    // Split text into words for multi-line wrapping
+    const words = text.split(' ');
+    const lines = [];
+    const maxWidth = this.canvas.width * 0.9; // Use 90% of canvas width
+    
+    // Set up the font to measure text
+    this.ctx.font = `${Constants.TEXT.FONT_SIZE}px sans-serif`;
+    
+    // Build lines by fitting words within maxWidth
+    let currentLine = '';
+    words.forEach(word => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const metrics = this.ctx.measureText(testLine);
+      
+      if (metrics.width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
     const lineHeight = Constants.SCENE_TEXT.LINE_HEIGHT;
     
     // Calculate starting Y position for centered text

@@ -256,6 +256,7 @@ export class GameState {
     this.currentScene = 'intro';
     this.sceneTimer = 0;
     this.sceneFrameIndex = 0;
+    this.sceneTextIndex = 0; // Track which intro text frame we're on
     this.sceneStartTime = performance.now();
   }
 
@@ -279,11 +280,27 @@ export class GameState {
     }
 
     const totalFrames = 3; // Full opacity (1 frame) + 50% opacity (1 frame) + 0% opacity (1 frame)
+    
+    // Check if current fade cycle is complete
     if (this.sceneFrameIndex >= totalFrames) {
+      // For intro, check if we have more text frames to show
+      if (this.currentScene === 'intro' && Array.isArray(Constants.SCENE_TEXT.INTRO_TEXT)) {
+        this.sceneTextIndex++;
+        
+        // If there are more intro text frames, reset for next frame
+        if (this.sceneTextIndex < Constants.SCENE_TEXT.INTRO_TEXT.length) {
+          this.sceneTimer = 0;
+          this.sceneFrameIndex = 0;
+          return { sceneComplete: false };
+        }
+      }
+      
+      // Scene is complete
       const completedScene = this.currentScene;
       this.currentScene = null;
       this.sceneTimer = 0;
       this.sceneFrameIndex = 0;
+      this.sceneTextIndex = 0;
       
       if (completedScene === 'intro') {
         this.gameHasStarted = true;
@@ -298,6 +315,21 @@ export class GameState {
   getCurrentSceneOpacity() {
     if (!this.currentScene) return 0;
     return this.getFadeOutOpacity(this.sceneFrameIndex);
+  }
+
+  getCurrentSceneText() {
+    if (!this.currentScene) return '';
+    
+    if (this.currentScene === 'intro') {
+      const introText = Constants.SCENE_TEXT.INTRO_TEXT;
+      // If intro text is an array, return the current frame
+      if (Array.isArray(introText)) {
+        return introText[this.sceneTextIndex] || '';
+      }
+      return introText;
+    }
+    
+    return Constants.SCENE_TEXT.OUTRO_TEXT;
   }
 
   getFadeOutOpacity(frameIndex) {

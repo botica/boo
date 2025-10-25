@@ -144,14 +144,21 @@ const Constants = {
   
   // Text display settings
   TEXT: {
-    FONT_SIZE: 28  // Universal font size for all text (boo, intro, outro)
+    FONT_SIZE: 72  // Universal font size for all text (boo, intro, outro)
   },
   
   SCENE_TEXT: {
-    INTRO_TEXT: "float around and scare people\nby landing on their heads and\ninputting the correct key combo.\ncorrect input advances the level.\ndont run into the side of someone\nor you'll blow away!",
+    INTRO_TEXT: [
+      "float around and scare people",
+      "by landing on their heads and",
+      "inputting the correct key combo.",
+      "correct input advances the level.",
+      "dont run into the side of someone",
+      "or you'll blow away!"
+    ],
     OUTRO_TEXT: "you won!",
     // Uses TEXT.FONT_SIZE
-    LINE_HEIGHT: 40 // Spacing between lines for multi-line text
+    LINE_HEIGHT: 60 // Spacing between lines for multi-line text
   },
 
   // Canvas configuration for responsive sizing

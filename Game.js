@@ -758,9 +758,7 @@ export class Game {
     if (!this.gameState.isInScene()) return;
     
     const opacity = this.gameState.getCurrentSceneOpacity();
-    const text = this.gameState.currentScene === 'intro' 
-      ? Constants.SCENE_TEXT.INTRO_TEXT 
-      : Constants.SCENE_TEXT.OUTRO_TEXT;
+    const text = this.gameState.getCurrentSceneText();
     
     if (text && opacity > 0) {
       this.renderer.drawSceneText(text, opacity);
