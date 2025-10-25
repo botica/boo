@@ -327,16 +327,7 @@ export class Game {
       return;
     }
 
-    if (this.gameState.currentLevel === 3) {
-      this.handleLevel3Escape();
-    }
-  }
-
-  /**
-   * Handle level 3 specific escape with cat rescue
-   */
-  handleLevel3Escape() {
-    // Delegate to witch to handle the victory sequence
+    // Check if victory sequence is active (only Witch has this)
     const victoryComplete = this.person.updateVictorySequence();
     
     if (victoryComplete) {

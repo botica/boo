@@ -10,6 +10,9 @@ import { MathUtils } from '../utils/MathUtils.js';
 export class Person extends NPCEntity {
   constructor(assetManager, canvas) {
     super(assetManager, canvas, { level: 1, defaultFacing: 'right' });
+    
+    // Person doesn't escape (only Witch does in level 3)
+    this.isEscaping = false;
   }
 
   /**
@@ -66,5 +69,13 @@ export class Person extends NPCEntity {
       const defaultState = this.currentLevel === 1 ? 'sleeping' : 'default';
       this.animator.setState(defaultState);
     }
+  }
+
+  /**
+   * Update victory sequence (stub for Person class - only Witch has complex victory sequence)
+   * @returns {boolean} Always returns false for Person
+   */
+  updateVictorySequence() {
+    return false;
   }
 }
