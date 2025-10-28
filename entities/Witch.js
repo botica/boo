@@ -34,6 +34,26 @@ export class Witch extends NPCEntity {
     const sprites = this.assetManager.getWitchSprites();
     const states = AnimationFactory.createPersonAnimations(sprites);
     this.animator = new AnimatedEntity(states, 'default');
+    
+    // Store sprites reference for dimension updates
+    this.sprites = sprites;
+    
+    // Use original sprite dimensions instead of hardcoded constants
+    this.updateDimensionsForState('default');
+  }
+
+  /**
+   * Update width/height based on current animation state
+   * @param {string} state - Animation state ('default' or 'scared')
+   */
+  updateDimensionsForState(state) {
+    if (!this.sprites || !this.sprites[state] || !this.sprites[state][0]) {
+      return;
+    }
+    
+    const sprite = this.sprites[state][0];
+    this.width = sprite.width;
+    this.height = sprite.height;
   }
 
   /**
@@ -60,6 +80,7 @@ export class Witch extends NPCEntity {
     // Set default animation state
     if (this.animator) {
       this.animator.setState('default');
+      this.updateDimensionsForState('default');
     }
   }
 
@@ -105,6 +126,7 @@ export class Witch extends NPCEntity {
     // Set scared animation
     if (this.animator) {
       this.animator.setState('scared');
+      this.updateDimensionsForState('scared');
       console.log(`${this.constructor.name} animation set to scared`);
     }
   }

@@ -151,16 +151,16 @@ const Constants = {
   
   SCENE_TEXT: {
     INTRO_TEXT: [
-      "float around and scare people",
-      "by landing on their heads and",
-      "inputting the correct key combo.",
-      "correct input advances the level.",
-      "dont run into the side of someone",
-      "or you'll blow away!"
+      "FLOAT AROUND AND SCARE PEOPLE",
+      "BY LANDING ON THEIR HEADS AND",
+      "INPUTTING THE CORRECT KEY COMBO.",
+      "CORRECT INPUT ADVANCES THE LEVEL.",
+      "DONT RUN INTO THE SIDE OF SOMEONE",
+      "OR YOU'LL BLOW AWAY!"
     ],
-    OUTRO_TEXT: "you won!",
+    OUTRO_TEXT: "YOU WON!",
     // Uses TEXT.FONT_SIZE
-    LINE_HEIGHT: 72 // Spacing between lines for multi-line text
+    LINE_HEIGHT: 86 // Spacing between lines for multi-line text
   },
 
   // Canvas configuration for responsive sizing
