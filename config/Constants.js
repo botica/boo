@@ -141,7 +141,8 @@ const Constants = {
     MIN_PROGRESS_WIDTH: 64,
     PROGRESS_MARGIN: 40,
     PROGRESS_BAR_FRAMES: 5, // Number of progress bar animation frames (0-5 = 6 frames total, 5 transitions)
-    PROGRESS_BAR_START_DELAY_FACTOR: 0.5 // Delay as a fraction of one progress bar frame duration
+    PROGRESS_BAR_START_DELAY_FACTOR: 0.5, // Delay as a fraction of one progress bar frame duration
+    get COMBO_SUCCESS_BLINK_DURATION() { return Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 1000 / 2; } //fraction of def frame int
   },
   
   // Text display settings

@@ -65,6 +65,7 @@ export class UIManager {
     }
 
     if (this.arrows) this.arrows.style.display = 'flex';
+    if (this.progressBar) this.progressBar.style.display = 'flex';
     
     if (this.arrow1 && combo[0]) {
       this.arrow1.style.display = 'block';
@@ -101,6 +102,11 @@ export class UIManager {
   highlightSuccessfulCombo() {
     this.setArrowStyle(this.arrow1, true);
     this.setArrowStyle(this.arrow2, true);
+  }
+
+  hideComboArrowsAndProgress() {
+    if (this.arrows) this.arrows.style.display = 'none';
+    if (this.progressBar) this.progressBar.style.display = 'none';
   }
 
   updateProgress(percentage) {

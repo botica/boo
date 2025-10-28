@@ -384,7 +384,11 @@ export class Game {
     
     switch (result) {
       case 'continue':
-        this.startNextCombo();
+        // Blink UI dark for one quarter of a frame
+        this.uiManager.hideComboArrowsAndProgress();
+        setTimeout(() => {
+          this.startNextCombo();
+        }, Constants.UI.COMBO_SUCCESS_BLINK_DURATION);
         break;
       case 'level_complete':
         this.handleLevelComplete(false);
@@ -400,8 +404,8 @@ export class Game {
    */
   startNextCombo() {
     this.gameState.startNextCombo();
-    this.uiManager.updateProgress(1.0); // Ensure progress bar starts at full (frame 5)
-    this.updateComboUI();
+    this.updateComboUI(); // Show new arrows
+    this.uiManager.updateProgress(1.0); // Start progress bar at full (frame 5)
     this.inputManager.setCurrentCombo(this.gameState.currentCombo);
     this.inputManager.startComboTracking();
   }
