@@ -15,7 +15,7 @@ const Constants = {
     // Movement speeds
     VERTICAL_SPEED: 250, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
     ACCEL: 1500,
-    VERTICAL_INERTIA: 0.97, // How much vertical velocity is retained when key is released
+    VERTICAL_INERTIA: 0.96, // How much vertical velocity is retained when key is released
 
     
     // Float tier system - 2 tiers based on key hold duration
@@ -41,7 +41,7 @@ const Constants = {
     FLOAT_FULL_SPEED_RATIO: 0.25, // Maintain full speed for first part of float 
     FLOAT_DECELERATION_RATIO: 0.75, // Decelerate during remaining part
     FLOAT_TIER_INTERPOLATION_SPEED: 750, // How fast to transition between tiers
-    FLOAT_HORIZONTAL_INERTIA: 0.92, // Horizontal velocity decay after float ends
+    FLOAT_HORIZONTAL_INERTIA: 0.93, // Horizontal velocity decay after float ends
     
     // Movement detection threshold
     MOVEMENT_THRESHOLD: 0.001, // Minimum velocity to be considered "moving"
@@ -142,7 +142,7 @@ const Constants = {
     PROGRESS_MARGIN: 40,
     PROGRESS_BAR_FRAMES: 5, // Number of progress bar animation frames (0-5 = 6 frames total, 5 transitions)
     PROGRESS_BAR_START_DELAY_FACTOR: 0.5, // Delay as a fraction of one progress bar frame duration
-    get COMBO_SUCCESS_BLINK_DURATION() { return Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 1000 / 2; } //fraction of def frame int
+    get COMBO_SUCCESS_BLINK_DURATION() { return Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 1000 / 3; } //fraction of def frame int
   },
   
   // Text display settings
@@ -162,7 +162,7 @@ const Constants = {
     ],
     OUTRO_TEXT: "YOU WON!",
     // Uses TEXT.FONT_SIZE
-    LINE_HEIGHT: 96 // Spacing between lines for multi-line text
+    LINE_HEIGHT: 136 // Spacing between lines for multi-line text
   },
 
   // Canvas configuration for responsive sizing

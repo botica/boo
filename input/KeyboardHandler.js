@@ -28,7 +28,10 @@ export class KeyboardHandler {
     const k = (raw.length === 1) ? raw.toLowerCase() : raw;
     
     if (k in this.keys) {
-      this.keys[k] = true;
+      // Only register the keydown if the key was released since combo started
+      if (this.keyReleasedSinceComboStart[k]) {
+        this.keys[k] = true;
+      }
     }
     
     return k;
@@ -77,7 +80,14 @@ export class KeyboardHandler {
    */
   startComboTracking(keyList) {
     for (const k of keyList) {
-      this.keyReleasedSinceComboStart[k] = !this.keys[k];
+      // If key is currently pressed, mark as not released and clear the key state
+      // so it won't be counted until released and pressed again
+      if (this.keys[k]) {
+        this.keyReleasedSinceComboStart[k] = false;
+        this.keys[k] = false; // Clear the pressed state
+      } else {
+        this.keyReleasedSinceComboStart[k] = true;
+      }
     }
   }
 
@@ -91,12 +101,16 @@ export class KeyboardHandler {
       this.keys[key] = false;
     }
     
-    this.keys[key] = pressed;
-    
-    if (!pressed && key in this.keyReleasedSinceComboStart) {
-      this.keyReleasedSinceComboStart[key] = true;
-    } else if (pressed && key in this.keyReleasedSinceComboStart) {
-      this.keyReleasedSinceComboStart[key] = false;
+    // Only set to pressed if the key was released since combo started
+    if (pressed) {
+      if (this.keyReleasedSinceComboStart[key]) {
+        this.keys[key] = true;
+      }
+    } else {
+      this.keys[key] = false;
+      if (key in this.keyReleasedSinceComboStart) {
+        this.keyReleasedSinceComboStart[key] = true;
+      }
     }
   }
 }
