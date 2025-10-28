@@ -504,6 +504,9 @@ export class Game {
   handleCollisions() {
     if (!this.player || !this.person) return;
     
+    // Don't handle collisions during animations (prevents re-triggering interaction during victory sequence)
+    if (this.gameState.animationInProgress) return;
+    
     const nowColliding = this.person.checkCollision(this.player);
     
     if (nowColliding && !this.person.colliding) {

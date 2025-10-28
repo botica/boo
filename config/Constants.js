@@ -112,7 +112,7 @@ const Constants = {
   // All animation durations are in FRAMES for consistency
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
-    DEFAULT_FRAME_INTERVAL: 0.5,
+    DEFAULT_FRAME_INTERVAL: 0.6,
     
     // Ghost animation durations (in frames)
     ANGRY_FRAMES: 4,
@@ -146,11 +146,12 @@ const Constants = {
   
   // Text display settings
   TEXT: {
-    FONT_SIZE: 72  // Universal font size for all text (boo, intro, outro)
+    FONT_SIZE: 96  // Universal font size for all text (boo, intro, outro)
   },
   
   SCENE_TEXT: {
     INTRO_TEXT: [
+      "WELCOME TO BOO GAME!",
       "FLOAT AROUND AND SCARE PEOPLE",
       "BY LANDING ON THEIR HEADS AND",
       "INPUTTING THE CORRECT KEY COMBO.",
@@ -160,7 +161,7 @@ const Constants = {
     ],
     OUTRO_TEXT: "YOU WON!",
     // Uses TEXT.FONT_SIZE
-    LINE_HEIGHT: 86 // Spacing between lines for multi-line text
+    LINE_HEIGHT: 96 // Spacing between lines for multi-line text
   },
 
   // Canvas configuration for responsive sizing

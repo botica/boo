@@ -231,7 +231,7 @@ export class Renderer {
     const maxWidth = this.canvas.width * 0.9; // Use 90% of canvas width
     
     // Set up the font to measure text
-    this.ctx.font = `${Constants.TEXT.FONT_SIZE}px sans-serif`;
+    this.ctx.font = `${Constants.TEXT.FONT_SIZE}px monospace`;
     
     // Build lines by fitting words within maxWidth
     let currentLine = '';
@@ -260,7 +260,7 @@ export class Renderer {
     // Draw each line
     lines.forEach(line => {
       this.drawText(line, centerX, currentY, {
-        font: `${Constants.TEXT.FONT_SIZE}px sans-serif`,
+        font: `${Constants.TEXT.FONT_SIZE}px monospace`,
         fillStyle: `rgba(255, 255, 255, ${opacity})`,
         textAlign: 'center',
         textBaseline: 'middle'
@@ -354,12 +354,6 @@ export class Renderer {
     // Draw background
     this.drawRect(0, 0, this.canvas.width, this.canvas.height, {
       fillStyle: '#000000'
-    });
-    
-    // Draw loading text
-    this.drawText('welcome to boo game', this.canvas.width / 2, this.canvas.height / 2, {
-      font: '24px sans-serif',
-      fillStyle: '#ffffff'
     });
   }
 
