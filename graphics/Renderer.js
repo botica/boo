@@ -186,52 +186,47 @@ export class Renderer {
   }
 
   /**
-   * Draw the "BOO!" text effect (same style as intro/outro)
-   * @param {number} frameIndex - Current frame index for animation (0 = full opacity, 1 = 50%, 2+ = gone)
+   * Draw text with fade effect - unified method for scene text and boo text
+   * @param {string} text - Text to display
+   * @param {number} opacity - Current opacity (0-1)
+   * @param {Object} options - Optional configuration
+   * @param {string} options.font - Font family to use (default: monospace)
+   * @param {boolean} options.wrap - Whether to wrap text across multiple lines (default: true)
+   * @param {number} options.maxWidth - Max width as percentage of canvas (default: 0.9)
+   * @param {number} options.lineHeight - Line height for multi-line text
    */
-  drawBooText(frameIndex) {
+  drawFadeText(text, opacity, options = {}) {
+    if (!text || opacity <= 0) return;
+
+    const {
+      font = `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`,
+      wrap = true,
+      maxWidth = 0.9,
+      lineHeight = Constants.SCENE_TEXT.LINE_HEIGHT
+    } = options;
+
     // Calculate center position
     const centerX = this.canvas.width / 2;
     const centerY = this.canvas.height / 2;
 
-    // Calculate opacity based on frame index (same as intro/outro text)
-    let opacity = 0;
-    if (frameIndex === 0) {
-      opacity = 1.0;  // Full opacity
-    } else if (frameIndex === 1) {
-      opacity = 0.5;  // 50% opacity
-    }
-    // Frame 2+: opacity = 0 (text fades out)
-    
-    if (opacity > 0) {
-      this.drawText('BOO!', centerX, centerY, {// change this to change scarey message
-        font: `${Constants.TEXT.FONT_SIZE}px sans-serif`,
+    if (!wrap) {
+      // Single line text (e.g., "BOO!")
+      this.drawText(text, centerX, centerY, {
+        font,
         fillStyle: `rgba(255, 255, 255, ${opacity})`,
         textAlign: 'center',
         textBaseline: 'middle'
       });
+      return;
     }
-  }
 
-  /**
-   * Draw scene text (intro/outro) with fade opacity
-   * @param {string} text - Text to display
-   * @param {number} opacity - Current opacity (0-1)
-   */
-  drawSceneText(text, opacity) {
-    if (!text || opacity <= 0) return;
-
-    // Calculate center position
-    const centerX = this.canvas.width / 2;
-    const centerY = this.canvas.height / 2;
-
-    // Split text into words for multi-line wrapping
+    // Multi-line text with wrapping
     const words = text.split(' ');
     const lines = [];
-    const maxWidth = this.canvas.width * 0.9; // Use 90% of canvas width
+    const maxWidthPixels = this.canvas.width * maxWidth;
     
     // Set up the font to measure text
-    this.ctx.font = `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`;
+    this.ctx.font = font;
     
     // Build lines by fitting words within maxWidth
     let currentLine = '';
@@ -239,7 +234,7 @@ export class Renderer {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
       const metrics = this.ctx.measureText(testLine);
       
-      if (metrics.width > maxWidth && currentLine) {
+      if (metrics.width > maxWidthPixels && currentLine) {
         lines.push(currentLine);
         currentLine = word;
       } else {
@@ -251,8 +246,6 @@ export class Renderer {
       lines.push(currentLine);
     }
 
-    const lineHeight = Constants.SCENE_TEXT.LINE_HEIGHT;
-    
     // Calculate starting Y position for centered text
     const totalHeight = (lines.length - 1) * lineHeight;
     let currentY = centerY - totalHeight / 2;
@@ -260,7 +253,7 @@ export class Renderer {
     // Draw each line
     lines.forEach(line => {
       this.drawText(line, centerX, currentY, {
-        font: `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`,
+        font,
         fillStyle: `rgba(255, 255, 255, ${opacity})`,
         textAlign: 'center',
         textBaseline: 'middle'

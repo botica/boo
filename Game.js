@@ -716,12 +716,16 @@ export class Game {
     }
   }
 
-  /**h
+  /**
    * Draw text effects 
    */
   drawTextEffects() {
     if (this.gameState.showBooText) {
-      this.renderer.drawBooText(this.gameState.booTextFrameIndex);
+      const opacity = this.gameState.getBooTextOpacity();
+      this.renderer.drawFadeText('BOO!', opacity, {
+        font: `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`,
+        wrap: false
+      });
     }
   }
 
@@ -754,7 +758,7 @@ export class Game {
     const text = this.gameState.getCurrentSceneText();
     
     if (text && opacity > 0) {
-      this.renderer.drawSceneText(text, opacity);
+      this.renderer.drawFadeText(text, opacity);
     }
   }
 

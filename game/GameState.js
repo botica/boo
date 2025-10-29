@@ -202,17 +202,26 @@ export class GameState {
     if (this.showBooText) {
       this.booTextTimer += dt;
       
-      // Calculate frame index based on timer (similar to scene text)
+      // Calculate frame index based on timer (same fade logic as scene text)
       const frameInterval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
       this.booTextFrameIndex = Math.floor(this.booTextTimer / frameInterval);
       
-      // Total duration: 3 frames (flash white, fade, gone)
-      const booTextDuration = 3 * frameInterval;
+      // Total duration: 4 frames (full opacity for 2 frames, fade for 1 frame, gone for 1 frame)
+      const booTextDuration = 4 * frameInterval;
       
       if (this.booTextTimer >= booTextDuration) {
         this.showBooText = false;
       }
     }
+  }
+
+  /**
+   * Get the current opacity for BOO text using the unified fade effect
+   * @returns {number} Opacity value (0-1)
+   */
+  getBooTextOpacity() {
+    if (!this.showBooText) return 0;
+    return this.getFadeOutOpacity(this.booTextFrameIndex);
   }
 
   updateComboTimer(dt, changes) {
@@ -292,7 +301,7 @@ export class GameState {
       this.sceneFrameIndex = newFrameIndex;
     }
 
-    const totalFrames = 3; // Full opacity (1 frame) + 50% opacity (1 frame) + 0% opacity (1 frame)
+    const totalFrames = 4; // Full opacity (2 frames) + 50% opacity (1 frame) + 0% opacity (1 frame)
     
     // Check if current fade cycle is complete
     if (this.sceneFrameIndex >= totalFrames) {
@@ -346,11 +355,11 @@ export class GameState {
   }
 
   getFadeOutOpacity(frameIndex) {
-    // Frame 0: full opacity (1.0)
-    // Frame 1: fade to 50% opacity (0.5)
-    // Frame 2+: fade to dark (0.0)
-    if (frameIndex === 0) return 1.0;
-    if (frameIndex === 1) return 0.5;
+    // Frame 0-1: full opacity (1.0) - displayed for 2 frames
+    // Frame 2: fade to 50% opacity (0.5) - displayed for 1 frame
+    // Frame 3+: fade to dark (0.0) - displayed for 1 frame then done
+    if (frameIndex <= 1) return 1.0;
+    if (frameIndex === 2) return 0.5;
     return 0;
   }
 
