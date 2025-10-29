@@ -57,8 +57,8 @@ export class AssetManager {
       tree2: 'images/tree-1.png',
       
       // City sprites
-      city1: 'images/city.png',
-      city2: 'images/city-1.png',
+      city1: 'images/cityscape-2.png',
+      city2: 'images/cityscape-3.png',
       
       // Cat sprites
       cat: 'images/cat.png',

@@ -94,7 +94,7 @@ const Constants = {
   },
   
   CITY: {
-    WIDTH: 800,
+    WIDTH: 1200,
     HEIGHT: 800,
     DEFAULT_X_OFFSET: 0,
     DEFAULT_Y_OFFSET: 0
@@ -112,7 +112,7 @@ const Constants = {
   // All animation durations are in FRAMES for consistency
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
-    DEFAULT_FRAME_INTERVAL: 0.6,
+    DEFAULT_FRAME_INTERVAL: 0.5,
     
     // Ghost animation durations (in frames)
     ANGRY_FRAMES: 4,
@@ -142,7 +142,7 @@ const Constants = {
     PROGRESS_MARGIN: 40,
     PROGRESS_BAR_FRAMES: 5, // Number of progress bar animation frames (0-5 = 6 frames total, 5 transitions)
     PROGRESS_BAR_START_DELAY_FACTOR: 0.5, // Delay as a fraction of one progress bar frame duration
-    get COMBO_SUCCESS_BLINK_DURATION() { return Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 1000 / 3; } //fraction of def frame int
+    get COMBO_SUCCESS_BLINK_DURATION() { return Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 1000 / 4; } //fraction of def frame int
   },
   
   // Text display settings
@@ -162,7 +162,7 @@ const Constants = {
     ],
     OUTRO_TEXT: "YOU WON!",
     // Uses TEXT.FONT_SIZE
-    LINE_HEIGHT: 100 // Spacing between lines for multi-line text
+    LINE_HEIGHT: 96 // Spacing between lines for multi-line text
   },
 
   // Canvas configuration for responsive sizing
