@@ -231,7 +231,7 @@ export class Renderer {
     const maxWidth = this.canvas.width * 0.9; // Use 90% of canvas width
     
     // Set up the font to measure text
-    this.ctx.font = `${Constants.TEXT.FONT_SIZE}px monospace`;
+    this.ctx.font = `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`;
     
     // Build lines by fitting words within maxWidth
     let currentLine = '';
@@ -260,7 +260,7 @@ export class Renderer {
     // Draw each line
     lines.forEach(line => {
       this.drawText(line, centerX, currentY, {
-        font: `${Constants.TEXT.FONT_SIZE}px monospace`,
+        font: `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`,
         fillStyle: `rgba(255, 255, 255, ${opacity})`,
         textAlign: 'center',
         textBaseline: 'middle'
