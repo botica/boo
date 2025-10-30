@@ -60,9 +60,9 @@ export class Witch extends NPCEntity {
    * Reset witch to initial state
    */
   reset() {
-    // Witch spawns bottom left
-    this.x = this.width/2 + Constants.PERSON.SPAWN_OFFSET_X;
-    this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
+    // Witch spawns bottom left with custom offset
+    this.x = this.width/2 + Constants.WITCH.SPAWN_OFFSET_X;
+    this.y = this.canvas.height - this.height/2 - Constants.WITCH.SPAWN_OFFSET_Y;
     
     // Reset facing direction
     this.facing = 'right';

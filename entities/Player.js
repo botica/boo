@@ -354,6 +354,29 @@ export class Player {
     this.animator.setState('default');
   }
 
+  /**
+   * Constrain player position to canvas bounds without full reset
+   * Only moves player if they would be clipped by canvas edges
+   */
+  constrainToCanvas() {
+    const halfW = this.width / 2;
+    const halfH = this.height / 2;
+    
+    // Check and adjust horizontal position
+    if (this.x < halfW) {
+      this.x = halfW;
+    } else if (this.x > this.canvas.width - halfW) {
+      this.x = this.canvas.width - halfW;
+    }
+    
+    // Check and adjust vertical position
+    if (this.y < halfH) {
+      this.y = halfH;
+    } else if (this.y > this.canvas.height - halfH) {
+      this.y = this.canvas.height - halfH;
+    }
+  }
+
   getCurrentFrame() {
     return this.animator.getCurrentFrame();
   }

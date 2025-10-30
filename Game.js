@@ -114,7 +114,27 @@ export class Game {
    */
   onResize() {
     this.resizeCanvas();
-    this.resetScene();
+    
+    // Constrain player to new canvas bounds instead of full reset
+    if (this.player) {
+      this.player.constrainToCanvas();
+    }
+    
+    // Update other entities that need repositioning
+    if (this.moon && this.gameState.currentLevel !== 2) {
+      this.moon.x = this.canvas.width / 2;
+      this.moon.y = Constants.MOON.OFFSET_Y;
+    }
+    
+    if (this.tree) {
+      this.tree.x = this.canvas.width / 2 + 50;
+      this.tree.y = this.canvas.height - 400;
+    }
+    
+    if (this.city) {
+      this.city.x = Constants.CITY.DEFAULT_X_OFFSET;
+      this.city.y = Constants.CITY.DEFAULT_Y_OFFSET;
+    }
   }
 
   /**
@@ -722,8 +742,8 @@ export class Game {
   drawTextEffects() {
     if (this.gameState.showBooText) {
       const opacity = this.gameState.getBooTextOpacity();
-      this.renderer.drawFadeText('BOO!', opacity, {
-        font: `${Constants.TEXT.FONT_SIZE}px "Courier New", Courier, monospace`,
+      this.renderer.drawFadeText(Constants.TEXT.SCARY_MESSAGE, opacity, {
+        font: `${Constants.TEXT.SCARY_MESSAGE_FONT_SIZE}px "Courier New", Courier, monospace`,
         wrap: false
       });
     }

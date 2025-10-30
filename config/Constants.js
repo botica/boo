@@ -13,7 +13,7 @@ const Constants = {
     SPAWN_OFFSET_Y: 10,
     
     // Movement speeds
-    VERTICAL_SPEED: 250, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
+    VERTICAL_SPEED: 225, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
     ACCEL: 1500,
     VERTICAL_INERTIA: 0.96, // How much vertical velocity is retained when key is released
 
@@ -24,7 +24,7 @@ const Constants = {
         force: 350, // Horizontal speed
         threshold: 0, // Always available
         holdDurationMax: 0.075,
-        duration: 0.3, // Float duration in seconds
+        duration: 0.4, // Float duration in seconds
         hopHeight: 20 // Vertical hop height in pixels - ADJUST THIS FOR SMALL FLOAT HEIGHT
       },
       large: {
@@ -32,7 +32,7 @@ const Constants = {
         threshold: 0.1, // Requires > 0.1s hold
         holdDurationMax: Infinity,
         duration: 0.6, // Float duration in seconds
-        hopHeight: 40 // Vertical hop height in pixels - ADJUST THIS FOR LARGE FLOAT HEIGHT
+        hopHeight: 35 // Vertical hop height in pixels - ADJUST THIS FOR LARGE FLOAT HEIGHT
       }
     },
 
@@ -100,6 +100,11 @@ const Constants = {
     DEFAULT_Y_OFFSET: 0
   },
   
+  WITCH: {
+    SPAWN_OFFSET_X: 40, // Horizontal offset from left edge (default spawn position)
+    SPAWN_OFFSET_Y: 10  // Vertical offset from bottom edge
+  },
+  
   CAT: {
     WIDTH: 150,
     HEIGHT: 150,
@@ -147,7 +152,9 @@ const Constants = {
   
   // Text display settings
   TEXT: {
-    FONT_SIZE: 96  // Universal font size for all text (boo, intro, outro)
+    FONT_SIZE: 96,  // Font size for scene text (intro, outro)
+    SCARY_MESSAGE: "BOO!",  // Text displayed when scaring someone
+    SCARY_MESSAGE_FONT_SIZE: 220  // Font size for scary message
   },
   
   SCENE_TEXT: {
