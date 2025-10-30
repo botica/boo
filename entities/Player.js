@@ -170,26 +170,24 @@ export class Player {
   }
 
   updateFloatEffects(dt, levelConfig) {
-    if (levelConfig && levelConfig.hasFloats !== false) {
-      if (this.floatActive) {
-        this.floatTimer += dt;
+    if (this.floatActive) {
+      this.floatTimer += dt;
+      
+      const currentTime = this.getCurrentTime();
+      const keyStillHeld = this.keyPressStart[this.floatKey] !== null;
+      
+      const holdDuration = this.calculateHoldDuration(currentTime, keyStillHeld);
         
-        const currentTime = this.getCurrentTime();
-        const keyStillHeld = this.keyPressStart[this.floatKey] !== null;
-        
-        const holdDuration = this.calculateHoldDuration(currentTime, keyStillHeld);
-        
-        const { targetMode, targetForce, targetDuration } = this.determineFloatTier(holdDuration);
-        
-        this.updateFloatMode(targetMode, targetForce, dt);
-        
-        const progress = this.floatTimer / targetDuration;
-        if (progress >= 1.0) {
-          this.endFloat();
-        } else {
-          this.updateFloatSpeed(progress);
-          this.updateVerticalFloatEffect(dt);
-        }
+      const { targetMode, targetForce, targetDuration } = this.determineFloatTier(holdDuration);
+      
+      this.updateFloatMode(targetMode, targetForce, dt);
+      
+      const progress = this.floatTimer / targetDuration;
+      if (progress >= 1.0) {
+        this.endFloat();
+      } else {
+        this.updateFloatSpeed(progress);
+        this.updateVerticalFloatEffect(dt);
       }
     }
   }

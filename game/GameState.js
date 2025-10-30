@@ -274,8 +274,7 @@ export class GameState {
   }
 
   hasFloatEffect() {
-    const config = this.getCurrentLevelConfig();
-    return config && config.hasFloats !== false && !this.interactionActive && !this.animationInProgress;
+    return !this.interactionActive && !this.animationInProgress;
   }
 
   // =================== SCENE MANAGEMENT ===================
