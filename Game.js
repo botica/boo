@@ -454,23 +454,27 @@ export class Game {
     
     // Start BOO text animation and immediately set scared/laughing when BOO appears
     this.startBooAnimation(() => {
-      // BOO! just appeared - set person to scared and player to laughing NOW
+      // BOO! just appeared - set person to scared and keep player in scaring state for two frames
       this.person.setAnimationState('scared');
-      this.player.setAnimationState('laughing', {
-        frames: Constants.ANIMATION.LAUGHING_FRAMES,
-        onComplete: () => {
-          // After laughing animation completes
-          this.gameState.endSuccessAnimation();
-          
-          if (!gameComplete) {
-            this.gameState.advanceToNextLevel();
+      
+      // Keep player in scaring state for two frame intervals before transitioning to laughing
+      setTimeout(() => {
+        this.player.setAnimationState('laughing', {
+          frames: Constants.ANIMATION.LAUGHING_FRAMES,
+          onComplete: () => {
+            // After laughing animation completes
+            this.gameState.endSuccessAnimation();
+            
+            if (!gameComplete) {
+              this.gameState.advanceToNextLevel();
+            }
+            
+            this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
+            this.resetScene();
           }
-          
-          this.endInteraction(gameComplete ? 'success: game complete' : 'success: level advanced');
-          this.resetScene();
-        }
-      });
-      this.gameState.startLaughingAnimation();
+        });
+        this.gameState.startLaughingAnimation();
+      }, Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 3 * 1000); // 3frames
     });
   }
 
@@ -507,8 +511,11 @@ export class Game {
       // BOO! just appeared - delegate to witch to handle victory sequence
       this.person.startVictorySequence();
       
-      this.player.setAnimationState('laughing', { loop: true });
-      this.gameState.startContinuousLaughing();
+      // Keep player in scaring state for two frame intervals before transitioning to laughing
+      setTimeout(() => {
+        this.player.setAnimationState('laughing', { loop: true });
+        this.gameState.startContinuousLaughing();
+      }, Constants.ANIMATION.DEFAULT_FRAME_INTERVAL * 2 * 1000);
     });
   }
 
