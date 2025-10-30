@@ -120,7 +120,7 @@ const Constants = {
   // All animation durations are in FRAMES for consistency
   ANIMATION: {
     // Frame timing - interval between animation frames (in seconds)
-    DEFAULT_FRAME_INTERVAL: 0.5,
+    DEFAULT_FRAME_INTERVAL: 0.4,
     
     // Ghost animation durations (in frames)
     ANGRY_FRAMES: 4,
@@ -131,6 +131,9 @@ const Constants = {
     // Text animation timings (in frames)
     BOO_TEXT_FLASH_FRAMES: 1,  // How many frames per flash
     BOO_TEXT_FLASH_CYCLES: 4,  // Number of flash cycles (controls both display duration and callback timing)
+    
+    // Text blink effect - brief dark period between frames
+    TEXT_BLINK_DURATION: 0.01,  // Duration of blink as fraction of frame (0.05 = 5% of frame)
     
     // Level 3 cat rescue timing
     CAT_RESCUE_DELAY_FRAMES: 2, // Delay before person starts cat rescue (in frames)
@@ -170,7 +173,10 @@ const Constants = {
       "DONT RUN INTO THE SIDE OF SOMEONE",
       "OR YOU'LL BLOW AWAY!"
     ],
-    OUTRO_TEXT: "YOU WON!",
+    OUTRO_TEXT: [
+      "YOU WON!",
+      "HAPPY HALLOWEEN!"
+    ],
     // Uses TEXT.FONT_SIZE
     LINE_HEIGHT: 96 // Spacing between lines for multi-line text
   },

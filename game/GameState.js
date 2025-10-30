@@ -23,12 +23,14 @@ export class GameState {
     this.showBooText = false;
     this.booTextTimer = 0;
     this.booTextFrameIndex = 0;
-  this.continuousLaughing = false;
+    this.booTextSubFrameProgress = 0;
+    this.continuousLaughing = false;
     
     this.gameHasStarted = false;
     this.currentScene = null;
     this.sceneTimer = 0;
     this.sceneFrameIndex = 0;
+    this.sceneSubFrameProgress = 0;
     this.sceneStartTime = 0;
     
     this.arrowKeys = GameConfig.arrowKeys;
@@ -206,6 +208,10 @@ export class GameState {
       const frameInterval = Constants.ANIMATION.DEFAULT_FRAME_INTERVAL;
       this.booTextFrameIndex = Math.floor(this.booTextTimer / frameInterval);
       
+      // Store sub-frame progress for blink effect (0 to 1 within each frame)
+      const timeInCurrentFrame = (this.booTextTimer % frameInterval) / frameInterval;
+      this.booTextSubFrameProgress = timeInCurrentFrame;
+      
       // Total duration: 4 frames (full opacity for 2 frames, fade for 1 frame, gone for 1 frame)
       const booTextDuration = 4 * frameInterval;
       
@@ -286,6 +292,7 @@ export class GameState {
     this.currentScene = 'outro';
     this.sceneTimer = 0;
     this.sceneFrameIndex = 0;
+    this.sceneTextIndex = 0; // Track which outro text frame we're on
     this.sceneStartTime = performance.now();
   }
 
@@ -296,6 +303,10 @@ export class GameState {
     
     const frameInterval = Constants.SCENE_TEXT.FADE_FRAME_INTERVAL;
     const newFrameIndex = Math.floor(this.sceneTimer / frameInterval);
+    
+    // Store sub-frame progress for blink effect (0 to 1 within each frame)
+    const timeInCurrentFrame = (this.sceneTimer % frameInterval) / frameInterval;
+    this.sceneSubFrameProgress = timeInCurrentFrame;
     
     if (newFrameIndex !== this.sceneFrameIndex) {
       this.sceneFrameIndex = newFrameIndex;
@@ -311,6 +322,18 @@ export class GameState {
         
         // If there are more intro text frames, reset for next frame
         if (this.sceneTextIndex < Constants.SCENE_TEXT.INTRO_TEXT.length) {
+          this.sceneTimer = 0;
+          this.sceneFrameIndex = 0;
+          return { sceneComplete: false };
+        }
+      }
+      
+      // For outro, check if we have more text frames to show
+      if (this.currentScene === 'outro' && Array.isArray(Constants.SCENE_TEXT.OUTRO_TEXT)) {
+        this.sceneTextIndex++;
+        
+        // If there are more outro text frames, reset for next frame
+        if (this.sceneTextIndex < Constants.SCENE_TEXT.OUTRO_TEXT.length) {
           this.sceneTimer = 0;
           this.sceneFrameIndex = 0;
           return { sceneComplete: false };
@@ -351,16 +374,47 @@ export class GameState {
       return introText;
     }
     
-    return Constants.SCENE_TEXT.OUTRO_TEXT;
+    if (this.currentScene === 'outro') {
+      const outroText = Constants.SCENE_TEXT.OUTRO_TEXT;
+      // If outro text is an array, return the current frame
+      if (Array.isArray(outroText)) {
+        return outroText[this.sceneTextIndex] || '';
+      }
+      return outroText;
+    }
+    
+    return '';
   }
 
   getFadeOutOpacity(frameIndex) {
     // Frame 0-1: full opacity (1.0) - displayed for 2 frames
     // Frame 2: fade to 50% opacity (0.5) - displayed for 1 frame
     // Frame 3+: fade to dark (0.0) - displayed for 1 frame then done
-    if (frameIndex <= 1) return 1.0;
-    if (frameIndex === 2) return 0.5;
-    return 0;
+    
+    let baseOpacity;
+    if (frameIndex <= 1) {
+      baseOpacity = 1.0;
+    } else if (frameIndex === 2) {
+      baseOpacity = 0.5;
+    } else {
+      baseOpacity = 0;
+    }
+    
+    // Apply blink effect between every frame: briefly go dark at the start of each frame
+    // Use sub-frame progress to determine if we're in the blink period
+    const subFrameProgress = this.currentScene ? this.sceneSubFrameProgress : this.booTextSubFrameProgress;
+    
+    // Apply blink regardless of base opacity (creates blink between all frames)
+    if (subFrameProgress !== undefined) {
+      const blinkDuration = Constants.ANIMATION.TEXT_BLINK_DURATION;
+      
+      if (subFrameProgress < blinkDuration) {
+        // Go completely dark during the blink
+        return 0;
+      }
+    }
+    
+    return baseOpacity;
   }
 
   isInScene() {
