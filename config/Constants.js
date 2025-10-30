@@ -2,6 +2,9 @@
  * Game constants for physics, timing, and visual properties
  */
 const Constants = {
+  // =================== DEBUG ===================
+  DEBUG: true, // Set to true to show yellow debug outlines on entities
+  
   // =================== PLAYER CONSTANTS ===================
   PLAYER: {
     // Basic properties

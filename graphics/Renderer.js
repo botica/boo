@@ -96,7 +96,7 @@ export class Renderer {
     const options = {
       flipX: player.facing === 'left',
       debug: false,
-      debugOutline: player.debugOutline || { color: 'yellow', width: 2 }
+      debugOutline: Constants.DEBUG ? { color: 'yellow', width: 2 } : null
     };
     this.drawSprite(
       currentSprite,
@@ -125,7 +125,7 @@ export class Renderer {
       {
         debug: false,
         flipX: person.facing === 'left',
-        debugOutline: (person.isScared || person.debugOutline) ? { color: 'yellow', width: 2 } : null
+        debugOutline: Constants.DEBUG ? { color: 'yellow', width: 2 } : null
       }
     );
   }
@@ -142,7 +142,7 @@ export class Renderer {
       cat.y,
       cat.width,
       cat.height,
-      { debug: false, debugOutline: cat.debugOutline || { color: 'yellow', width: 2 } }
+      { debug: false, debugOutline: Constants.DEBUG ? { color: 'yellow', width: 2 } : null }
     );
   }
 
