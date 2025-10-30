@@ -227,7 +227,7 @@ export class GameState {
    */
   getBooTextOpacity() {
     if (!this.showBooText) return 0;
-    return this.getFadeOutOpacity(this.booTextFrameIndex);
+    return { frameIndex: this.booTextFrameIndex, subFrameProgress: this.booTextSubFrameProgress };
   }
 
   updateComboTimer(dt, changes) {
@@ -358,7 +358,7 @@ export class GameState {
 
   getCurrentSceneOpacity() {
     if (!this.currentScene) return 0;
-    return this.getFadeOutOpacity(this.sceneFrameIndex);
+    return { frameIndex: this.sceneFrameIndex, subFrameProgress: this.sceneSubFrameProgress };
   }
 
   getCurrentSceneText() {
@@ -383,37 +383,6 @@ export class GameState {
     }
     
     return '';
-  }
-
-  getFadeOutOpacity(frameIndex) {
-    // Frame 0-1: full opacity (1.0) - displayed for 2 frames
-    // Frame 2: fade to 50% opacity (0.5) - displayed for 1 frame
-    // Frame 3+: fade to dark (0.0) - displayed for 1 frame then done
-    
-    let baseOpacity;
-    if (frameIndex <= 1) {
-      baseOpacity = 1.0;
-    } else if (frameIndex === 2) {
-      baseOpacity = 0.5;
-    } else {
-      baseOpacity = 0;
-    }
-    
-    // Apply blink effect between every frame: briefly go dark at the start of each frame
-    // Use sub-frame progress to determine if we're in the blink period
-    const subFrameProgress = this.currentScene ? this.sceneSubFrameProgress : this.booTextSubFrameProgress;
-    
-    // Apply blink regardless of base opacity (creates blink between all frames)
-    if (subFrameProgress !== undefined) {
-      const blinkDuration = Constants.ANIMATION.TEXT_BLINK_DURATION;
-      
-      if (subFrameProgress < blinkDuration) {
-        // Go completely dark during the blink
-        return 0;
-      }
-    }
-    
-    return baseOpacity;
   }
 
   isInScene() {

@@ -186,6 +186,40 @@ export class Renderer {
   }
 
   /**
+   * Calculate fade-out opacity with blink effect
+   * @param {number} frameIndex - Current animation frame index
+   * @param {number} subFrameProgress - Progress within current frame (0-1)
+   * @returns {number} Opacity value (0-1)
+   */
+  calculateFadeOutOpacity(frameIndex, subFrameProgress = 0) {
+    // Frame 0-1: full opacity (1.0) - displayed for 2 frames
+    // Frame 2: fade to 50% opacity (0.5) - displayed for 1 frame
+    // Frame 3+: fade to dark (0.0) - displayed for 1 frame then done
+    
+    let baseOpacity;
+    if (frameIndex <= 1) {
+      baseOpacity = 1.0;
+    } else if (frameIndex === 2) {
+      baseOpacity = 0.5;
+    } else {
+      baseOpacity = 0;
+    }
+    
+    // Apply blink effect between every frame: briefly go dark at the start of each frame
+    // Use sub-frame progress to determine if we're in the blink period
+    if (subFrameProgress !== undefined) {
+      const blinkDuration = Constants.ANIMATION.TEXT_BLINK_DURATION;
+      
+      if (subFrameProgress < blinkDuration) {
+        // Go completely dark during the blink
+        return 0;
+      }
+    }
+    
+    return baseOpacity;
+  }
+
+  /**
    * Draw text with fade effect - unified method for scene text and boo text
    * @param {string} text - Text to display
    * @param {number} opacity - Current opacity (0-1)

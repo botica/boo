@@ -754,11 +754,14 @@ export class Game {
    */
   drawTextEffects() {
     if (this.gameState.showBooText) {
-      const opacity = this.gameState.getBooTextOpacity();
-      this.renderer.drawFadeText(Constants.TEXT.SCARY_MESSAGE, opacity, {
-        font: `${Constants.TEXT.SCARY_MESSAGE_FONT_SIZE}px "Courier New", Courier, monospace`,
-        wrap: false
-      });
+      const opacityData = this.gameState.getBooTextOpacity();
+      if (opacityData !== 0) {
+        const opacity = this.renderer.calculateFadeOutOpacity(opacityData.frameIndex, opacityData.subFrameProgress);
+        this.renderer.drawFadeText(Constants.TEXT.SCARY_MESSAGE, opacity, {
+          font: `${Constants.TEXT.SCARY_MESSAGE_FONT_SIZE}px "Courier New", Courier, monospace`,
+          wrap: false
+        });
+      }
     }
   }
 
@@ -787,10 +790,11 @@ export class Game {
   drawSceneText() {
     if (!this.gameState.isInScene()) return;
     
-    const opacity = this.gameState.getCurrentSceneOpacity();
+    const opacityData = this.gameState.getCurrentSceneOpacity();
     const text = this.gameState.getCurrentSceneText();
     
-    if (text && opacity > 0) {
+    if (text && opacityData !== 0) {
+      const opacity = this.renderer.calculateFadeOutOpacity(opacityData.frameIndex, opacityData.subFrameProgress);
       this.renderer.drawFadeText(text, opacity);
     }
   }
