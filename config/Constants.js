@@ -101,7 +101,7 @@ const Constants = {
   },
   
   WITCH: {
-    SPAWN_OFFSET_X: 40, // Horizontal offset from left edge (default spawn position)
+    SPAWN_OFFSET_X: 100, // Horizontal offset from left edge (default spawn position)
     SPAWN_OFFSET_Y: 10  // Vertical offset from bottom edge
   },
   
