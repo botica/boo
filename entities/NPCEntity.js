@@ -195,4 +195,21 @@ export class NPCEntity {
     this.moveTimeLeft = 0;
     this.colliding = false;
   }
+
+  /**
+   * Update NPC position based on canvas size (called on resize)
+   * Recalculates Y position to maintain floor offset and constrains X if needed
+   */
+  updatePosition() {
+    // Update Y position to maintain floor offset
+    this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
+    
+    // Constrain X position to keep entity within bounds
+    const halfW = this.width / 2;
+    if (this.x < halfW) {
+      this.x = halfW;
+    } else if (this.x > this.canvas.width - halfW) {
+      this.x = this.canvas.width - halfW;
+    }
+  }
 }

@@ -170,6 +170,11 @@ export class Game {
     if (this.cat && this.gameState.currentLevel === 3) {
       this.cat.updatePosition();
     }
+    
+    // Update NPC positions (person or witch)
+    if (this.person) {
+      this.person.updatePosition();
+    }
   }
   
   /**
@@ -196,6 +201,11 @@ export class Game {
     // Update cat position on level 3
     if (this.cat && this.gameState.currentLevel === 3) {
       this.cat.updatePosition();
+    }
+    
+    // Update NPC positions (person or witch)
+    if (this.person) {
+      this.person.updatePosition();
     }
   }
 
