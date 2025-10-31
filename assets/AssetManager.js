@@ -37,10 +37,10 @@ export class AssetManager {
       guyScared1: 'images/guy-scared-1.png',
       
       // Business person sprites
-      businessDefault: 'images/business.png',
-      businessAlt: 'images/business-1.png',
-      businessScared: 'images/business-scared.png',
-      businessScaredAlt: 'images/business-scared-1.png',
+      businessDefault: 'images/busi-400h.png',
+      businessAlt: 'images/busi-400h-1.png',
+      businessScared: 'images/busi-scared-400h.png',
+      businessScaredAlt: 'images/busi-scared-400h-1.png',
       
       // Witch sprites
       witchDefault: 'images/witch.png',
@@ -53,12 +53,12 @@ export class AssetManager {
       moon2: 'images/moon-1.png',
       
       // Tree sprites
-      tree1: 'images/tree.png',
-      tree2: 'images/tree-1.png',
+      tree1: 'images/tree-lg.png',
+      tree2: 'images/tree-lg-1.png',
       
       // City sprites
-      city1: 'images/cityscape-2.png',
-      city2: 'images/cityscape-3.png',
+      city1: 'images/city3.png',
+      city2: 'images/city3-1.png',
       
       // Cat sprites
       cat: 'images/cat.png',

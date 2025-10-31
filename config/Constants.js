@@ -12,8 +12,8 @@ const Constants = {
     HEIGHT: 150,
     
     // Spawn position
-    SPAWN_OFFSET_X: 10,
-    SPAWN_OFFSET_Y: 10,
+    SPAWN_OFFSET_X: 100,
+    SPAWN_OFFSET_Y: 0,
     
     // Movement speeds
     VERTICAL_SPEED: 225, // UP/DOWN arrow key movement speed - ADJUST THIS FOR Y MOVEMENT
@@ -53,21 +53,32 @@ const Constants = {
     TIME_SCALE: 1000, // Milliseconds to seconds conversion
     
     // ===== WIND SYSTEM =====
-    WIND_CHANGE_INTERVAL: 0.3,
-    WIND_INERTIA: 0.7,
+    WIND_CHANGE_INTERVAL: 0.2,
+    WIND_INERTIA: 0.8,
     WIND_DECAY: 0.998,
     WIND_DECAY_NO_WIND: 0.9,
     
     // Wind strength by level
-    WIND_STRENGTH_NORMAL_MIN: 135,
-    WIND_STRENGTH_NORMAL_MAX: 225,
-    WIND_Y_FACTOR: 0.3
+    WIND_STRENGTH_NORMAL_MIN: 140,
+    WIND_STRENGTH_NORMAL_MAX: 250,
+    WIND_Y_FACTOR: 0.4
   },
   
   // =================== OTHER ENTITY CONSTANTS ===================
   PERSON: {
-    WIDTH: 225,
-    HEIGHT: 225,
+    // Level 1: Sleeping guy in the park
+    LEVEL_1: {
+      WIDTH: 225,
+      HEIGHT: 225
+    },
+    // Level 2: Business person
+    LEVEL_2: {
+      WIDTH: 100,
+      HEIGHT: 265
+    },
+    // Shared properties
+    WIDTH: 225,  // Default fallback
+    HEIGHT: 225, // Default fallback
     MOVE_SPEED: 80,
     ESCAPE_SPEED: 400,
     MOVE_WAIT_MIN: 1.0,
@@ -79,7 +90,7 @@ const Constants = {
     
     // Spawn position
     SPAWN_OFFSET_X: 10,
-    SPAWN_OFFSET_Y: 10
+    SPAWN_OFFSET_Y: -10
   },
   
   MOON: {
@@ -92,8 +103,8 @@ const Constants = {
   TREE: {
     WIDTH: 200,
     HEIGHT: 400,
-    DEFAULT_X_OFFSET: 200,
-    DEFAULT_Y_OFFSET: 300
+    DEFAULT_X_OFFSET: 0,
+    DEFAULT_Y_OFFSET: 0
   },
   
   CITY: {
@@ -104,7 +115,7 @@ const Constants = {
   },
   
   WITCH: {
-    SPAWN_OFFSET_X: 100, // Horizontal offset from left edge (default spawn position)
+    SPAWN_OFFSET_X: 400, // Horizontal offset from left edge (default spawn position)
     SPAWN_OFFSET_Y: 10  // Vertical offset from bottom edge
   },
   

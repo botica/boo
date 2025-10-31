@@ -6,13 +6,16 @@ import { Constants } from '../config/Constants.js';
 export class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext('2d', { alpha: false });
     
     // Disable image smoothing for crisp pixel art
     this.ctx.imageSmoothingEnabled = false;
     this.ctx.mozImageSmoothingEnabled = false;
     this.ctx.webkitImageSmoothingEnabled = false;
     this.ctx.msImageSmoothingEnabled = false;
+    
+    // Ensure crisp rendering
+    this.ctx.imageSmoothingQuality = 'low';
   }
 
   /**

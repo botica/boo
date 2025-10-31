@@ -53,7 +53,7 @@ export class Witch extends NPCEntity {
     
     const sprite = this.sprites[state][0];
     this.width = sprite.width;
-    this.height = sprite.height;
+    this.height = sprite.height + 75; // Make witch 75 pixels taller
   }
 
   /**

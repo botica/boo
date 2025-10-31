@@ -35,9 +35,15 @@ export class Person extends NPCEntity {
       case 1:
         sprites = this.assetManager.getLevel1PersonSprites();
         defaultState = 'sleeping';
+        // Update size for level 1
+        this.width = Constants.PERSON.LEVEL_1.WIDTH;
+        this.height = Constants.PERSON.LEVEL_1.HEIGHT;
         break;
       case 2:
         sprites = this.assetManager.getBusinessSprites();
+        // Update size for level 2
+        this.width = Constants.PERSON.LEVEL_2.WIDTH;
+        this.height = Constants.PERSON.LEVEL_2.HEIGHT;
         break;
     }
     
@@ -50,9 +56,9 @@ export class Person extends NPCEntity {
    */
   reset() {
     // Default spawn: bottom left
-    // For level 2, spawn bottom right
+    // For level 2, spawn bottom right (but 100px more to the left)
     if (this.currentLevel === 2) {
-      this.x = this.canvas.width - this.width/2 - Constants.PERSON.SPAWN_OFFSET_X;
+      this.x = this.canvas.width - this.width/2 - Constants.PERSON.SPAWN_OFFSET_X - 200; //busi man move left more
       this.y = this.canvas.height - this.height/2 - Constants.PERSON.SPAWN_OFFSET_Y;
       this.facing = 'left'; // Businessman faces left
     } else {

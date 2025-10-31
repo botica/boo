@@ -122,13 +122,13 @@ export class Game {
     
     // Update other entities that need repositioning
     if (this.moon && this.gameState.currentLevel !== 2) {
-      this.moon.x = this.canvas.width / 2;
+      this.moon.x = this.moon.width / 2 + Constants.MOON.OFFSET_X;
       this.moon.y = Constants.MOON.OFFSET_Y;
     }
     
     if (this.tree) {
       this.tree.x = this.canvas.width / 2 + 50;
-      this.tree.y = this.canvas.height - 400;
+      this.tree.y = this.canvas.height - this.tree.height;
     }
     
     if (this.city) {
@@ -669,14 +669,14 @@ export class Game {
     if (this.moon) {
       // Only reset moon if not level 2
       if (this.gameState.currentLevel !== 2) {
-        this.moon.x = this.canvas.width / 2;
+        this.moon.x = this.moon.width / 2 + Constants.MOON.OFFSET_X;
         this.moon.y = Constants.MOON.OFFSET_Y;
       }
     }
     
     if (this.tree) {
       this.tree.x = this.canvas.width / 2 + 50;
-      this.tree.y = this.canvas.height - 400;
+      this.tree.y = this.canvas.height - this.tree.height;
     }
     
     if (this.city) {
