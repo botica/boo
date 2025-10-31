@@ -3,7 +3,7 @@
  */
 const Constants = {
   // =================== DEBUG ===================
-  DEBUG: true, // Set to true to show yellow debug outlines on entities
+  DEBUG: false, // Set to true to show yellow debug outlines on entities
   
   // =================== PLAYER CONSTANTS ===================
   PLAYER: {
@@ -115,6 +115,7 @@ const Constants = {
   },
   
   WITCH: {
+    HEIGHT_BONUS: 75, // Additional pixels added to sprite height
     SPAWN_OFFSET_X: 400, // Horizontal offset from left edge (default spawn position)
     SPAWN_OFFSET_Y: 10  // Vertical offset from bottom edge
   },
@@ -125,6 +126,20 @@ const Constants = {
     MARGIN_FROM_EDGE: 20,
     CARRY_OFFSET_X: 0, // Offset when being carried by person
     CARRY_OFFSET_Y: 0
+  },
+  
+  GRAVE: {
+    WIDTH: 150,
+    HEIGHT: 150,
+    OFFSET_X: 50, // Bottom left
+    OFFSET_Y: 0 // Will be positioned from bottom
+  },
+  
+  CLOUDS: {
+    WIDTH: 300,
+    HEIGHT: 200,
+    OFFSET_X: 100, // Will be positioned at center top
+    OFFSET_Y: 20
   },
   
   // =================== ANIMATION CONSTANTS ===================

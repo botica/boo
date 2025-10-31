@@ -66,6 +66,14 @@ export class AssetManager {
       catScared: 'images/cat-scared.png',
       catScared1: 'images/cat-scared-1.png',
       
+      // Grave sprites (level 3 only)
+      grave: 'images/grave.png',
+      grave1: 'images/grave-1.png',
+      
+      // Clouds sprites (level 3 only)
+      clouds: 'images/clouds.png',
+      clouds1: 'images/clouds-1.png',
+      
       // Arrow UI sprites (from GameConfig)
       arrowUpLarge: GameConfig.arrowImages.large.ArrowUp,
       arrowDownLarge: GameConfig.arrowImages.large.ArrowDown,
@@ -216,6 +224,18 @@ export class AssetManager {
     return {
       default: [this.sprites.cat, this.sprites.cat1],
       scared: [this.sprites.catScared, this.sprites.catScared1]
+    };
+  }
+
+  getGraveSprites() {
+    return {
+      default: [this.sprites.grave, this.sprites.grave1]
+    };
+  }
+
+  getCloudsSprites() {
+    return {
+      default: [this.sprites.clouds, this.sprites.clouds1]
     };
   }
 }

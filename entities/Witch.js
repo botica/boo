@@ -11,6 +11,10 @@ export class Witch extends NPCEntity {
   constructor(assetManager, canvas) {
     super(assetManager, canvas, { level: 3, defaultFacing: 'right' });
     
+    // Witch-specific movement (more frequent and longer than businessman)
+    this.moveSpeed = Constants.PERSON.MOVE_SPEED * 1.5; // 50% faster than businessman
+    this.nextMoveIn = MathUtils.random(0.3, 1.0); // Move more frequently (vs businessman's 1.0-3.0)
+    
     // Level 3 victory sequence state
     this.cat = null;
     this.victorySequenceTriggered = false;
@@ -52,7 +56,7 @@ export class Witch extends NPCEntity {
     }
     
     const sprite = this.sprites[state][0];
-    this.width = sprite.width;
+    this.width = sprite.width; + 75;
     this.height = sprite.height + 75; // Make witch 75 pixels taller
   }
 
@@ -90,6 +94,33 @@ export class Witch extends NPCEntity {
    */
   setCat(cat) {
     this.cat = cat;
+  }
+
+  /**
+   * Override stopMoving to make witch wait less before next move
+   */
+  stopMoving() {
+    this.isMoving = false;
+    this.vx = 0;
+    // Witch waits much less than businessman (0.3-1.0s vs 1.0-4.0s)
+    this.nextMoveIn = MathUtils.random(0.3, 1.0);
+  }
+
+  /**
+   * Override startRandomMove to make witch move for longer distances
+   */
+  startRandomMove() {
+    this.isMoving = true;
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    // Witch moves for longer duration (0.5-1.5s vs businessman's 0.15-0.6s)
+    this.moveTimeLeft = MathUtils.random(0.5, 1.5);
+    // Use witch's faster move speed with variance
+    const speed = this.moveSpeed * MathUtils.random(
+      Constants.PERSON.MOVE_SPEED_VARIANCE_MIN, 
+      Constants.PERSON.MOVE_SPEED_VARIANCE_MAX + 0.3
+    );
+    this.vx = dir * speed;
+    this.facing = dir > 0 ? 'right' : 'left';
   }
 
   /**

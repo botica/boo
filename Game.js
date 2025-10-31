@@ -10,6 +10,7 @@ import { Moon } from './entities/Moon.js';
 import { Tree } from './entities/Tree.js';
 import { City } from './entities/City.js';
 import { Cat } from './entities/Cat.js';
+import { Grave } from './entities/Grave.js';
 import { InputManager } from './input/InputManager.js';
 import { GameState } from './game/GameState.js';
 import { UIManager } from './ui/UIManager.js';
@@ -43,6 +44,7 @@ export class Game {
     this.tree = null;
     this.city = null;
     this.cat = null;
+    this.grave = null;  // Level 3 grave
     
     // Game loop tracking
     this.lastTime = performance.now();
@@ -89,8 +91,14 @@ export class Game {
     this.city = new City(this.assetManager);
     this.cat = new Cat(this.assetManager, this.canvas);
     
+    // Level 3 entities
     // Set up witch-cat relationship for level 3
     this.witchEntity.setCat(this.cat);
+    
+    // Grave positioned bottom left
+    const graveX = Constants.GRAVE.OFFSET_X;
+    const graveY = this.canvas.height - Constants.GRAVE.HEIGHT;
+    this.grave = new Grave(this.assetManager, graveX, graveY);
     
     this.resetScene();
     this.gameState.updateLevelTitle();
@@ -134,6 +142,12 @@ export class Game {
     if (this.city) {
       this.city.x = Constants.CITY.DEFAULT_X_OFFSET;
       this.city.y = Constants.CITY.DEFAULT_Y_OFFSET;
+    }
+    
+    // Update level 3 entities
+    if (this.grave) {
+      this.grave.x = Constants.GRAVE.OFFSET_X;
+      this.grave.y = this.canvas.height - Constants.GRAVE.HEIGHT;
     }
   }
 
@@ -340,6 +354,11 @@ export class Game {
     // Update cat (only on level 3)
     if (this.cat && this.gameState.currentLevel === 3) {
       this.cat.update(dt);
+    }
+    
+    // Update grave (only on level 3)
+    if (this.grave && this.gameState.currentLevel === 3) {
+      this.grave.update(dt);
     }
     
     // Handle combo input
@@ -728,6 +747,11 @@ export class Game {
     
     if (this.tree && levelConfig.showTree) {
       this.tree.render(this.renderer.ctx);
+    }
+    
+    // Draw grave (only level 3, in front of tree)
+    if (this.grave && this.gameState.currentLevel === 3) {
+      this.grave.render(this.renderer.ctx);
     }
   }
 

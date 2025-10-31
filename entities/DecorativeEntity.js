@@ -43,6 +43,8 @@ export class DecorativeEntity {
   render(ctx) {
     const currentFrame = this.animator?.getCurrentFrame();
     if (currentFrame) {
+      // Ensure crisp pixel rendering (no smoothing/blurring)
+      ctx.imageSmoothingEnabled = false;
       ctx.drawImage(currentFrame, this.x, this.y, this.width, this.height);
     }
   }
