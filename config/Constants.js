@@ -115,7 +115,6 @@ const Constants = {
   },
   
   WITCH: {
-    HEIGHT_BONUS: 75, // Additional pixels added to sprite height
     SPAWN_OFFSET_X: 400, // Horizontal offset from left edge (default spawn position)
     SPAWN_OFFSET_Y: 10  // Vertical offset from bottom edge
   },
